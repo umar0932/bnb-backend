@@ -10,11 +10,11 @@ import { join } from 'path'
 import { AuthModule } from './modules/auth/auth.module'
 import { AppService } from './app.service'
 import { AppResolver } from './app.resolver'
-import { UsersModule } from './modules/users/users.module'
+import { UserModule } from './modules/users/user.module'
 
 dotenv.config()
 
-const env = `${(process.env.NODE_ENV || 'development').toLowerCase()}`
+const env = `${process.env.APP_ENV.toLowerCase()}`
 
 @Module({
   imports: [
@@ -45,12 +45,12 @@ const env = `${(process.env.NODE_ENV || 'development').toLowerCase()}`
           database: configService.get('DB_DATABASE'),
           entities: [__dirname + '/**/**.entity{.ts,.js}'],
           synchronize: configService.get('DB_SYNC'),
-          logging: env === 'development' ? true : false,
-          ssl: env === 'production' ? { rejectUnauthorized: false } : false
+          logging: env === 'dev' ? true : false,
+          ssl: env === 'prod' ? { rejectUnauthorized: false } : false
         } as TypeOrmModuleAsyncOptions
       }
     }),
-    UsersModule,
+    UserModule,
     AuthModule
   ],
   providers: [AppService, AppResolver]

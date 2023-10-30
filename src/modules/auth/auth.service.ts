@@ -5,17 +5,17 @@ import * as bcrypt from 'bcrypt'
 
 import { CreateUserInput } from '@app/users/dto/create-user.input'
 import { LoginUserInput } from './dto/login-user.input'
-import { UsersService } from '@app/users/users.service'
+import { UserService } from '@app/users/user.service'
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
+    private userService: UserService,
     private jwtService: JwtService
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findOne(email)
+    const user = await this.userService.findOne(email)
     const valid = user && (await bcrypt.compare(password, user?.password))
 
     if (user && valid) {
@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   async login(loginUserInput: LoginUserInput) {
-    const user = await this.usersService.findOne(loginUserInput.email)
+    const user = await this.userService.findOne(loginUserInput.email)
     const { password, ...result } = user
 
     return {
@@ -41,7 +41,7 @@ export class AuthService {
   }
 
   async signup(signupUserInput: CreateUserInput) {
-    const user = await this.usersService.findOne(signupUserInput.email)
+    const user = await this.userService.findOne(signupUserInput.email)
 
     if (user) {
       throw new Error('User already exists')
@@ -49,7 +49,7 @@ export class AuthService {
 
     const password = await bcrypt.hash(signupUserInput.password, 10)
 
-    return this.usersService.create({
+    return this.userService.create({
       ...signupUserInput,
       password
     })

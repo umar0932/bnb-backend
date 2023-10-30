@@ -5,7 +5,7 @@
 input CreateUserInput {
   email: String!
   password: String!
-  username: String!
+  role: String
 }
 
 type LoginResponse {
@@ -35,5 +35,4 @@ type User {
   id: Int!
   password: String!
   role: String!
-  username: String!
 }

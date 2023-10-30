@@ -7,7 +7,7 @@ import { CreateUserInput } from './dto/create-user.input'
 import { User } from './entities/user.entity'
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(@InjectRepository(User) private usersRespository: Repository<User>) {}
 
   findAll(): Promise<User[]> {
@@ -15,7 +15,7 @@ export class UsersService {
   }
 
   findOne(email: string): Promise<User> {
-    return this.usersRespository.findOne({  where: { email } })
+    return this.usersRespository.findOne({ where: { email } })
   }
 
   create(createUserInput: CreateUserInput) {

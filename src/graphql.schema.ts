@@ -11,7 +11,7 @@
 export interface CreateUserInput {
     email: string;
     password: string;
-    username: string;
+    role?: Nullable<string>;
 }
 
 export interface LoginUserInput {
@@ -41,7 +41,6 @@ export interface User {
     id: number;
     password: string;
     role: string;
-    username: string;
 }
 
 type Nullable<T> = T | null;
