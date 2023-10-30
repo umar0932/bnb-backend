@@ -14,7 +14,7 @@ import { UserModule } from './modules/users/user.module'
 
 dotenv.config()
 
-const env = `${process.env.APP_ENV.toLowerCase()}`
+const env = `${process.env.APP_ENV}`
 
 @Module({
   imports: [

@@ -20,7 +20,7 @@ export class UserResolver {
   // Create roles in enums/roles.enum.ts
   // Import the enum
   // Add the right roles to the @Roles() decorator
-  @Roles(Role.ADMIN)
+  @Roles(Role.ORGANIZER)
   findAll(): Promise<User[]> {
     return this.userService.findAll()
   }
