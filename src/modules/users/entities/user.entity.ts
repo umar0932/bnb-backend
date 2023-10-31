@@ -17,6 +17,15 @@ export class User {
 
   @Column()
   @Field()
+  firstName: string
+
+  @Column()
+  @Field()
+  lastName: string
+
+
+  @Column()
+  @Field()
   password: string
 
   @Column({
@@ -27,4 +36,3 @@ export class User {
   @Field()
   role: Role
 }
-
