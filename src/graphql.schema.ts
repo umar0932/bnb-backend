@@ -38,7 +38,9 @@ export interface IQuery {
 
 export interface User {
     email: string;
+    firstName: string;
     id: number;
+    lastName: string;
     password: string;
     role: string;
 }

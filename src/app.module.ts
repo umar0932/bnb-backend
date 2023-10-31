@@ -40,11 +40,13 @@ const env = `${process.env.APP_ENV}`
           type: configService.get('DB_TYPE'),
           host: configService.get('DB_HOST'),
           port: configService.get('DB_PORT'),
-          username: configService.get('DB_USERNAME'),
+          username: configService.get('DB_USER'),
           password: configService.get('DB_PASSWORD'),
-          database: configService.get('DB_DATABASE'),
+          database: configService.get('DB_NAME'),
           entities: [__dirname + '/**/**.entity{.ts,.js}'],
-          synchronize: configService.get('DB_SYNC'),
+          synchronize: configService.get('APP_ENV') === 'dev' ? true : false,
+          migrations: [`${__dirname}/../db/migrations/*{.ts,.js}`],
+          migrationsTableName: 'migrations',
           logging: env === 'dev' ? true : false,
           ssl: env === 'prod' ? { rejectUnauthorized: false } : false
         } as TypeOrmModuleAsyncOptions
