@@ -1,7 +1,8 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { GraphQLError, GraphQLFormattedError } from 'graphql'
 import { GraphQLModule } from '@nestjs/graphql'
-import { Module } from '@nestjs/common'
+import { HttpStatus, Module } from '@nestjs/common'
 import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm'
 
 import * as dotenv from 'dotenv'
@@ -14,7 +15,7 @@ import { UserModule } from './modules/users/user.module'
 
 dotenv.config()
 
-const env = `${process.env.APP_ENV}`
+const env = `${process.env.NODE_ENV}`
 
 @Module({
   imports: [
@@ -28,8 +29,22 @@ const env = `${process.env.APP_ENV}`
       definitions: {
         path: join(process.cwd(), 'src/graphql.schema.ts')
       },
-      playground: true,
-      sortSchema: true
+      playground: env !== 'prod',
+      introspection: env !== 'prod',
+      sortSchema: true,
+      formatError: (error: GraphQLError | any) => {
+        const graphQLFormattedError: GraphQLFormattedError & {
+          statusCode: HttpStatus
+        } = {
+          statusCode:
+            error?.extensions?.originalError?.statusCode ||
+            error?.extensions?.code ||
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          message:
+            error?.extensions?.originalError?.message || error?.message || 'Something went wrong'
+        }
+        return graphQLFormattedError
+      }
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -44,7 +59,7 @@ const env = `${process.env.APP_ENV}`
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_NAME'),
           entities: [__dirname + '/**/**.entity{.ts,.js}'],
-          synchronize: configService.get('APP_ENV') === 'dev' ? true : false,
+          synchronize: configService.get('NODE_ENV') === 'dev' ? true : false,
           migrations: [`${__dirname}/../db/migrations/*{.ts,.js}`],
           migrationsTableName: 'migrations',
           logging: env === 'dev' ? true : false,
