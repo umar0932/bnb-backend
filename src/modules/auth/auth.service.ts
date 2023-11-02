@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 
 import { CreateUserInput } from '@app/users/dto/create-user.input'
-import { LoginUserInput } from './dto/login-user.input'
+import { LoginUserInput } from './dto/inputs/login-user.input'
 import { UserService } from '@app/users/user.service'
 
 @Injectable()
@@ -33,8 +33,8 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign({
         email: user.email,
-        sub: user.id,
-        role: user.role
+        sub: user.id
+        // role: user.role
       }),
       user: result
     }

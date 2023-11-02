@@ -4,8 +4,9 @@
 
 input CreateUserInput {
   email: String!
+  firstName: String!
+  lastName: String!
   password: String!
-  role: String
 }
 
 type LoginResponse {
@@ -31,10 +32,21 @@ type Query {
 }
 
 type User {
+  JobTitle: String
+  cellPhone: String
+  city: String
+  companyName: String
+  country: String
   email: String!
+  firstAddress: String
   firstName: String!
-  id: Int!
+  homePhone: String
+  id: ID!
+  isActive: String
   lastName: String!
   password: String!
-  role: String!
+  secondAddress: String
+  state: String
+  website: String
+  zipCode: String
 }
