@@ -10,8 +10,9 @@
 
 export interface CreateUserInput {
     email: string;
+    firstName: string;
+    lastName: string;
     password: string;
-    role?: Nullable<string>;
 }
 
 export interface LoginUserInput {
@@ -37,12 +38,23 @@ export interface IQuery {
 }
 
 export interface User {
+    JobTitle?: Nullable<string>;
+    cellPhone?: Nullable<string>;
+    city?: Nullable<string>;
+    companyName?: Nullable<string>;
+    country?: Nullable<string>;
     email: string;
+    firstAddress?: Nullable<string>;
     firstName: string;
-    id: number;
+    homePhone?: Nullable<string>;
+    id: string;
+    isActive?: Nullable<string>;
     lastName: string;
     password: string;
-    role: string;
+    secondAddress?: Nullable<string>;
+    state?: Nullable<string>;
+    website?: Nullable<string>;
+    zipCode?: Nullable<string>;
 }
 
 type Nullable<T> = T | null;
