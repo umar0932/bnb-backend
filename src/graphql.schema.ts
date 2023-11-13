@@ -48,7 +48,7 @@ export interface User {
     firstName: string;
     homePhone?: Nullable<string>;
     id: string;
-    isActive?: Nullable<string>;
+    isActive?: Nullable<boolean>;
     lastName: string;
     password: string;
     secondAddress?: Nullable<string>;
