@@ -1,110 +1,82 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  MinLength,
-  IsPhoneNumber,
-  IsOptional
-} from 'class-validator'
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
+
 import { Transform } from 'class-transformer'
+import { CustomBaseEntity } from 'src/common/entities/base.entity'
 
 @Entity()
 @ObjectType()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
+export class User extends CustomBaseEntity {
   @Field(() => ID)
+  @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column({ unique: true })
+  @Column({ length: 50, unique: true })
   @Field()
-  @IsNotEmpty()
-  @IsEmail()
-  email: string
+  email!: string
 
-  @Column()
+  @Column({ length: 50, name: 'first_name' })
   @Field()
-  @IsString()
-  @IsNotEmpty()
-  firstName: string
+  firstName!: string
 
-  @Column()
+  @Column({ length: 50, name: 'last_name' })
   @Field()
-  @IsString()
-  @IsNotEmpty()
-  lastName: string
+  lastName!: string
 
-  @Column()
+  @Column({ name: 'password' })
   @Field()
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(8)
-  password: string
+  password!: string
 
-  @Column({ nullable: true })
+  @Column({ length: 20, name: 'home_phone', nullable: true })
   @Field({ nullable: true })
   @Transform(value => value.toString())
-  @IsPhoneNumber()
-  homePhone: string
+  homePhone?: string
 
-  @Column({ nullable: true })
+  @Column({ length: 20, name: 'cell_phone', nullable: true })
   @Field({ nullable: true })
   @Transform(value => value.toString())
-  @IsPhoneNumber()
-  cellPhone: string
+  cellPhone?: string
 
-  @Column({ nullable: true })
+  @Column({ length: 50, name: 'job_title', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  JobTitle: string
+  JobTitle?: string
 
-  @Column({ nullable: true })
+  @Column({ length: 50, name: 'company_name', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  companyName: string
+  companyName?: string
 
-  @Column({ nullable: true })
+  @Column({ name: 'website', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  website: string
+  website?: string
 
-  @Column({ nullable: true })
+  @Column({ name: 'first_address', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  firstAddress: string
+  firstAddress?: string
 
-  @Column({ nullable: true })
+  @Column({ name: 'second_address', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  secondAddress: string
+  secondAddress?: string
 
-  @Column({ nullable: true })
+  @Column({ length: 50, name: 'city', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  city: string
+  city?: string
 
-  @Column({ nullable: true })
+  @Column({ length: 50, name: 'country', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  country: string
+  country?: string
 
-  @Column({ nullable: true })
+  @Column({ length: 50, name: 'zip_code', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  zipCode: string
+  zipCode?: string
 
-  @Column({ nullable: true })
+  @Column({ length: 50, name: 'state', nullable: true })
   @Field({ nullable: true })
-  @IsString()
-  state: string
+  state?: string
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: false })
   @Field({ nullable: true })
-  @IsString()
-  isActive: string
-
+  isActive: boolean
 
   // @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   // @Field()
