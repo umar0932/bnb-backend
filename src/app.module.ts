@@ -73,7 +73,3 @@ const env = `${process.env.NODE_ENV}`
   providers: [AppService, AppResolver]
 })
 export class AppModule {}
-console.log(process.env.JWT_SECRET_KEY)
-console.log('process.env.NODE_ENV', process.env.NODE_ENV)
-console.log('process.env.DB_TYPE', process.env.DB_TYPE)
-console.log(`.env.${env}`)
