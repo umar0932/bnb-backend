@@ -1,30 +1,31 @@
 import { InputType, Field } from '@nestjs/graphql'
+import { Transform } from 'class-transformer'
 
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength, validate } from 'class-validator'
-import { CreateDateColumn, UpdateDateColumn } from 'typeorm'
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator'
 
 @InputType()
 export class CreateUserInput {
-  @Field()
+  @Field(() => String)
+  @IsString()
   @IsEmail()
   @IsNotEmpty()
   email: string
 
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(3, { message: 'Minimum length is 3 characters' })
-  @MaxLength(15)
-  firstName: string
-
-  @Field()
+  @Field(() => String)
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
-  @MaxLength(15)
+  @MaxLength(50)
+  firstName: string
+
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(50)
   lastName: string
 
-  @Field()
+  @Field(() => String)
   @IsString()
   @IsNotEmpty()
   @MinLength(8)

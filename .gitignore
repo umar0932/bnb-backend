@@ -20,6 +20,7 @@ lerna-debug.log*
 .env.dev
 .env.test
 .env.prod
+.env.stage
 
 # Tests
 /coverage

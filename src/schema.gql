@@ -42,7 +42,7 @@ type User {
   firstName: String!
   homePhone: String
   id: ID!
-  isActive: String
+  isActive: Boolean
   lastName: String!
   password: String!
   secondAddress: String
