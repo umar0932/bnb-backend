@@ -51,7 +51,7 @@ docker compose down
 
 ## Usage
 
-When the database is connected, you can start up the server by running `npm start:dev`.
+When the database is connected, you can start up the server by running `npm run start:dev`.
 A GraphQL schema will be generated. This will contain a Users table and all the dto's for user authentication. If it is already present then the schema willupdate according to your typeORM Entity
 
 To register a user:
