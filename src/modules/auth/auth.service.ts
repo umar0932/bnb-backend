@@ -5,6 +5,8 @@ import * as bcrypt from 'bcrypt'
 
 import { CreateUserInput } from '@app/users/dto/create-user.input'
 import { LoginUserInput } from './dto/inputs/login-user.input'
+import { SignResponse } from './dto/args/sign-response'
+import { User } from '@app/users/entities/user.entity'
 import { UserService } from '@app/users/user.service'
 
 @Injectable()
@@ -26,33 +28,38 @@ export class AuthService {
     return null
   }
 
-  async login(loginUserInput: LoginUserInput) {
-    const user = await this.userService.findOne(loginUserInput.email)
-
-    if (!user) throw new BadRequestException('User does not exist')
-
-    const { password, ...result } = user
-
+  async login(loginUserInput: LoginUserInput, contextUser: User): Promise<SignResponse> {
+    const accessToken = await this.createToken(contextUser.id, loginUserInput?.email)
     return {
-      access_token: this.jwtService.sign({
-        email: user.email,
-        sub: user.id
-        // role: user.role
-      }),
-      user: result
+      access_token: accessToken,
+      user: contextUser
     }
   }
 
-  async signup(signupUserInput: CreateUserInput) {
+  async signup(signupUserInput: CreateUserInput): Promise<SignResponse> {
     const user = await this.userService.findOne(signupUserInput.email)
 
     if (user) throw new BadRequestException('Username already exists')
 
     const password = await bcrypt.hash(signupUserInput.password, 10)
 
-    return this.userService.create({
+    const currentUser: User = await this.userService.create({
       ...signupUserInput,
       password
     })
+
+    const accessToken = await this.createToken(currentUser.id, currentUser.email)
+    return {
+      access_token: accessToken,
+      user: currentUser
+    }
+  }
+
+  async createToken(userId: string, email: string) {
+    const accessToken = await this.jwtService.sign({
+      userId,
+      email
+    })
+    return accessToken
   }
 }
