@@ -2,8 +2,8 @@
 
 #MUTATIONS
 
-mutation Login($loginUserInput: LoginUserInput!) {
-  login(loginUserInput: $loginUserInput) {
+mutation Login($input: LoginUserInput!) {
+  login(loginUserInput: $input) {
     access_token,
     user{
       email
@@ -11,9 +11,11 @@ mutation Login($loginUserInput: LoginUserInput!) {
   }
 }
 
-mutation Signup($signupUserInput: CreateUserInput!) {
-  signup(signupUserInput: $signupUserInput) {
-    email
-    username
+mutation Signup($input: CreateUserInput!) {
+  signup(signupUserInput: $input) {
+     access_token,
+    user{
+      email
+    }
   }
 }

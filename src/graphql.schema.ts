@@ -20,21 +20,21 @@ export interface LoginUserInput {
     password: string;
 }
 
-export interface LoginResponse {
-    access_token: string;
-    user: User;
-}
-
 export interface IMutation {
     create(createUserInput: CreateUserInput): User | Promise<User>;
-    login(loginUserInput: LoginUserInput): LoginResponse | Promise<LoginResponse>;
-    signup(signupUserInput: CreateUserInput): User | Promise<User>;
+    login(loginUserInput: LoginUserInput): SignResponse | Promise<SignResponse>;
+    signup(signupUserInput: CreateUserInput): SignResponse | Promise<SignResponse>;
 }
 
 export interface IQuery {
     index(): string | Promise<string>;
     user(email: string): User | Promise<User>;
     users(): User[] | Promise<User[]>;
+}
+
+export interface SignResponse {
+    access_token: string;
+    user: User;
 }
 
 export interface User {
