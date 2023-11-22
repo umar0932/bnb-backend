@@ -9,7 +9,6 @@ async function bootstrap() {
     cors: true
   })
   const configService = app.get(ConfigService)
-
   app.useGlobalPipes(
     new ValidationPipe({
       stopAtFirstError: true,
