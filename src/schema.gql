@@ -2,36 +2,14 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input CreateUserInput {
+input CreateCustomerInput {
   email: String!
   firstName: String!
   lastName: String!
   password: String!
 }
 
-input LoginUserInput {
-  email: String!
-  password: String!
-}
-
-type Mutation {
-  create(createUserInput: CreateUserInput!): User!
-  login(loginUserInput: LoginUserInput!): SignResponse!
-  signup(signupUserInput: CreateUserInput!): SignResponse!
-}
-
-type Query {
-  index: String!
-  user(email: String!): User!
-  users: [User!]!
-}
-
-type SignResponse {
-  access_token: String!
-  user: User!
-}
-
-type User {
+type Customer {
   JobTitle: String
   cellPhone: String
   city: String
@@ -49,4 +27,27 @@ type User {
   state: String
   website: String
   zipCode: String
+}
+
+type CustomerLoginResponse {
+  access_token: String!
+  user: Customer!
+}
+
+input LoginCustomerInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  """This will signup new `Customers"""
+  createCustomer(createCustomerInput: CreateCustomerInput!): CustomerLoginResponse!
+
+  """Customer Login"""
+  loginAsCustomer(loginCustomerInput: LoginCustomerInput!): CustomerLoginResponse!
+}
+
+type Query {
+  customers: [Customer!]!
+  index: String!
 }

@@ -1,17 +1,18 @@
 module.exports = {
   env: {
-    browser: true,
-    es2021: true
+    node: true,
+    jest: true
   },
-  extends: ['eslint:recommended', 'plugin:react/recommended', 'plugin:prettier/recommended'],
+  extends: [
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+  ],
+  root: true,
   parserOptions: {
-    ecmaFeatures: {
-      jsx: true
-    },
-    ecmaVersion: 12,
+    project: 'tsconfig.json',
     sourceType: 'module'
   },
-  plugins: ['react'],
+  plugins: ['@typescript-eslint/eslint-plugin'],
   rules: {
     'prettier/prettier': [
       'error',
@@ -35,9 +36,9 @@ module.exports = {
     ],
     'no-debugger': 'warn',
     quotes: [0, 'double'],
-    'jsx-quotes': [2, 'prefer-single'],
-    'react/react-in-jsx-scope': 0,
-    'react/display-name': 0,
-    'react/prop-types': 0
+    '@typescript-eslint/interface-name-prefix': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'on',
   }
 }

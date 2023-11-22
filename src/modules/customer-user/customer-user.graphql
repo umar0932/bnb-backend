@@ -1,0 +1,30 @@
+#QUERIES
+
+query getAllCustomers {
+  customers {
+    email
+    id
+    password
+    role
+  }
+}
+
+#MUTATIONS
+
+mutation loginAsCustomer($input: LoginCustomerInput!) {
+  loginAsCustomer(loginCustomerInput: $input) {
+    access_token
+    user {
+      email
+    }
+  }
+}
+
+mutation createCustomer($input: CreateCustomerInput!) {
+  createCustomer(createCustomerInput: $input) {
+    access_token
+    user {
+      email
+    }
+  }
+}
