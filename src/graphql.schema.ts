@@ -8,36 +8,19 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export interface CreateUserInput {
+export interface CreateCustomerInput {
     email: string;
     firstName: string;
     lastName: string;
     password: string;
 }
 
-export interface LoginUserInput {
+export interface LoginCustomerInput {
     email: string;
     password: string;
 }
 
-export interface IMutation {
-    create(createUserInput: CreateUserInput): User | Promise<User>;
-    login(loginUserInput: LoginUserInput): SignResponse | Promise<SignResponse>;
-    signup(signupUserInput: CreateUserInput): SignResponse | Promise<SignResponse>;
-}
-
-export interface IQuery {
-    index(): string | Promise<string>;
-    user(email: string): User | Promise<User>;
-    users(): User[] | Promise<User[]>;
-}
-
-export interface SignResponse {
-    access_token: string;
-    user: User;
-}
-
-export interface User {
+export interface Customer {
     JobTitle?: Nullable<string>;
     cellPhone?: Nullable<string>;
     city?: Nullable<string>;
@@ -55,6 +38,21 @@ export interface User {
     state?: Nullable<string>;
     website?: Nullable<string>;
     zipCode?: Nullable<string>;
+}
+
+export interface CustomerLoginResponse {
+    access_token: string;
+    user: Customer;
+}
+
+export interface IMutation {
+    createCustomer(createCustomerInput: CreateCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
+    loginAsCustomer(loginCustomerInput: LoginCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
+}
+
+export interface IQuery {
+    customers(): Customer[] | Promise<Customer[]>;
+    index(): string | Promise<string>;
 }
 
 type Nullable<T> = T | null;
