@@ -32,12 +32,12 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node --require tsconfig-paths/register ./node_modules/typeorm/cli",
-    "migration:run:dev": "cross-env NODE_ENV=dev npm run typeorm migration:run -- -d ./db/typeorm.config.ts",
-    "migration:generate:dev": "cross-env NODE_ENV=dev npm run typeorm -- -d ./db/typeorm.config.ts migration:generate ./db/migrations/$npm_config_name",
-    "migration:create:dev": "cross-env NODE_ENV=dev npm run typeorm -- migration:create ./db/migrations/$npm_config_name",
-    "migration:revert:dev": "cross-env NODE_ENV=dev npm run typeorm -- -d ./db/typeorm.config.ts migration:revert",
-    "migration:show:dev": "cross-env NODE_ENV=dev npm run typeorm -- migration:show -d ./db/typeorm.config.ts"
+    "typeorm": "npm run build && npx typeorm -d dist/db/data-source.js",
+    "migration:run": "npm run typeorm migration:run -- -d ./db/typeorm.config.ts",
+    "migration:generate": "npm run typeorm -- migration:generate",
+    "migration:create": "npm run typeorm -- migration:create",
+    "migration:revert": "npm run typeorm -- migration:revert",
+    "migration:show": "npm run typeorm -- migration:show"
   },
   "dependencies": {
     "@apollo/server": "^4.9.4",
@@ -85,6 +85,7 @@
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-react": "^7.33.2",
     "husky": "^8.0.3",
     "jest": "^29.5.0",
     "nodemon": "^3.0.1",
