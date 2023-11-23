@@ -15,9 +15,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwtAdmin') {
   }
 
   async validate(payload: JwtDto) {
+    console.log('payload2------------>>>>>>>>>>', payload )
     return {
       userId: payload.sub,
-      username: payload.username,
+      email: payload.email,
       type: JWT_STRATEGY_NAME.ADMIN,
     }
   }

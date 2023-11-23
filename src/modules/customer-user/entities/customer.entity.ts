@@ -76,5 +76,5 @@ export class Customer extends CustomBaseEntity {
 
   @Column({ nullable: true, default: true })
   @Field({ nullable: true })
-  isActive: boolean
+  isActive?: boolean
 }
