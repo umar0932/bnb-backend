@@ -2,6 +2,27 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Admin {
+  email: String!
+  firstName: String!
+  idAdminUser: ID!
+  isActive: Boolean
+  lastName: String!
+  password: String!
+}
+
+type AdminLoginResponse {
+  access_token: String!
+  user: Admin!
+}
+
+input CreateAdminUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
 input CreateCustomerInput {
   email: String!
   firstName: String!
@@ -34,20 +55,37 @@ type CustomerLoginResponse {
   user: Customer!
 }
 
+input LoginAdminInput {
+  email: String!
+  password: String!
+}
+
 input LoginCustomerInput {
   email: String!
   password: String!
 }
 
 type Mutation {
+  """Create new admin user"""
+  createAdminUser(createAdminInput: CreateAdminUserInput!): SuccessResponse!
+
   """This will signup new `Customers"""
   createCustomer(createCustomerInput: CreateCustomerInput!): CustomerLoginResponse!
+
+  """Admin Login"""
+  loginAsAdmin(loginAdminInput: LoginAdminInput!): AdminLoginResponse!
 
   """Customer Login"""
   loginAsCustomer(loginCustomerInput: LoginCustomerInput!): CustomerLoginResponse!
 }
 
 type Query {
-  customers: [Customer!]!
+  """The List of Customers"""
+  getCustomers: [Customer!]!
   index: String!
+}
+
+type SuccessResponse {
+  message: String
+  success: Boolean
 }

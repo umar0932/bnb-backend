@@ -5,7 +5,7 @@ import { Customer } from './entities/customer.entity'
 import { CustomerLoginResponse } from './dto/args/customer-login-response'
 import { CustomerUserService } from './customer-user.service'
 import { CreateCustomerInput } from './dto/inputs/create-customer.input'
-import { CurrentUser } from 'src/common/decorator'
+import { Allow, CurrentUser } from 'src/common/decorator'
 import { GqlAuthGuard } from './guards/gql-auth.guard'
 import { LoginCustomerInput } from './dto/inputs/login-customer.input'
 
@@ -32,15 +32,18 @@ export class CustomerUserResolver {
   }
 
   // Example of a query that requires a JWT token and a role of ADMIN
-  @Query(() => [Customer], { name: 'customers' })
+  @Query(() => [Customer], { description: 'The List of Customers' })
   // Make sure to add RolesGuard to the @UseGuards() decorator
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // Create roles in enums/roles.enum.ts
   // Import the enum
   // Add the right roles to the @Roles() decorator
   // @Roles(Role.ORGANIZER)
-  findAll(): Promise<Customer[]> {
-    return this.customerUserService.findAll()
+  @Allow()
+  getCustomers(@CurrentUser() user): Promise<Customer[]> {
+    console.log('User22------>>>>>>>>', user)
+
+    return this.customerUserService.findAll(user.id)
   }
 
   // @Query(() => Customer, { name: 'customer' })
