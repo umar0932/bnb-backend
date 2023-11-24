@@ -35,19 +35,19 @@ const env = `${process.env.NODE_ENV}`
       playground: env !== 'prod',
       introspection: env !== 'prod',
       sortSchema: true,
-      // formatError: (error: GraphQLError | any) => {
-      //   const graphQLFormattedError: GraphQLFormattedError & {
-      //     statusCode: HttpStatus
-      //   } = {
-      //     statusCode:
-      //       error?.extensions?.originalError?.statusCode ||
-      //       error?.extensions?.code ||
-      //       HttpStatus.INTERNAL_SERVER_ERROR,
-      //     message:
-      //       error?.extensions?.originalError?.message || error?.message || 'Something went wrong'
-      //   }
-      //   return graphQLFormattedError
-      // }
+      formatError: (error: GraphQLError | any) => {
+        const graphQLFormattedError: GraphQLFormattedError & {
+          statusCode: HttpStatus
+        } = {
+          statusCode:
+            error?.extensions?.originalError?.statusCode ||
+            error?.extensions?.code ||
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          message:
+            error?.extensions?.originalError?.message || error?.message || 'Something went wrong'
+        }
+        return graphQLFormattedError
+      }
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     AdminModule,
