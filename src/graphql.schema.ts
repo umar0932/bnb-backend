@@ -8,6 +8,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export interface CreateAdminUserInput {
+    email: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+}
+
 export interface CreateCustomerInput {
     email: string;
     firstName: string;
@@ -15,9 +22,28 @@ export interface CreateCustomerInput {
     password: string;
 }
 
+export interface LoginAdminInput {
+    email: string;
+    password: string;
+}
+
 export interface LoginCustomerInput {
     email: string;
     password: string;
+}
+
+export interface Admin {
+    email: string;
+    firstName: string;
+    idAdminUser: string;
+    isActive?: Nullable<boolean>;
+    lastName: string;
+    password: string;
+}
+
+export interface AdminLoginResponse {
+    access_token: string;
+    user: Admin;
 }
 
 export interface Customer {
@@ -46,13 +72,20 @@ export interface CustomerLoginResponse {
 }
 
 export interface IMutation {
+    createAdminUser(createAdminInput: CreateAdminUserInput): SuccessResponse | Promise<SuccessResponse>;
     createCustomer(createCustomerInput: CreateCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
+    loginAsAdmin(loginAdminInput: LoginAdminInput): AdminLoginResponse | Promise<AdminLoginResponse>;
     loginAsCustomer(loginCustomerInput: LoginCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
 }
 
 export interface IQuery {
-    customers(): Customer[] | Promise<Customer[]>;
+    getCustomers(): Customer[] | Promise<Customer[]>;
     index(): string | Promise<string>;
+}
+
+export interface SuccessResponse {
+    message?: Nullable<string>;
+    success?: Nullable<boolean>;
 }
 
 type Nullable<T> = T | null;

@@ -3,7 +3,7 @@ import { ObjectType, Field, ID } from '@nestjs/graphql'
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 import { Transform } from 'class-transformer'
 
-import { CustomBaseEntity } from 'src/common/entities/base.entity'
+import { CustomBaseEntity } from '@app/common/entities/base.entity'
 
 @Entity({ name: 'customer_user' })
 @ObjectType()
@@ -76,5 +76,5 @@ export class Customer extends CustomBaseEntity {
 
   @Column({ nullable: true, default: true })
   @Field({ nullable: true })
-  isActive: boolean
+  isActive?: boolean
 }
