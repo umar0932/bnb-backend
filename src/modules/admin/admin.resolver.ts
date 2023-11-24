@@ -17,19 +17,13 @@ export class AdminResolver {
 
   @Mutation(() => AdminLoginResponse, { description: 'Admin Login' })
   @UseGuards(GqlAuthGuard)
-  async loginAsAdmin(
-    @Args('loginAdminInput') loginAdminInput: LoginAdminInput,
-    @CurrentUser() user
-  ) {
+  async loginAsAdmin(@Args('input') loginAdminInput: LoginAdminInput, @CurrentUser() user) {
     return this.adminService.login(loginAdminInput, user)
   }
 
   @Mutation(() => SuccessResponse, { description: 'Create new admin user' })
-  // @Allow([JWT_STRATEGY_NAME.ADMIN], {
-  //   [SUBJECT.USER_MANAGEMENT]: [ACTION.CREATE],
-  // })
   async createAdminUser(
-    @Args('createAdminInput') createAdminUserData: CreateAdminUserInput,
+    @Args('input') createAdminUserData: CreateAdminUserInput,
     @CurrentUser() contextUser
   ): Promise<SuccessResponse> {
     return this.adminService.create(createAdminUserData, contextUser)

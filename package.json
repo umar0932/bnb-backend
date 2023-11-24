@@ -37,7 +37,8 @@
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:create": "npm run typeorm -- migration:create",
     "migration:revert": "npm run typeorm -- migration:revert",
-    "migration:show": "npm run typeorm -- migration:show"
+    "migration:show": "npm run typeorm -- migration:show",
+    "db:drop": "npm run typeorm schema:drop"
   },
   "dependencies": {
     "@apollo/server": "^4.9.4",

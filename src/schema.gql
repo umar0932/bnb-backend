@@ -67,16 +67,19 @@ input LoginCustomerInput {
 
 type Mutation {
   """Create new admin user"""
-  createAdminUser(createAdminInput: CreateAdminUserInput!): SuccessResponse!
+  createAdminUser(input: CreateAdminUserInput!): SuccessResponse!
 
   """This will signup new `Customers"""
-  createCustomer(createCustomerInput: CreateCustomerInput!): CustomerLoginResponse!
+  createCustomer(input: CreateCustomerInput!): CustomerLoginResponse!
 
   """Admin Login"""
-  loginAsAdmin(loginAdminInput: LoginAdminInput!): AdminLoginResponse!
+  loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
 
   """Customer Login"""
-  loginAsCustomer(loginCustomerInput: LoginCustomerInput!): CustomerLoginResponse!
+  loginAsCustomer(input: LoginCustomerInput!): CustomerLoginResponse!
+
+  """This will update Customer"""
+  updateCustomer(input: UpdateCustomerInput!): Customer!
 }
 
 type Query {
@@ -88,4 +91,21 @@ type Query {
 type SuccessResponse {
   message: String
   success: Boolean
+}
+
+input UpdateCustomerInput {
+  JobTitle: String
+  cellPhone: String
+  city: String
+  companyName: String
+  country: String
+  firstAddress: String
+  firstName: String
+  homePhone: String
+  isActive: Boolean
+  lastName: String
+  secondAddress: String
+  state: String
+  website: String
+  zipCode: String
 }
