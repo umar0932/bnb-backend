@@ -4,13 +4,14 @@ import { JwtService } from '@nestjs/jwt'
 
 import { Repository } from 'typeorm'
 
+import { comparePassword, encodePassword, isValidPassword } from '@app/common/utils'
+import { JwtDto } from '@app/common'
+import { JWT_STRATEGY_NAME } from '@app/common/types'
+
 import { Admin } from '@app/admin/entities/admin.entity'
 import { Customer } from './entities/customer.entity'
-import { comparePassword, encodePassword, isValidPassword } from 'src/common/utils'
 import { CreateCustomerInput } from './dto/inputs/create-customer.input'
 import { CustomerLoginResponse } from './dto/args/customer-login-response'
-import { JwtDto } from 'src/common'
-import { JWT_STRATEGY_NAME } from 'src/common/types'
 import { LoginCustomerInput } from './dto/inputs/login-customer.input'
 
 @Injectable()
@@ -90,11 +91,11 @@ export class CustomerUserService {
     return await this.jwtService.sign(payload)
   }
 
-  async findAll(userId: string): Promise<Customer[]> {
+  async getAllCustomers(userId: string): Promise<Customer[]> {
     const isAdmin = await this.adminRepository.findOne({
       where: { idAdminUser: userId }
     })
-
+    
     if (!isAdmin) throw new UnauthorizedException('Only admin can access this data.')
 
     return await this.customerRepository.find()

@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { JWTConfigTypes } from 'src/common'
+import { JWTConfigTypes } from '@app/common'
 
 import { Admin } from './entities/admin.entity'
 import { AdminResolver } from './admin.resolver'

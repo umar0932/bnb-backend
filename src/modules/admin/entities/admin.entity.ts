@@ -2,7 +2,7 @@ import { ObjectType, Field, ID } from '@nestjs/graphql'
 
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
-import { CustomBaseEntity } from 'src/common/entities/base.entity'
+import { CustomBaseEntity } from '@app/common/entities/base.entity'
 
 @Entity({ name: 'admin_user' })
 @ObjectType()
