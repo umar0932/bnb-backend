@@ -9,6 +9,7 @@ import { CustomerUserService } from './customer-user.service'
 import { CreateCustomerInput } from './dto/inputs/create-customer.input'
 import { GqlAuthGuard } from './guards/gql-auth.guard'
 import { LoginCustomerInput } from './dto/inputs/login-customer.input'
+import { UpdateCustomerInput } from './dto/inputs/update-user.input'
 
 @Resolver(() => Customer)
 export class CustomerUserResolver {
@@ -17,7 +18,7 @@ export class CustomerUserResolver {
   @Mutation(() => CustomerLoginResponse, { description: 'Customer Login' })
   @UseGuards(GqlAuthGuard)
   async loginAsCustomer(
-    @Args('loginCustomerInput') loginCustomerInput: LoginCustomerInput,
+    @Args('input') loginCustomerInput: LoginCustomerInput,
     @CurrentUser() user
   ) {
     return await this.customerUserService.login(loginCustomerInput, user)
@@ -27,11 +28,10 @@ export class CustomerUserResolver {
     description: 'This will signup new `Customers'
   })
   async createCustomer(
-    @Args('createCustomerInput') createCustomerData: CreateCustomerInput
+    @Args('input') createCustomerData: CreateCustomerInput
   ): Promise<CustomerLoginResponse> {
     return await this.customerUserService.create(createCustomerData)
   }
-  // Make sure to add RolesGuard to the @UseGuards() decorator
 
   @Query(() => [Customer], { description: 'The List of Customers' })
   @Allow()
@@ -39,13 +39,12 @@ export class CustomerUserResolver {
     return this.customerUserService.getAllCustomers(user.userId)
   }
 
-  // @Query(() => Customer, { name: 'customer' })
-  // findOne(@Args('email') email: string): Promise<Customer> {
-  //   return this.customerUserService.findOne(email)
-  // }
-
-  // @Mutation(() => Customer)
-  // create(@Args('createUserInput') createUserInput: CreateUserInput): Promise<Customer> {
-  //   return this.customerUserService.create(createUserInput)
-  // }
+  @Mutation(() => Customer, { description: 'This will update Customer' })
+  @Allow()
+  async updateCustomer(
+    @Args('input') updateCustomerInput: UpdateCustomerInput,
+    @CurrentUser() user
+  ): Promise<Customer> {
+    return await this.customerUserService.updateCustomerData(updateCustomerInput, user.userId)
+  }
 }

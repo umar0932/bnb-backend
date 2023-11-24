@@ -46,6 +46,18 @@ export class CustomerUserService {
     return true
   }
 
+  async getCustomerById(id: string): Promise<Customer> {
+    try {
+      const findCustomer = this.customerRepository.findOne({ where: { id } })
+      if (!findCustomer)
+        throw new BadRequestException('Unable to find the customer. Please verify the customer id')
+
+      return findCustomer
+    } catch (e) {
+      throw new BadRequestException('Failed to fetch customer. Check the customerID')
+    }
+  }
+
   async login(
     loginCustomerInput: LoginCustomerInput,
     contextUser: Customer
@@ -95,14 +107,27 @@ export class CustomerUserService {
     const isAdmin = await this.adminRepository.findOne({
       where: { idAdminUser: userId }
     })
-    
+
     if (!isAdmin) throw new UnauthorizedException('Only admin can access this data.')
 
     return await this.customerRepository.find()
   }
 
-  // create(createUserInput: CreateCustomerInput) {
-  //   const user = this.customerRepository.create(createUserInput)
-  //   return this.customerRepository.save(user)
-  // }
+  async updateCustomerData(
+    customerInput: Partial<Customer>,
+    customerId: string
+  ): Promise<Customer> {
+    const customerData = await this.getCustomerById(customerId)
+
+    try {
+      await this.customerRepository.update(customerData.id, {
+        ...customerInput,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      throw new BadRequestException('Failed to update data')
+    }
+
+    return await this.getCustomerById(customerId)
+  }
 }
