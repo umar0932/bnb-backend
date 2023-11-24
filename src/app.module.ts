@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import * as dotenv from 'dotenv'
 import { join } from 'path'
 
+import { AdminModule } from '@app/admin'
 import { AppResolver } from './app.resolver'
 import { AppService } from './app.service'
 import { CustomerUserModule } from '@app/customer-user'
@@ -49,6 +50,7 @@ const env = `${process.env.NODE_ENV}`
       }
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
+    AdminModule,
     CustomerUserModule
   ],
   providers: [AppService, AppResolver]

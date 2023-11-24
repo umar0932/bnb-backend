@@ -12,7 +12,6 @@ export class GqlAuthGuard extends AuthGuard('customer') {
     const ctx = GqlExecutionContext.create(context)
     const request = ctx.getContext().req
     request.body = ctx.getArgs().loginCustomerInput
-
     return request
   }
 }

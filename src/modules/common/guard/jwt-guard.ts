@@ -8,4 +8,7 @@ export class JWTGuard extends AuthGuard(['jwtCustomer', 'jwtAdmin']) {
     const ctx = GqlExecutionContext.create(context)
     return ctx.getContext().req
   }
+  handleRequest(...args: Parameters<InstanceType<ReturnType<typeof AuthGuard>>['handleRequest']>) {
+    return super.handleRequest(...args);
+  }
 }

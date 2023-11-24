@@ -6,29 +6,29 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { JWTConfigTypes } from '@app/common'
 
-import { Customer } from './entities/customer.entity'
-import { CustomerUserResolver } from './customer-user.resolver'
-import { CustomerUserService } from './customer-user.service'
+import { Admin } from './entities/admin.entity'
+import { AdminResolver } from './admin.resolver'
+import { AdminService } from './admin.service'
 import { JwtStrategy } from './strategy/jwt.strategy'
 import { LocalStrategy } from './strategy/local.strategy'
-import { Admin } from '@app/admin/entities/admin.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Customer, Admin]),
+    ConfigModule,
+    TypeOrmModule.forFeature([Admin]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const jwtConfig = configService.get<JWTConfigTypes>('jwt.customer', {
+        const jwtConfig = configService.get<JWTConfigTypes>('jwt.admin', {
           infer: true
         })
         return { ...jwtConfig }
       },
       inject: [ConfigService]
     })
-  ],
-  providers: [CustomerUserResolver, CustomerUserService, JwtStrategy, LocalStrategy],
-  exports: [CustomerUserService]
+  ], 
+  providers: [AdminResolver, AdminService, JwtStrategy, LocalStrategy],
+  exports: [AdminService]
 })
-export class CustomerUserModule {}
+export class AdminModule {}

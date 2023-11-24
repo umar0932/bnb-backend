@@ -17,4 +17,5 @@ type JWTConfigType = {
 
 export type JWTConfigTypes = {
   customer?: JWTConfigType
+  admin?: JWTConfigType
 }
