@@ -12,7 +12,7 @@ query getAllCustomers {
 #MUTATIONS
 
 mutation loginAsCustomer($input: LoginCustomerInput!) {
-  loginAsCustomer(loginCustomerInput: $input) {
+  loginAsCustomer(input: $input) {
     access_token
     user {
       email
@@ -21,7 +21,7 @@ mutation loginAsCustomer($input: LoginCustomerInput!) {
 }
 
 mutation createCustomer($input: CreateCustomerInput!) {
-  createCustomer(createCustomerInput: $input) {
+  createCustomer(input: $input) {
     access_token
     user {
       email

@@ -15,9 +15,9 @@ export abstract class CustomBaseEntity {
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   @Field()
-  createdAt: Date
+  createdDate: Date
 
   @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', name: 'updated_at' })
   @Field()
-  updatedAt: Date
+  updatedDate: Date
 }
