@@ -1,0 +1,19 @@
+#QUERIES
+
+#MUTATIONS
+
+mutation loginAsAdmin($input: LoginAdminInput!) {
+  loginAsAdmin(input: $input) {
+    access_token
+    user {
+      email
+    }
+  }
+}
+
+mutation createAdminUser($input: CreateAdminUserInput!) {
+  createAdminUser(input: $input) {
+    success
+    message
+  }
+}
