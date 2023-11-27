@@ -50,3 +50,10 @@ mutation updateCustomer($input: UpdateCustomerInput!) {
     zipCode
   }
 }
+
+mutation updateCustomerPassword($input: String!) {
+  updateCustomerPassword(password: $input) {
+    success
+    message
+  }
+}
