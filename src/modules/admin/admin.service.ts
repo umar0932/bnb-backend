@@ -29,7 +29,7 @@ export class AdminService {
   async validateAdmin(email: string, password: string): Promise<Admin> {
     const user = await this.adminRepository.findOne({ where: { email } })
     if (!user) throw new BadRequestException('Invalid email or password')
-    const isValidPwd = this.validatePassword(password, user?.password)
+    const isValidPwd = await this.validatePassword(password, user?.password)
     if (isValidPwd) return user
     throw new BadRequestException('Invalid email or password')
   }
@@ -37,7 +37,7 @@ export class AdminService {
   async validatePassword(pwd: string, dbPwd: string): Promise<boolean> {
     // await this.isValidPwd(pwd)
     const isValidPwd = pwd && (await comparePassword(pwd, dbPwd))
-    if (!isValidPwd) throw new BadRequestException('Invalid email or password')
+    if (!isValidPwd) return false
     return true
   }
 
@@ -60,6 +60,18 @@ export class AdminService {
     }
   }
 
+  async getAdminById(idAdminUser: string): Promise<Admin> {
+    try {
+      const findAdmin = this.adminRepository.findOne({ where: { idAdminUser } })
+      if (!findAdmin)
+        throw new BadRequestException('Unable to find the admin. Please verify the admin id')
+
+      return findAdmin
+    } catch (e) {
+      throw new BadRequestException('Failed to fetch admin. Check the customerID')
+    }
+  }
+
   async create(data: CreateAdminUserInput, contextUser: Admin): Promise<SuccessResponse> {
     const { email } = data
 
@@ -77,5 +89,26 @@ export class AdminService {
       success: true,
       message: 'Created a new admin'
     }
+  }
+
+  async updatePassword(password: string, adminId: string): Promise<SuccessResponse> {
+    const adminData = await this.getAdminById(adminId)
+    if (!adminData) throw new BadRequestException('Unable to find the admin data')
+    // const checkPwd = await isValidPassword(password)
+    // if (!checkPwd) {
+    //   throw new BadRequestException('Invalid username or password')
+    // }
+
+    try {
+      const pwd = await encodePassword(password)
+
+      await this.adminRepository.update(adminData.idAdminUser, {
+        password: pwd,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      throw new BadRequestException('Failed to update admin data')
+    }
+    return { success: true, message: 'Password of admin has been updated' }
   }
 }

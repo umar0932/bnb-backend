@@ -1,7 +1,7 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 
-import { CurrentUser } from '@app/common'
+import { Allow, CurrentUser } from '@app/common'
 import { SuccessResponse } from '@app/common/dto/success-response'
 
 import { AdminService } from './admin.service'
@@ -27,5 +27,16 @@ export class AdminResolver {
     @CurrentUser() contextUser
   ): Promise<SuccessResponse> {
     return this.adminService.create(createAdminUserData, contextUser)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'This will update Admin Password'
+  })
+  @Allow()
+  async updateAdminPassword(
+    @CurrentUser() user,
+    @Args('password') password: string
+  ): Promise<SuccessResponse> {
+    return await this.adminService.updatePassword(password, user.userId)
   }
 }

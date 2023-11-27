@@ -78,8 +78,14 @@ type Mutation {
   """Customer Login"""
   loginAsCustomer(input: LoginCustomerInput!): CustomerLoginResponse!
 
+  """This will update Admin Password"""
+  updateAdminPassword(password: String!): SuccessResponse!
+
   """This will update Customer"""
   updateCustomer(input: UpdateCustomerInput!): Customer!
+
+  """This will update Customer Password"""
+  updateCustomerPassword(password: String!): SuccessResponse!
 }
 
 type Query {
