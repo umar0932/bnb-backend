@@ -28,3 +28,25 @@ mutation createCustomer($input: CreateCustomerInput!) {
     }
   }
 }
+
+mutation updateCustomer($input: UpdateCustomerInput!) {
+  updateCustomer(input: $input) {
+    JobTitle
+    cellPhone
+    city
+    companyName
+    country
+    email
+    firstAddress
+    firstName
+    homePhone
+    id
+    isActive
+    lastName
+    password
+    secondAddress
+    state
+    website
+    zipCode
+  }
+}
