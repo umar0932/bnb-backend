@@ -83,6 +83,11 @@ export interface Customer {
     zipCode?: Nullable<string>;
 }
 
+export interface CustomerEmailUpdateResponse {
+    access_token: string;
+    user: Customer;
+}
+
 export interface CustomerLoginResponse {
     access_token: string;
     user: Customer;
@@ -95,12 +100,14 @@ export interface IMutation {
     loginAsCustomer(input: LoginCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
     updateAdminPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
     updateCustomer(input: UpdateCustomerInput): Customer | Promise<Customer>;
+    updateCustomerEmail(input: string): CustomerEmailUpdateResponse | Promise<CustomerEmailUpdateResponse>;
     updateCustomerPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
 }
 
 export interface IQuery {
     getCustomers(): Customer[] | Promise<Customer[]>;
     index(): string | Promise<string>;
+    validEmail(input: string): SuccessResponse | Promise<SuccessResponse>;
 }
 
 export interface SuccessResponse {
