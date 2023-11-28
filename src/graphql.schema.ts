@@ -93,7 +93,9 @@ export interface IMutation {
     createCustomer(input: CreateCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
     loginAsAdmin(input: LoginAdminInput): AdminLoginResponse | Promise<AdminLoginResponse>;
     loginAsCustomer(input: LoginCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
+    updateAdminPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
     updateCustomer(input: UpdateCustomerInput): Customer | Promise<Customer>;
+    updateCustomerPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
 }
 
 export interface IQuery {
