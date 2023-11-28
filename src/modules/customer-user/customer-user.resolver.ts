@@ -27,7 +27,7 @@ export class CustomerUserResolver {
   }
 
   @Query(() => SuccessResponse, { description: 'check if email already exist' })
-  async validEmail(@Args('input') emailId: string): Promise<SuccessResponse> {
+  async validEmailCustomer(@Args('input') emailId: string): Promise<SuccessResponse> {
     return await this.customerUserService.isEmailExist(emailId)
   }
 

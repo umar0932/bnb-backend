@@ -9,6 +9,13 @@ query getAllCustomers {
   }
 }
 
+query validEmailCustomer($input: String!) {
+  validEmailCustomer(input: $input){
+    success
+    message
+  }
+}
+
 #MUTATIONS
 
 mutation loginAsCustomer($input: LoginCustomerInput!) {
@@ -55,5 +62,14 @@ mutation updateCustomerPassword($input: String!) {
   updateCustomerPassword(password: $input) {
     success
     message
+  }
+}
+
+mutation updateCustomerEmail($input: String!) {
+  updateCustomerEmail(input: $input) {
+    access_token
+    user {
+      email
+    }
   }
 }
