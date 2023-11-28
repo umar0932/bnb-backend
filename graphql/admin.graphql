@@ -1,5 +1,12 @@
 #QUERIES
 
+query validEmailAdmin($input: String!) {
+  validEmailAdmin(input: $input) {
+    success
+    message
+  }
+}
+
 #MUTATIONS
 
 mutation loginAsAdmin($input: LoginAdminInput!) {
@@ -22,5 +29,14 @@ mutation updateAdminPassword($input: String!) {
   updateAdminPassword(password: $input) {
     success
     message
+  }
+}
+
+mutation updateAdminEmail($input: String!) {
+  updateAdminEmail(input: $input) {
+    access_token
+    user {
+      email
+    }
   }
 }

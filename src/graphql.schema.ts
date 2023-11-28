@@ -58,6 +58,11 @@ export interface Admin {
     password: string;
 }
 
+export interface AdminEmailUpdateResponse {
+    access_token: string;
+    user: Admin;
+}
+
 export interface AdminLoginResponse {
     access_token: string;
     user: Admin;
@@ -83,6 +88,11 @@ export interface Customer {
     zipCode?: Nullable<string>;
 }
 
+export interface CustomerEmailUpdateResponse {
+    access_token: string;
+    user: Customer;
+}
+
 export interface CustomerLoginResponse {
     access_token: string;
     user: Customer;
@@ -93,14 +103,18 @@ export interface IMutation {
     createCustomer(input: CreateCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
     loginAsAdmin(input: LoginAdminInput): AdminLoginResponse | Promise<AdminLoginResponse>;
     loginAsCustomer(input: LoginCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
+    updateAdminEmail(input: string): AdminEmailUpdateResponse | Promise<AdminEmailUpdateResponse>;
     updateAdminPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
     updateCustomer(input: UpdateCustomerInput): Customer | Promise<Customer>;
+    updateCustomerEmail(input: string): CustomerEmailUpdateResponse | Promise<CustomerEmailUpdateResponse>;
     updateCustomerPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
 }
 
 export interface IQuery {
     getCustomers(): Customer[] | Promise<Customer[]>;
     index(): string | Promise<string>;
+    validEmailAdmin(input: string): SuccessResponse | Promise<SuccessResponse>;
+    validEmailCustomer(input: string): SuccessResponse | Promise<SuccessResponse>;
 }
 
 export interface SuccessResponse {

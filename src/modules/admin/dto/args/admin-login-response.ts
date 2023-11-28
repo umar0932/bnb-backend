@@ -8,5 +8,5 @@ export class AdminLoginResponse {
   access_token: string
 
   @Field(() => Admin)
-  user: Admin
+  user: Partial<Admin>
 }
