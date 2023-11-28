@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
 
@@ -13,6 +19,7 @@ import { Customer } from './entities/customer.entity'
 import { CreateCustomerInput } from './dto/inputs/create-customer.input'
 import { CustomerLoginResponse } from './dto/args/customer-login-response'
 import { LoginCustomerInput } from './dto/inputs/login-customer.input'
+import { SuccessResponse } from '@app/common/dto/success-response'
 
 @Injectable()
 export class CustomerUserService {
@@ -26,16 +33,17 @@ export class CustomerUserService {
 
   async validateCustomer(email: string, password: string): Promise<any> {
     const user = await this.customerRepository.findOne({ where: { email } })
-    if (!user) throw new BadRequestException('Invalid email or password-1')
-    const isValidPwd = this.validatePassword(password, user?.password)
+    if (!user) throw new NotFoundException('Invalid email or password')
+    const isValidPwd = await this.validatePassword(password, user?.password)
     if (isValidPwd) return user
-    throw new BadRequestException('Invalid email or password-4')
+    throw new BadRequestException('Invalid email or password')
   }
 
   async validatePassword(pwd: string, dbPwd: string): Promise<boolean> {
     // await this.isValidPwd(pwd)
     const isValidPwd = pwd && (await comparePassword(pwd, dbPwd))
-    if (!isValidPwd) throw new BadRequestException('Invalid email or password-2')
+
+    if (!isValidPwd) return false
     return true
   }
 
@@ -108,7 +116,7 @@ export class CustomerUserService {
       where: { idAdminUser: userId }
     })
 
-    if (!isAdmin) throw new UnauthorizedException('Only admin can access this data.')
+    if (!isAdmin) throw new ForbiddenException('Only admin can access this data.')
 
     return await this.customerRepository.find()
   }
@@ -129,5 +137,26 @@ export class CustomerUserService {
     }
 
     return await this.getCustomerById(customerId)
+  }
+
+  async updatePassword(password: string, customerId: string): Promise<SuccessResponse> {
+    const customerData = await this.getCustomerById(customerId)
+    if (!customerData) throw new BadRequestException('Unable to find the customer data')
+    // const checkPwd = await isValidPassword(password)
+    // if (!checkPwd) {
+    //   throw new BadRequestException('Invalid username or password')
+    // }
+
+    try {
+      const pwd = await encodePassword(password)
+
+      await this.customerRepository.update(customerData.id, {
+        password: pwd,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      throw new BadRequestException('Failed to update customer data')
+    }
+    return { success: true, message: 'Password of customer has been updated' }
   }
 }

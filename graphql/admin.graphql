@@ -17,3 +17,10 @@ mutation createAdminUser($input: CreateAdminUserInput!) {
     message
   }
 }
+
+mutation updateAdminPassword($input: String!) {
+  updateAdminPassword(password: $input) {
+    success
+    message
+  }
+}

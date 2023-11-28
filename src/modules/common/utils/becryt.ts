@@ -1,26 +1,26 @@
-import { hashSync, compareSync, genSaltSync } from 'bcrypt'
+import { hash, compare, genSalt } from 'bcrypt'
 
 import { decryptBase64 } from './helper'
 import { RegEx } from './Regex'
 
-export function encodePassword(pwd: string) {
-  const SALT = genSaltSync()
+export async function encodePassword(pwd: string) {
+  const SALT = await genSalt()
   const decodeBase64Pwd = decryptBase64(pwd)
-  return hashSync(decodeBase64Pwd, SALT)
+  return await hash(pwd, SALT)
 }
 
-export function comparePassword(pwd: string, dbPwd: string) {
+export async function comparePassword(pwd: string, dbPwd: string) {
   const decodeBase64Pwd = decryptBase64(pwd)
-  return compareSync(decodeBase64Pwd, dbPwd)
+  return await compare(pwd, dbPwd)
 }
 
-export function isValidPassword(pwd: string) {
+export async function isValidPassword(pwd: string) {
   const decodeBase64Pwd = decryptBase64(pwd) || ''
   const pwdRegex = new RegExp(RegEx.PWD)
   return pwd && pwdRegex.test(decodeBase64Pwd)
 }
 
-export function isValidPasswordWithoutRegex(pwd: string) {
+export async function isValidPasswordWithoutRegex(pwd: string) {
   const decodeBase64Pwd = decryptBase64(pwd) || ''
   return pwd && decodeBase64Pwd
 }

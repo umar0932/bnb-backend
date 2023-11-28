@@ -10,6 +10,7 @@ import { CreateCustomerInput } from './dto/inputs/create-customer.input'
 import { GqlAuthGuard } from './guards/gql-auth.guard'
 import { LoginCustomerInput } from './dto/inputs/login-customer.input'
 import { UpdateCustomerInput } from './dto/inputs/update-user.input'
+import { SuccessResponse } from '@app/common/dto/success-response'
 
 @Resolver(() => Customer)
 export class CustomerUserResolver {
@@ -46,5 +47,16 @@ export class CustomerUserResolver {
     @CurrentUser() user
   ): Promise<Customer> {
     return await this.customerUserService.updateCustomerData(updateCustomerInput, user.userId)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'This will update Customer Password'
+  })
+  @Allow()
+  async updateCustomerPassword(
+    @CurrentUser() user,
+    @Args('password') password: string
+  ): Promise<SuccessResponse> {
+    return await this.customerUserService.updatePassword(password, user.userId)
   }
 }
