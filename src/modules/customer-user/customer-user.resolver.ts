@@ -3,10 +3,11 @@ import { UseGuards } from '@nestjs/common'
 
 import { Allow, CurrentUser } from '@app/common/decorator'
 
+import { CreateCustomerInput } from './dto/inputs/create-customer.input'
 import { Customer } from './entities/customer.entity'
+import { CustomerEmailUpdateResponse } from './dto/args/customer-email-update-response'
 import { CustomerLoginResponse } from './dto/args/customer-login-response'
 import { CustomerUserService } from './customer-user.service'
-import { CreateCustomerInput } from './dto/inputs/create-customer.input'
 import { GqlAuthGuard } from './guards/gql-auth.guard'
 import { LoginCustomerInput } from './dto/inputs/login-customer.input'
 import { UpdateCustomerInput } from './dto/inputs/update-user.input'
@@ -20,9 +21,14 @@ export class CustomerUserResolver {
   @UseGuards(GqlAuthGuard)
   async loginAsCustomer(
     @Args('input') loginCustomerInput: LoginCustomerInput,
-    @CurrentUser() user
+    @CurrentUser() user: any
   ) {
     return await this.customerUserService.login(loginCustomerInput, user)
+  }
+
+  @Query(() => SuccessResponse, { description: 'check if email already exist' })
+  async validEmail(@Args('input') emailId: string): Promise<SuccessResponse> {
+    return await this.customerUserService.isEmailExist(emailId)
   }
 
   @Mutation(() => CustomerLoginResponse, {
@@ -36,7 +42,7 @@ export class CustomerUserResolver {
 
   @Query(() => [Customer], { description: 'The List of Customers' })
   @Allow()
-  getCustomers(@CurrentUser() user): Promise<Customer[]> {
+  getCustomers(@CurrentUser() user: any): Promise<Customer[]> {
     return this.customerUserService.getAllCustomers(user.userId)
   }
 
@@ -44,8 +50,8 @@ export class CustomerUserResolver {
   @Allow()
   async updateCustomer(
     @Args('input') updateCustomerInput: UpdateCustomerInput,
-    @CurrentUser() user
-  ): Promise<Customer> {
+    @CurrentUser() user: any
+  ): Promise<Partial<Customer>> {
     return await this.customerUserService.updateCustomerData(updateCustomerInput, user.userId)
   }
 
@@ -54,9 +60,17 @@ export class CustomerUserResolver {
   })
   @Allow()
   async updateCustomerPassword(
-    @CurrentUser() user,
+    @CurrentUser() user: any,
     @Args('password') password: string
   ): Promise<SuccessResponse> {
     return await this.customerUserService.updatePassword(password, user.userId)
+  }
+
+  @Mutation(() => CustomerEmailUpdateResponse, {
+    description: 'Update customer email'
+  })
+  @Allow()
+  async updateCustomerEmail(@CurrentUser() user: any, @Args('input') email: string) {
+    return this.customerUserService.updateCustomerEmail(user, email)
   }
 }

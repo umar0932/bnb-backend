@@ -50,6 +50,11 @@ type Customer {
   zipCode: String
 }
 
+type CustomerEmailUpdateResponse {
+  access_token: String!
+  user: Customer!
+}
+
 type CustomerLoginResponse {
   access_token: String!
   user: Customer!
@@ -84,6 +89,9 @@ type Mutation {
   """This will update Customer"""
   updateCustomer(input: UpdateCustomerInput!): Customer!
 
+  """Update customer email"""
+  updateCustomerEmail(input: String!): CustomerEmailUpdateResponse!
+
   """This will update Customer Password"""
   updateCustomerPassword(password: String!): SuccessResponse!
 }
@@ -92,6 +100,9 @@ type Query {
   """The List of Customers"""
   getCustomers: [Customer!]!
   index: String!
+
+  """check if email already exist"""
+  validEmail(input: String!): SuccessResponse!
 }
 
 type SuccessResponse {

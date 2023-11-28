@@ -24,7 +24,7 @@ export class AdminResolver {
   @Mutation(() => SuccessResponse, { description: 'Create new admin user' })
   async createAdminUser(
     @Args('input') createAdminUserData: CreateAdminUserInput,
-    @CurrentUser() contextUser
+    @CurrentUser() contextUser: any
   ): Promise<SuccessResponse> {
     return this.adminService.create(createAdminUserData, contextUser)
   }
@@ -34,7 +34,7 @@ export class AdminResolver {
   })
   @Allow()
   async updateAdminPassword(
-    @CurrentUser() user,
+    @CurrentUser() user: any,
     @Args('password') password: string
   ): Promise<SuccessResponse> {
     return await this.adminService.updatePassword(password, user.userId)
