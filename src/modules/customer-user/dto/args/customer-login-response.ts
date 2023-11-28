@@ -8,5 +8,5 @@ export class CustomerLoginResponse {
   access_token: string
 
   @Field(() => Customer)
-  user: Customer
+  user: Partial<Customer>
 }

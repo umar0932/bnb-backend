@@ -10,7 +10,6 @@ import { join } from 'path'
 
 import { AdminModule } from '@app/admin'
 import { AppResolver } from './app.resolver'
-import { AppService } from './app.service'
 import { CustomerUserModule } from '@app/customer-user'
 import { dataSourceOptions } from 'db/data-source'
 import EnvConfig from './config/config'
@@ -53,6 +52,6 @@ const env = `${process.env.NODE_ENV}`
     AdminModule,
     CustomerUserModule
   ],
-  providers: [AppService, AppResolver]
+  providers: [AppResolver]
 })
 export class AppModule {}

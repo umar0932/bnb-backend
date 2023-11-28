@@ -15,8 +15,9 @@ import { JwtDto } from '@app/common'
 import { JWT_STRATEGY_NAME } from '@app/common/types'
 
 import { Admin } from '@app/admin/entities/admin.entity'
-import { Customer } from './entities/customer.entity'
 import { CreateCustomerInput } from './dto/inputs/create-customer.input'
+import { Customer } from './entities/customer.entity'
+import { CustomerEmailUpdateResponse } from './dto/args/customer-email-update-response'
 import { CustomerLoginResponse } from './dto/args/customer-login-response'
 import { LoginCustomerInput } from './dto/inputs/login-customer.input'
 import { SuccessResponse } from '@app/common/dto/success-response'
@@ -50,13 +51,13 @@ export class CustomerUserService {
   async isValidPwd(pwd: string): Promise<boolean> {
     const checkPwd = isValidPassword(pwd)
 
-    if (!checkPwd) throw new BadRequestException('Invalid email or password-3')
+    if (!checkPwd) throw new BadRequestException('Invalid email or password')
     return true
   }
 
   async getCustomerById(id: string): Promise<Customer> {
     try {
-      const findCustomer = this.customerRepository.findOne({ where: { id } })
+      const findCustomer = this.customerRepository.findOne({ where: { id, isActive: true } })
       if (!findCustomer)
         throw new BadRequestException('Unable to find the customer. Please verify the customer id')
 
@@ -64,6 +65,13 @@ export class CustomerUserService {
     } catch (e) {
       throw new BadRequestException('Failed to fetch customer. Check the customerID')
     }
+  }
+
+  async isEmailExist(email: string): Promise<SuccessResponse> {
+    const emailExists = await this.customerRepository.count({ where: { email } })
+    if (emailExists > 0) return { success: true, message: 'Email is valid' }
+
+    return { success: false, message: 'Email is invalid' }
   }
 
   async login(
@@ -124,7 +132,7 @@ export class CustomerUserService {
   async updateCustomerData(
     customerInput: Partial<Customer>,
     customerId: string
-  ): Promise<Customer> {
+  ): Promise<Partial<Customer>> {
     const customerData = await this.getCustomerById(customerId)
 
     try {
@@ -136,7 +144,11 @@ export class CustomerUserService {
       throw new BadRequestException('Failed to update data')
     }
 
-    return await this.getCustomerById(customerId)
+    const updatedCustomerData = await this.getCustomerById(customerId)
+
+    const { password, ...rest } = updatedCustomerData
+
+    return rest
   }
 
   async updatePassword(password: string, customerId: string): Promise<SuccessResponse> {
@@ -158,5 +170,34 @@ export class CustomerUserService {
       throw new BadRequestException('Failed to update customer data')
     }
     return { success: true, message: 'Password of customer has been updated' }
+  }
+
+  async updateCustomerEmail(user: any, email: string): Promise<CustomerEmailUpdateResponse> {
+    const emailExists = await this.isEmailExist(email)
+    if (emailExists) throw new BadRequestException('Email already exists')
+    try {
+      const customerData: Partial<Customer> = await this.getCustomerById(user.userId)
+      if (customerData) {
+        await this.customerRepository.update(customerData.id, {
+          email,
+          updatedDate: new Date()
+        })
+      }
+
+      const updatedCustomerData: Partial<Customer> = await this.getCustomerById(user.id)
+
+      const { password, ...rest } = updatedCustomerData
+      const payload = {
+        email: updatedCustomerData?.email,
+        sub: updatedCustomerData?.id,
+        type: JWT_STRATEGY_NAME.CUSTOMER
+      }
+      return {
+        access_token: await this.getJwtToken(payload),
+        user: rest
+      }
+    } catch (err) {
+      throw new BadRequestException("Couldn't update email")
+    }
   }
 }

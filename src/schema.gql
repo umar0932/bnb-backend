@@ -11,6 +11,11 @@ type Admin {
   password: String!
 }
 
+type AdminEmailUpdateResponse {
+  access_token: String!
+  user: Admin!
+}
+
 type AdminLoginResponse {
   access_token: String!
   user: Admin!
@@ -50,6 +55,11 @@ type Customer {
   zipCode: String
 }
 
+type CustomerEmailUpdateResponse {
+  access_token: String!
+  user: Customer!
+}
+
 type CustomerLoginResponse {
   access_token: String!
   user: Customer!
@@ -78,11 +88,17 @@ type Mutation {
   """Customer Login"""
   loginAsCustomer(input: LoginCustomerInput!): CustomerLoginResponse!
 
+  """Update admin email"""
+  updateAdminEmail(input: String!): AdminEmailUpdateResponse!
+
   """This will update Admin Password"""
   updateAdminPassword(password: String!): SuccessResponse!
 
   """This will update Customer"""
   updateCustomer(input: UpdateCustomerInput!): Customer!
+
+  """Update customer email"""
+  updateCustomerEmail(input: String!): CustomerEmailUpdateResponse!
 
   """This will update Customer Password"""
   updateCustomerPassword(password: String!): SuccessResponse!
@@ -92,6 +108,12 @@ type Query {
   """The List of Customers"""
   getCustomers: [Customer!]!
   index: String!
+
+  """check if email already exist"""
+  validEmailAdmin(input: String!): SuccessResponse!
+
+  """check if email already exist"""
+  validEmailCustomer(input: String!): SuccessResponse!
 }
 
 type SuccessResponse {

@@ -9,9 +9,10 @@ import { JWT_STRATEGY_NAME } from '@app/common/types'
 import { SuccessResponse } from '@app/common/dto/success-response'
 
 import { Admin } from './entities/admin.entity'
+import { AdminEmailUpdateResponse } from './dto/args/admin-email-update-response'
 import { AdminLoginResponse } from './dto/args/admin-login-response'
-import { LoginAdminInput } from './dto/inputs/login-admin.input'
 import { CreateAdminUserInput } from './dto/inputs/create-admin-user.input'
+import { LoginAdminInput } from './dto/inputs/login-admin.input'
 import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
@@ -71,6 +72,12 @@ export class AdminService {
       throw new BadRequestException('Failed to fetch admin. Check the customerID')
     }
   }
+  async isEmailExist(email: string): Promise<SuccessResponse> {
+    const emailExists = await this.adminRepository.count({ where: { email } })
+    if (emailExists > 0) return { success: true, message: 'Email is valid' }
+
+    return { success: false, message: 'Email is invalid' }
+  }
 
   async create(data: CreateAdminUserInput, contextUser: Admin): Promise<SuccessResponse> {
     const { email } = data
@@ -110,5 +117,34 @@ export class AdminService {
       throw new BadRequestException('Failed to update admin data')
     }
     return { success: true, message: 'Password of admin has been updated' }
+  }
+
+  async updateAdminEmail(user: any, email: string): Promise<AdminEmailUpdateResponse> {
+    const emailExists = await this.isEmailExist(email)
+    if (emailExists) throw new BadRequestException('Email already exists')
+    try {
+      const adminData: Partial<Admin> = await this.getAdminById(user.userId)
+      if (adminData) {
+        await this.adminRepository.update(adminData.idAdminUser, {
+          email,
+          updatedDate: new Date()
+        })
+      }
+
+      const updatedAdminData: Partial<Admin> = await this.getAdminById(user.id)
+
+      const { password, ...rest } = updatedAdminData
+      const payload = {
+        email: updatedAdminData?.email,
+        sub: updatedAdminData?.idAdminUser,
+        type: JWT_STRATEGY_NAME.ADMIN
+      }
+      return {
+        access_token: await this.getJwtToken(payload),
+        user: rest
+      }
+    } catch (err) {
+      throw new BadRequestException("Couldn't update email")
+    }
   }
 }
