@@ -1,17 +1,13 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 
-import { Allow, CurrentUser } from '@app/common/decorator'
+import { Allow, CurrentUser, SuccessResponse } from '@app/common'
 
-import { CreateCustomerInput } from './dto/inputs/create-customer.input'
+import { CreateCustomerInput, LoginCustomerInput, UpdateCustomerInput } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
-import { CustomerEmailUpdateResponse } from './dto/args/customer-email-update-response'
-import { CustomerLoginResponse } from './dto/args/customer-login-response'
+import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
 import { CustomerUserService } from './customer-user.service'
-import { GqlAuthGuard } from './guards/gql-auth.guard'
-import { LoginCustomerInput } from './dto/inputs/login-customer.input'
-import { UpdateCustomerInput } from './dto/inputs/update-user.input'
-import { SuccessResponse } from '@app/common/dto/success-response'
+import { GqlAuthGuard } from './guards'
 
 @Resolver(() => Customer)
 export class CustomerUserResolver {

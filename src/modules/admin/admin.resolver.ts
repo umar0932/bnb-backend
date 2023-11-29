@@ -1,16 +1,13 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 
-import { Allow, CurrentUser } from '@app/common'
-import { SuccessResponse } from '@app/common/dto/success-response'
+import { Allow, CurrentUser, SuccessResponse } from '@app/common'
 
-import { Admin } from './entities/admin.entity'
-import { AdminEmailUpdateResponse } from './dto/args/admin-email-update-response'
+import { Admin } from './entities'
+import { AdminEmailUpdateResponse, AdminLoginResponse } from './dto/args'
 import { AdminService } from './admin.service'
-import { AdminLoginResponse } from './dto/args/admin-login-response'
-import { CreateAdminUserInput } from './dto/inputs/create-admin-user.input'
-import { GqlAuthGuard } from './guards/gql-auth.guard'
-import { LoginAdminInput } from './dto/inputs/login-admin.input'
+import { CreateAdminUserInput, LoginAdminInput } from './dto/inputs'
+import { GqlAuthGuard } from './guards'
 
 @Resolver(() => Admin)
 export class AdminResolver {
