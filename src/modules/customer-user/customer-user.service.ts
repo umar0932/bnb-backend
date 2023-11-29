@@ -3,24 +3,25 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
 
 import { Repository } from 'typeorm'
 
-import { comparePassword, encodePassword, isValidPassword } from '@app/common/utils'
-import { JwtDto } from '@app/common'
-import { JWT_STRATEGY_NAME } from '@app/common/types'
+import {
+  JWT_STRATEGY_NAME,
+  JwtDto,
+  SuccessResponse,
+  comparePassword,
+  encodePassword,
+  isValidPassword
+} from '@app/common'
 
-import { Admin } from '@app/admin/entities/admin.entity'
-import { CreateCustomerInput } from './dto/inputs/create-customer.input'
+import { Admin } from '@app/admin/entities'
+import { CreateCustomerInput, LoginCustomerInput } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
-import { CustomerEmailUpdateResponse } from './dto/args/customer-email-update-response'
-import { CustomerLoginResponse } from './dto/args/customer-login-response'
-import { LoginCustomerInput } from './dto/inputs/login-customer.input'
-import { SuccessResponse } from '@app/common/dto/success-response'
+import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
 
 @Injectable()
 export class CustomerUserService {
