@@ -6,11 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { JWTConfigTypes } from '@app/common'
 
-import { Admin } from './entities/admin.entity'
+import { Admin } from './entities'
 import { AdminResolver } from './admin.resolver'
 import { AdminService } from './admin.service'
-import { JwtStrategy } from './strategy/jwt.strategy'
-import { LocalStrategy } from './strategy/local.strategy'
+import { JwtStrategy, LocalStrategy } from './strategy'
 
 @Module({
   imports: [

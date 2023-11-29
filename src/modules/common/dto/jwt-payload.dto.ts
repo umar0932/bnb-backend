@@ -1,4 +1,4 @@
-import { JWT_STRATEGY_NAME } from '../types/enum'
+import { JWT_STRATEGY_NAME } from "../types"
 
 export interface JwtDto {
   sub: string

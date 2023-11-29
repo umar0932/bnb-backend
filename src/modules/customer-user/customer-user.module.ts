@@ -6,12 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { JWTConfigTypes } from '@app/common'
 
-import { Customer } from './entities/customer.entity'
+import { Admin } from '@app/admin/entities'
+import { Customer } from './entities'
 import { CustomerUserResolver } from './customer-user.resolver'
 import { CustomerUserService } from './customer-user.service'
-import { JwtStrategy } from './strategy/jwt.strategy'
-import { LocalStrategy } from './strategy/local.strategy'
-import { Admin } from '@app/admin/entities/admin.entity'
+import { JwtStrategy, LocalStrategy } from './strategy'
 
 @Module({
   imports: [
