@@ -27,7 +27,7 @@ export class Admin extends CustomBaseEntity {
   @Field()
   password!: string
 
-  @Column({ nullable: true, default: true })
+  @Column({ nullable: true, default: true, name: 'is_active' })
   @Field({ nullable: true })
   isActive?: boolean
 }
