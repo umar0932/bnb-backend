@@ -22,6 +22,13 @@ export interface CreateCustomerInput {
     password: string;
 }
 
+export interface CreateOrganizerInput {
+    description?: Nullable<string>;
+    name: string;
+    organizationBio?: Nullable<string>;
+    websiteLink?: Nullable<string>;
+}
+
 export interface LoginAdminInput {
     email: string;
     password: string;
@@ -47,6 +54,13 @@ export interface UpdateCustomerInput {
     state?: Nullable<string>;
     website?: Nullable<string>;
     zipCode?: Nullable<string>;
+}
+
+export interface UpdateOrganizerInput {
+    description?: Nullable<string>;
+    name: string;
+    organizationBio?: Nullable<string>;
+    websiteLink?: Nullable<string>;
 }
 
 export interface Admin {
@@ -101,6 +115,7 @@ export interface CustomerLoginResponse {
 export interface IMutation {
     createAdminUser(input: CreateAdminUserInput): SuccessResponse | Promise<SuccessResponse>;
     createCustomer(input: CreateCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
+    createOrganizer(input: CreateOrganizerInput): SuccessResponse | Promise<SuccessResponse>;
     loginAsAdmin(input: LoginAdminInput): AdminLoginResponse | Promise<AdminLoginResponse>;
     loginAsCustomer(input: LoginCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
     updateAdminEmail(input: string): AdminEmailUpdateResponse | Promise<AdminEmailUpdateResponse>;
@@ -108,6 +123,16 @@ export interface IMutation {
     updateCustomer(input: UpdateCustomerInput): Customer | Promise<Customer>;
     updateCustomerEmail(input: string): CustomerEmailUpdateResponse | Promise<CustomerEmailUpdateResponse>;
     updateCustomerPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
+    updateOrganizer(input: UpdateOrganizerInput): Organizer | Promise<Organizer>;
+}
+
+export interface Organizer {
+    description: string;
+    idOrganizerUser: string;
+    isActive?: Nullable<boolean>;
+    name: string;
+    organizationBio: string;
+    websiteLink: string;
 }
 
 export interface IQuery {
