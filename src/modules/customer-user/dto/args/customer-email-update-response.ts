@@ -1,4 +1,5 @@
 import { ObjectType, PickType } from '@nestjs/graphql'
+
 import { CustomerLoginResponse } from './customer-login-response'
 
 @ObjectType()

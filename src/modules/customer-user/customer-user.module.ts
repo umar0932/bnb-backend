@@ -6,15 +6,17 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { JWTConfigTypes } from '@app/common'
 
-import { Admin } from '@app/admin/entities'
-import { Customer } from './entities'
+import { Admin } from '@app/admin/entities/admin.entity'
+import { Customer } from './entities/customer.entity'
 import { CustomerUserResolver } from './customer-user.resolver'
 import { CustomerUserService } from './customer-user.service'
-import { JwtStrategy, LocalStrategy } from './strategy'
+import { JwtStrategy } from './strategy/jwt.strategy'
+import { LocalStrategy } from './strategy/local.strategy'
+import { Organizer } from './entities/organizer.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Customer, Admin]),
+    TypeOrmModule.forFeature([Admin, Customer, Organizer]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
