@@ -8,6 +8,9 @@ import { Customer } from './entities/customer.entity'
 import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
 import { CustomerUserService } from './customer-user.service'
 import { GqlAuthGuard } from './guards'
+import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
+import { Organizer } from './entities/organizer.entity'
+import { UpdateOrganizerInput } from './dto/inputs/update-organizer.input'
 
 @Resolver(() => Customer)
 export class CustomerUserResolver {
@@ -68,5 +71,27 @@ export class CustomerUserResolver {
   @Allow()
   async updateCustomerEmail(@CurrentUser() user: any, @Args('input') email: string) {
     return this.customerUserService.updateCustomerEmail(user, email)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'This will signup new `Organizers'
+  })
+  @Allow()
+  async createOrganizer(
+    @CurrentUser() user: any,
+    @Args('input') createOrganizerInput: CreateOrganizerInput
+  ): Promise<SuccessResponse> {
+    return await this.customerUserService.createOrganizer(createOrganizerInput, user.userId)
+  }
+
+  @Mutation(() => Organizer, {
+    description: 'This will signup new `Organizers'
+  })
+  @Allow()
+  async updateOrganizer(
+    @CurrentUser() user: any,
+    @Args('input') updateOrganizerInput: UpdateOrganizerInput
+  ): Promise<Partial<Organizer>> {
+    return await this.customerUserService.updateOrganizerData(updateOrganizerInput, user.userId)
   }
 }

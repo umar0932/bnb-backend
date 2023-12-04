@@ -35,6 +35,13 @@ input CreateCustomerInput {
   password: String!
 }
 
+input CreateOrganizerInput {
+  description: String
+  name: String!
+  organizationBio: String
+  websiteLink: String
+}
+
 type Customer {
   JobTitle: String
   cellPhone: String
@@ -82,6 +89,9 @@ type Mutation {
   """This will signup new `Customers"""
   createCustomer(input: CreateCustomerInput!): CustomerLoginResponse!
 
+  """This will signup new `Organizers"""
+  createOrganizer(input: CreateOrganizerInput!): SuccessResponse!
+
   """Admin Login"""
   loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
 
@@ -102,6 +112,18 @@ type Mutation {
 
   """This will update Customer Password"""
   updateCustomerPassword(password: String!): SuccessResponse!
+
+  """This will signup new `Organizers"""
+  updateOrganizer(input: UpdateOrganizerInput!): Organizer!
+}
+
+type Organizer {
+  description: String!
+  idOrganizerUser: ID!
+  isActive: Boolean
+  name: String!
+  organizationBio: String!
+  websiteLink: String!
 }
 
 type Query {
@@ -136,4 +158,11 @@ input UpdateCustomerInput {
   state: String
   website: String
   zipCode: String
+}
+
+input UpdateOrganizerInput {
+  description: String
+  name: String!
+  organizationBio: String
+  websiteLink: String
 }
