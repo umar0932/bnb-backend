@@ -10,7 +10,7 @@ query getAllCustomers {
 }
 
 query validEmailCustomer($input: String!) {
-  validEmailCustomer(input: $input){
+  validEmailCustomer(input: $input) {
     success
     message
   }
@@ -71,5 +71,22 @@ mutation updateCustomerEmail($input: String!) {
     user {
       email
     }
+  }
+}
+
+mutation createOrganizer($input: CreateOrganizerInput!) {
+  createOrganizer(input: $input) {
+    success
+    message
+  }
+}
+
+mutation updateOrganizer($input: UpdateOrganizerInput!) {
+  updateOrganizer(input: $input) {
+    idOrganizerUser
+    name
+    description
+    organizationBio
+    websiteLink
   }
 }

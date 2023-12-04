@@ -22,6 +22,8 @@ import { Admin } from '@app/admin/entities'
 import { CreateCustomerInput, LoginCustomerInput } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
 import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
+import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
+import { Organizer } from './entities/organizer.entity'
 
 @Injectable()
 export class CustomerUserService {
@@ -30,6 +32,8 @@ export class CustomerUserService {
     private adminRepository: Repository<Admin>,
     @InjectRepository(Customer)
     private customerRepository: Repository<Customer>,
+    @InjectRepository(Organizer)
+    private organizerRepository: Repository<Organizer>,
     private jwtService: JwtService
   ) {}
 
@@ -66,6 +70,14 @@ export class CustomerUserService {
     } catch (e) {
       throw new BadRequestException('Failed to fetch customer. Check the customerID')
     }
+  }
+
+  async getOrganizerByName(name: string, customerId: string): Promise<Organizer> {
+    const findOrganizer = this.organizerRepository.findOne({
+      where: { name, isActive: true, createdBy: customerId }
+    })
+
+    return findOrganizer
   }
 
   async isEmailExist(email: string): Promise<SuccessResponse> {
@@ -200,5 +212,49 @@ export class CustomerUserService {
     } catch (err) {
       throw new BadRequestException("Couldn't update email")
     }
+  }
+
+  async createOrganizer(
+    organizerInput: CreateOrganizerInput,
+    customerId: string
+  ): Promise<SuccessResponse> {
+    await this.getCustomerById(customerId)
+    const organizerData = await this.getOrganizerByName(organizerInput.name, customerId)    
+    if (organizerData)
+      throw new BadRequestException('This organizer already exist. Enter a valid name')
+
+    try {
+      await this.organizerRepository.save({
+        ...organizerInput,
+        createdBy: customerId
+      })
+    } catch (err) {
+      throw new BadRequestException("Couldn't create organizer")
+    }
+
+    return { success: true, message: 'Organizer has been created' }
+  }
+
+  async updateOrganizerData(
+    organizerInput: Partial<Organizer>,
+    customerId: string
+  ): Promise<Partial<Organizer>> {
+    await this.getCustomerById(customerId)
+    const organizerData = await this.getOrganizerByName(organizerInput.name, customerId)
+    if (!organizerData)
+      throw new BadRequestException('Unable to find the organizer. Please enter a valid organizer')
+    try {
+      await this.organizerRepository.update(organizerData.idOrganizerUser, {
+        ...organizerInput,
+        updatedBy: customerId,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      throw new BadRequestException('Failed to update data')
+    }
+
+    const updatedOrganizerData = await this.getOrganizerByName(organizerInput.name, customerId)
+
+    return updatedOrganizerData
   }
 }
