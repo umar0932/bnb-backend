@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql'
+import { ObjectType, Field, ID, InputType } from '@nestjs/graphql'
 
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
@@ -17,6 +17,9 @@ export class Category extends CustomBaseEntity {
   @Field()
   categoryName!: string
 
-  @OneToMany(() => SubCategory, subCategory => subCategory.category)
+  @OneToMany(() => SubCategory, subCategory => subCategory.category, {
+    cascade: ['insert', 'update', 'remove']
+  })
+  @Field(() => [SubCategory], { nullable: true })
   subCategories: SubCategory[]
 }

@@ -1,6 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 
@@ -18,5 +18,7 @@ export class SubCategory extends CustomBaseEntity {
   subCategoryName!: string
 
   @ManyToOne(() => Category, category => category.subCategories)
+  @JoinColumn({ name: 'category_id' })
+  @Field(() => Category, { nullable: true })
   category: Category
 }
