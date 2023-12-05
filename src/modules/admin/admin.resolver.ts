@@ -20,11 +20,12 @@ export class AdminResolver {
   }
 
   @Mutation(() => SuccessResponse, { description: 'Create new admin user' })
+  // @Allow()
   async createAdminUser(
     @Args('input') createAdminUserData: CreateAdminUserInput,
-    @CurrentUser() contextUser: any
+    @CurrentUser() user: any
   ): Promise<SuccessResponse> {
-    return this.adminService.create(createAdminUserData, contextUser)
+    return this.adminService.create(createAdminUserData, user?.userId)
   }
 
   @Query(() => SuccessResponse, { description: 'check if email already exist' })

@@ -15,6 +15,10 @@ export interface CreateAdminUserInput {
     password: string;
 }
 
+export interface CreateCategoryInput {
+    categoryName: string;
+}
+
 export interface CreateCustomerInput {
     email: string;
     firstName: string;
@@ -37,6 +41,11 @@ export interface LoginAdminInput {
 export interface LoginCustomerInput {
     email: string;
     password: string;
+}
+
+export interface UpdateCategoryInput {
+    categoryName: string;
+    idCategory: string;
 }
 
 export interface UpdateCustomerInput {
@@ -82,6 +91,11 @@ export interface AdminLoginResponse {
     user: Admin;
 }
 
+export interface Category {
+    categoryName: string;
+    idCategory: string;
+}
+
 export interface Customer {
     JobTitle?: Nullable<string>;
     cellPhone?: Nullable<string>;
@@ -114,12 +128,14 @@ export interface CustomerLoginResponse {
 
 export interface IMutation {
     createAdminUser(input: CreateAdminUserInput): SuccessResponse | Promise<SuccessResponse>;
+    createCategory(input: CreateCategoryInput): SuccessResponse | Promise<SuccessResponse>;
     createCustomer(input: CreateCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
     createOrganizer(input: CreateOrganizerInput): SuccessResponse | Promise<SuccessResponse>;
     loginAsAdmin(input: LoginAdminInput): AdminLoginResponse | Promise<AdminLoginResponse>;
     loginAsCustomer(input: LoginCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
     updateAdminEmail(input: string): AdminEmailUpdateResponse | Promise<AdminEmailUpdateResponse>;
     updateAdminPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
+    updateCategory(input: UpdateCategoryInput): Category | Promise<Category>;
     updateCustomer(input: UpdateCustomerInput): Customer | Promise<Customer>;
     updateCustomerEmail(input: string): CustomerEmailUpdateResponse | Promise<CustomerEmailUpdateResponse>;
     updateCustomerPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
@@ -136,6 +152,7 @@ export interface Organizer {
 }
 
 export interface IQuery {
+    getAllCategories(): Category[] | Promise<Category[]>;
     getCustomers(): Customer[] | Promise<Customer[]>;
     index(): string | Promise<string>;
     validEmailAdmin(input: string): SuccessResponse | Promise<SuccessResponse>;

@@ -10,6 +10,7 @@ import { join } from 'path'
 
 import { AdminModule } from '@app/admin'
 import { AppResolver } from './app.resolver'
+import { CategoryModule } from '@app/category'
 import { CustomerUserModule } from '@app/customer-user'
 import { dataSourceOptions } from 'db/data-source'
 import EnvConfig from './config/config'
@@ -50,7 +51,8 @@ const env = `${process.env.NODE_ENV}`
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     AdminModule,
-    CustomerUserModule
+    CustomerUserModule,
+    CategoryModule
   ],
   providers: [AppResolver]
 })
