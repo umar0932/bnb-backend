@@ -16,15 +16,15 @@ export class Organizer extends CustomBaseEntity {
   name!: string
 
   @Column({ length: 500, name: 'website_link', nullable: true })
-  @Field()
+  @Field({ nullable: true })
   websiteLink?: string
 
   @Column({ name: 'organization_bio', nullable: true })
-  @Field()
+  @Field({ nullable: true })
   organizationBio?: string
 
   @Column({ length: 500, name: 'description', nullable: true })
-  @Field()
+  @Field({ nullable: true })
   description?: string
 
   @Column({ nullable: true, default: true, name: 'is_active' })

@@ -24,6 +24,7 @@ type AdminLoginResponse {
 type Category {
   categoryName: String!
   idCategory: ID!
+  subCategories: [SubCategory!]
 }
 
 input CreateAdminUserInput {
@@ -49,6 +50,11 @@ input CreateOrganizerInput {
   name: String!
   organizationBio: String
   websiteLink: String
+}
+
+input CreateSubCategoryInput {
+  idCategory: ID!
+  subCategoryName: String!
 }
 
 type Customer {
@@ -104,6 +110,9 @@ type Mutation {
   """This will signup new `Organizers"""
   createOrganizer(input: CreateOrganizerInput!): SuccessResponse!
 
+  """This will crete new SubCategories"""
+  createSubCategory(input: CreateSubCategoryInput!): SuccessResponse!
+
   """Admin Login"""
   loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
 
@@ -130,20 +139,26 @@ type Mutation {
 
   """This will signup new `Organizers"""
   updateOrganizer(input: UpdateOrganizerInput!): Organizer!
+
+  """This will update SubCategory"""
+  updateSubCategories(input: UpdateSubCategoryInput!): SubCategory!
 }
 
 type Organizer {
-  description: String!
+  description: String
   idOrganizerUser: ID!
   isActive: Boolean
   name: String!
-  organizationBio: String!
-  websiteLink: String!
+  organizationBio: String
+  websiteLink: String
 }
 
 type Query {
   """This will get all categories"""
   getAllCategories: [Category!]!
+
+  """This will get all categories"""
+  getAllSubCategories: [SubCategory!]!
 
   """The List of Customers"""
   getCustomers: [Customer!]!
@@ -154,6 +169,12 @@ type Query {
 
   """check if email already exist"""
   validEmailCustomer(input: String!): SuccessResponse!
+}
+
+type SubCategory {
+  category: Category
+  idSubCategory: ID!
+  subCategoryName: String!
 }
 
 type SuccessResponse {
@@ -188,4 +209,10 @@ input UpdateOrganizerInput {
   name: String!
   organizationBio: String
   websiteLink: String
+}
+
+input UpdateSubCategoryInput {
+  idCategory: ID!
+  idSubCategory: ID!
+  subCategoryName: String!
 }
