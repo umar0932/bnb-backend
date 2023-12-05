@@ -1,0 +1,17 @@
+#QUERIES
+
+query getAllCategories {
+  getAllCategories {
+    idCategory
+    categoryName
+  }
+}
+
+#MUTATIONS
+
+mutation createCategory($input: CreateCategoryInput!) {
+  createCategory(input: $input) {
+    success
+    message
+  }
+}

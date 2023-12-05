@@ -21,11 +21,20 @@ type AdminLoginResponse {
   user: Admin!
 }
 
+type Category {
+  categoryName: String!
+  idCategory: ID!
+}
+
 input CreateAdminUserInput {
   email: String!
   firstName: String!
   lastName: String!
   password: String!
+}
+
+input CreateCategoryInput {
+  categoryName: String!
 }
 
 input CreateCustomerInput {
@@ -86,6 +95,9 @@ type Mutation {
   """Create new admin user"""
   createAdminUser(input: CreateAdminUserInput!): SuccessResponse!
 
+  """This will crete new Categories"""
+  createCategory(input: CreateCategoryInput!): SuccessResponse!
+
   """This will signup new `Customers"""
   createCustomer(input: CreateCustomerInput!): CustomerLoginResponse!
 
@@ -103,6 +115,9 @@ type Mutation {
 
   """This will update Admin Password"""
   updateAdminPassword(password: String!): SuccessResponse!
+
+  """This will update Category"""
+  updateCategory(input: UpdateCategoryInput!): Category!
 
   """This will update Customer"""
   updateCustomer(input: UpdateCustomerInput!): Customer!
@@ -127,6 +142,9 @@ type Organizer {
 }
 
 type Query {
+  """This will get all categories"""
+  getAllCategories: [Category!]!
+
   """The List of Customers"""
   getCustomers: [Customer!]!
   index: String!
@@ -141,6 +159,11 @@ type Query {
 type SuccessResponse {
   message: String
   success: Boolean
+}
+
+input UpdateCategoryInput {
+  categoryName: String!
+  idCategory: ID!
 }
 
 input UpdateCustomerInput {
