@@ -1,0 +1,57 @@
+#QUERIES
+
+query getAllCategories {
+  getAllCategories {
+    idCategory
+    categoryName
+    subCategories {
+      idSubCategory
+      subCategoryName
+    }
+  }
+}
+
+query getAllSubCategories {
+  getAllSubCategories {
+    idSubCategory
+    subCategoryName
+    category {
+      idCategory
+      categoryName
+    }
+  }
+}
+
+#MUTATIONS
+
+mutation createCategory($input: CreateCategoryInput!) {
+  createCategory(input: $input) {
+    success
+    message
+  }
+}
+
+mutation updateCategory($input: UpdateCategoryInput!) {
+  updateCategory(input: $input) {
+    idCategory,
+    categoryName
+  }
+}
+
+mutation createSubCategory($input: CreateSubCategoryInput!) {
+  createSubCategory(input: $input) {
+    success
+    message
+  }
+}
+
+mutation updateSubCategories($input: UpdateSubCategoryInput!) {
+  updateSubCategories(input: $input) {
+    idSubCategory
+    subCategoryName
+    category {
+      idCategory
+      categoryName
+    }
+  }
+}

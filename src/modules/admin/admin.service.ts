@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
 
@@ -66,12 +66,11 @@ export class AdminService {
   async getAdminById(idAdminUser: string): Promise<Admin> {
     try {
       const findAdmin = this.adminRepository.findOne({ where: { idAdminUser } })
-      if (!findAdmin)
-        throw new BadRequestException('Unable to find the admin. Please verify the admin id')
+      if (!findAdmin) throw new ForbiddenException('Invalid Admin user')
 
       return findAdmin
     } catch (e) {
-      throw new BadRequestException('Failed to fetch admin. Check the customerID')
+      throw new BadRequestException('Failed to fetch admin')
     }
   }
   async isEmailExist(email: string): Promise<SuccessResponse> {
@@ -81,11 +80,13 @@ export class AdminService {
     return { success: false, message: 'Email is invalid' }
   }
 
-  async create(data: CreateAdminUserInput, contextUser: Admin): Promise<SuccessResponse> {
+  async create(data: CreateAdminUserInput, idAdminUser: string): Promise<SuccessResponse> {
     const { email } = data
 
-    const user = await this.adminRepository.findOne({ where: { email } })
-    if (user) throw new BadRequestException('Email already exists')
+    await this.getAdminById(idAdminUser)
+
+    const adminUser = await this.adminRepository.findOne({ where: { email } })
+    if (adminUser) throw new BadRequestException('Email already exists')
 
     const password = await encodePassword(data.password)
 

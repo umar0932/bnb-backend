@@ -15,6 +15,10 @@ export interface CreateAdminUserInput {
     password: string;
 }
 
+export interface CreateCategoryInput {
+    categoryName: string;
+}
+
 export interface CreateCustomerInput {
     email: string;
     firstName: string;
@@ -29,6 +33,11 @@ export interface CreateOrganizerInput {
     websiteLink?: Nullable<string>;
 }
 
+export interface CreateSubCategoryInput {
+    idCategory: string;
+    subCategoryName: string;
+}
+
 export interface LoginAdminInput {
     email: string;
     password: string;
@@ -37,6 +46,11 @@ export interface LoginAdminInput {
 export interface LoginCustomerInput {
     email: string;
     password: string;
+}
+
+export interface UpdateCategoryInput {
+    categoryName: string;
+    idCategory: string;
 }
 
 export interface UpdateCustomerInput {
@@ -63,6 +77,12 @@ export interface UpdateOrganizerInput {
     websiteLink?: Nullable<string>;
 }
 
+export interface UpdateSubCategoryInput {
+    idCategory: string;
+    idSubCategory: string;
+    subCategoryName: string;
+}
+
 export interface Admin {
     email: string;
     firstName: string;
@@ -80,6 +100,12 @@ export interface AdminEmailUpdateResponse {
 export interface AdminLoginResponse {
     access_token: string;
     user: Admin;
+}
+
+export interface Category {
+    categoryName: string;
+    idCategory: string;
+    subCategories?: Nullable<SubCategory[]>;
 }
 
 export interface Customer {
@@ -114,32 +140,44 @@ export interface CustomerLoginResponse {
 
 export interface IMutation {
     createAdminUser(input: CreateAdminUserInput): SuccessResponse | Promise<SuccessResponse>;
+    createCategory(input: CreateCategoryInput): SuccessResponse | Promise<SuccessResponse>;
     createCustomer(input: CreateCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
     createOrganizer(input: CreateOrganizerInput): SuccessResponse | Promise<SuccessResponse>;
+    createSubCategory(input: CreateSubCategoryInput): SuccessResponse | Promise<SuccessResponse>;
     loginAsAdmin(input: LoginAdminInput): AdminLoginResponse | Promise<AdminLoginResponse>;
     loginAsCustomer(input: LoginCustomerInput): CustomerLoginResponse | Promise<CustomerLoginResponse>;
     updateAdminEmail(input: string): AdminEmailUpdateResponse | Promise<AdminEmailUpdateResponse>;
     updateAdminPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
+    updateCategory(input: UpdateCategoryInput): Category | Promise<Category>;
     updateCustomer(input: UpdateCustomerInput): Customer | Promise<Customer>;
     updateCustomerEmail(input: string): CustomerEmailUpdateResponse | Promise<CustomerEmailUpdateResponse>;
     updateCustomerPassword(password: string): SuccessResponse | Promise<SuccessResponse>;
     updateOrganizer(input: UpdateOrganizerInput): Organizer | Promise<Organizer>;
+    updateSubCategories(input: UpdateSubCategoryInput): SubCategory | Promise<SubCategory>;
 }
 
 export interface Organizer {
-    description: string;
+    description?: Nullable<string>;
     idOrganizerUser: string;
     isActive?: Nullable<boolean>;
     name: string;
-    organizationBio: string;
-    websiteLink: string;
+    organizationBio?: Nullable<string>;
+    websiteLink?: Nullable<string>;
 }
 
 export interface IQuery {
+    getAllCategories(): Category[] | Promise<Category[]>;
+    getAllSubCategories(): SubCategory[] | Promise<SubCategory[]>;
     getCustomers(): Customer[] | Promise<Customer[]>;
     index(): string | Promise<string>;
     validEmailAdmin(input: string): SuccessResponse | Promise<SuccessResponse>;
     validEmailCustomer(input: string): SuccessResponse | Promise<SuccessResponse>;
+}
+
+export interface SubCategory {
+    category?: Nullable<Category>;
+    idSubCategory: string;
+    subCategoryName: string;
 }
 
 export interface SuccessResponse {

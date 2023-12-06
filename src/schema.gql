@@ -21,11 +21,21 @@ type AdminLoginResponse {
   user: Admin!
 }
 
+type Category {
+  categoryName: String!
+  idCategory: ID!
+  subCategories: [SubCategory!]
+}
+
 input CreateAdminUserInput {
   email: String!
   firstName: String!
   lastName: String!
   password: String!
+}
+
+input CreateCategoryInput {
+  categoryName: String!
 }
 
 input CreateCustomerInput {
@@ -40,6 +50,11 @@ input CreateOrganizerInput {
   name: String!
   organizationBio: String
   websiteLink: String
+}
+
+input CreateSubCategoryInput {
+  idCategory: ID!
+  subCategoryName: String!
 }
 
 type Customer {
@@ -86,11 +101,17 @@ type Mutation {
   """Create new admin user"""
   createAdminUser(input: CreateAdminUserInput!): SuccessResponse!
 
+  """This will crete new Categories"""
+  createCategory(input: CreateCategoryInput!): SuccessResponse!
+
   """This will signup new `Customers"""
   createCustomer(input: CreateCustomerInput!): CustomerLoginResponse!
 
   """This will signup new `Organizers"""
   createOrganizer(input: CreateOrganizerInput!): SuccessResponse!
+
+  """This will crete new SubCategories"""
+  createSubCategory(input: CreateSubCategoryInput!): SuccessResponse!
 
   """Admin Login"""
   loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
@@ -104,6 +125,9 @@ type Mutation {
   """This will update Admin Password"""
   updateAdminPassword(password: String!): SuccessResponse!
 
+  """This will update Category"""
+  updateCategory(input: UpdateCategoryInput!): Category!
+
   """This will update Customer"""
   updateCustomer(input: UpdateCustomerInput!): Customer!
 
@@ -115,18 +139,27 @@ type Mutation {
 
   """This will signup new `Organizers"""
   updateOrganizer(input: UpdateOrganizerInput!): Organizer!
+
+  """This will update SubCategory"""
+  updateSubCategories(input: UpdateSubCategoryInput!): SubCategory!
 }
 
 type Organizer {
-  description: String!
+  description: String
   idOrganizerUser: ID!
   isActive: Boolean
   name: String!
-  organizationBio: String!
-  websiteLink: String!
+  organizationBio: String
+  websiteLink: String
 }
 
 type Query {
+  """This will get all categories"""
+  getAllCategories: [Category!]!
+
+  """This will get all categories"""
+  getAllSubCategories: [SubCategory!]!
+
   """The List of Customers"""
   getCustomers: [Customer!]!
   index: String!
@@ -138,9 +171,20 @@ type Query {
   validEmailCustomer(input: String!): SuccessResponse!
 }
 
+type SubCategory {
+  category: Category
+  idSubCategory: ID!
+  subCategoryName: String!
+}
+
 type SuccessResponse {
   message: String
   success: Boolean
+}
+
+input UpdateCategoryInput {
+  categoryName: String!
+  idCategory: ID!
 }
 
 input UpdateCustomerInput {
@@ -165,4 +209,10 @@ input UpdateOrganizerInput {
   name: String!
   organizationBio: String
   websiteLink: String
+}
+
+input UpdateSubCategoryInput {
+  idCategory: ID!
+  idSubCategory: ID!
+  subCategoryName: String!
 }
