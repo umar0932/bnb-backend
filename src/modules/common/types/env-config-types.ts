@@ -1,4 +1,4 @@
-export type DatabaseConfigTypes = {
+export interface DatabaseConfigTypes {
   host: string
   dbName: string
   user: string
@@ -8,14 +8,14 @@ export type DatabaseConfigTypes = {
 
 export type PortConfig = string
 
-type JWTConfigType = {
+interface JWTConfigType {
   secret: string
   signOptions: {
     expiresIn: string
   }
 }
 
-export type JWTConfigTypes = {
+export interface JWTConfigTypes {
   customer?: JWTConfigType
   admin?: JWTConfigType
 }

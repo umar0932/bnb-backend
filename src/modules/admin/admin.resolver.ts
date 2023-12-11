@@ -1,7 +1,7 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 
-import { Allow, CurrentUser, SuccessResponse } from '@app/common'
+import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
 
 import { Admin } from './entities'
 import { AdminEmailUpdateResponse, AdminLoginResponse } from './dto/args'
@@ -15,15 +15,15 @@ export class AdminResolver {
 
   @Mutation(() => AdminLoginResponse, { description: 'Admin Login' })
   @UseGuards(GqlAuthGuard)
-  async loginAsAdmin(@Args('input') loginAdminInput: LoginAdminInput, @CurrentUser() user) {
+  async loginAsAdmin(@Args('input') loginAdminInput: LoginAdminInput, @CurrentUser() user: any) {
     return this.adminService.login(loginAdminInput, user)
   }
 
   @Mutation(() => SuccessResponse, { description: 'Create new admin user' })
-  // @Allow()
+  @Allow()
   async createAdminUser(
     @Args('input') createAdminUserData: CreateAdminUserInput,
-    @CurrentUser() user: any
+    @CurrentUser() user: JwtUserPayload
   ): Promise<SuccessResponse> {
     return this.adminService.create(createAdminUserData, user?.userId)
   }
@@ -38,7 +38,7 @@ export class AdminResolver {
   })
   @Allow()
   async updateAdminPassword(
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtUserPayload,
     @Args('password') password: string
   ): Promise<SuccessResponse> {
     return await this.adminService.updatePassword(password, user.userId)
@@ -48,7 +48,7 @@ export class AdminResolver {
     description: 'Update admin email'
   })
   @Allow()
-  async updateAdminEmail(@CurrentUser() user: any, @Args('input') email: string) {
-    return this.adminService.updateAdminEmail(user, email)
+  async updateAdminEmail(@CurrentUser() user: JwtUserPayload, @Args('input') email: string) {
+    return this.adminService.updateAdminEmail(user.userId, email)
   }
 }

@@ -26,7 +26,7 @@ import { JwtStrategy, LocalStrategy } from './strategy'
       },
       inject: [ConfigService]
     })
-  ], 
+  ],
   providers: [AdminResolver, AdminService, JwtStrategy, LocalStrategy],
   exports: [AdminService]
 })

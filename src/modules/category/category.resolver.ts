@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
 
-import { Allow, CurrentUser, SuccessResponse } from '@app/common'
+import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
 
 import { Category, SubCategory } from './entities'
 import {
@@ -21,14 +21,14 @@ export class CategoryResolver {
   @Allow()
   async createCategory(
     @Args('input') createCategoryData: CreateCategoryInput,
-    @CurrentUser() user: any
+    @CurrentUser() user: JwtUserPayload
   ): Promise<SuccessResponse> {
     return await this.categoryService.createCategory(createCategoryData, user.userId)
   }
 
   @Query(() => [Category], { description: 'This will get all categories' })
   @Allow()
-  getAllCategories(@CurrentUser() user: any): Promise<Category[]> {
+  getAllCategories(@CurrentUser() user: JwtUserPayload): Promise<Category[]> {
     return this.categoryService.getAllCategories(user.userId)
   }
 
@@ -36,7 +36,7 @@ export class CategoryResolver {
   @Allow()
   async updateCategory(
     @Args('input') updateCategoryInput: UpdateCategoryInput,
-    @CurrentUser() user: any
+    @CurrentUser() user: JwtUserPayload
   ): Promise<Partial<Category>> {
     return await this.categoryService.updateCategories(updateCategoryInput, user.userId)
   }
@@ -46,15 +46,15 @@ export class CategoryResolver {
   })
   @Allow()
   async createSubCategory(
-    @Args('input') CreateSubCategoryInput: CreateSubCategoryInput,
-    @CurrentUser() user: any
+    @Args('input') createSubCategoryInput: CreateSubCategoryInput,
+    @CurrentUser() user: JwtUserPayload
   ): Promise<SuccessResponse> {
-    return await this.categoryService.createSubCategory(CreateSubCategoryInput, user.userId)
+    return await this.categoryService.createSubCategory(createSubCategoryInput, user.userId)
   }
 
   @Query(() => [SubCategory], { description: 'This will get all categories' })
   @Allow()
-  getAllSubCategories(@CurrentUser() user: any): Promise<SubCategory[]> {
+  getAllSubCategories(@CurrentUser() user: JwtUserPayload): Promise<SubCategory[]> {
     return this.categoryService.getAllSubCategories(user.userId)
   }
 
@@ -62,7 +62,7 @@ export class CategoryResolver {
   @Allow()
   async updateSubCategories(
     @Args('input') updateSubCategoryInput: UpdateSubCategoryInput,
-    @CurrentUser() user: any
+    @CurrentUser() user: JwtUserPayload
   ): Promise<Partial<SubCategory>> {
     return await this.categoryService.updateSubCategories(updateSubCategoryInput, user.userId)
   }

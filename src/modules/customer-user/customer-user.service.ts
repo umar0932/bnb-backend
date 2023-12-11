@@ -2,7 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
@@ -12,6 +12,7 @@ import { Repository } from 'typeorm'
 import {
   JWT_STRATEGY_NAME,
   JwtDto,
+  JwtUserPayload,
   SuccessResponse,
   comparePassword,
   encodePassword,
@@ -24,6 +25,7 @@ import { Customer } from './entities/customer.entity'
 import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
 import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
 import { Organizer } from './entities/organizer.entity'
+import { UpdateOrganizerInput } from './dto/inputs/update-organizer.input'
 
 @Injectable()
 export class CustomerUserService {
@@ -61,10 +63,11 @@ export class CustomerUserService {
   }
 
   async getCustomerById(id: string): Promise<Customer> {
+    if (!id) throw new BadRequestException('Id is invalid')
     try {
-      const findCustomer = this.customerRepository.findOne({ where: { id, isActive: true } })
+      const findCustomer = await this.customerRepository.findOne({ where: { id, isActive: true } })
       if (!findCustomer)
-        throw new BadRequestException('Unable to find the customer. Please verify the customer id')
+        throw new BadRequestException('Unable to find the customer. Please enter valid customer id')
 
       return findCustomer
     } catch (e) {
@@ -73,10 +76,20 @@ export class CustomerUserService {
   }
 
   async getOrganizerByName(name: string, customerId: string): Promise<Organizer> {
-    const findOrganizer = this.organizerRepository.findOne({
+    const findOrganizer = await this.organizerRepository.findOne({
       where: { name, isActive: true, createdBy: customerId }
     })
+    if (!findOrganizer)
+      throw new BadRequestException('Unable to find the organizer. Please enter valid input ')
+    return findOrganizer
+  }
 
+  async getOrganizerById(idOrganizerUser: string, customerId: string): Promise<Organizer> {
+    const findOrganizer = await this.organizerRepository.findOne({
+      where: { idOrganizerUser, isActive: true, createdBy: customerId }
+    })
+    if (!findOrganizer)
+      throw new BadRequestException('Unable to find the organizer. Please enter valid input')
     return findOrganizer
   }
 
@@ -89,16 +102,16 @@ export class CustomerUserService {
 
   async login(
     loginCustomerInput: LoginCustomerInput,
-    contextUser: Customer
+    user: JwtUserPayload
   ): Promise<CustomerLoginResponse> {
     const payload = {
       email: loginCustomerInput?.email,
-      sub: contextUser?.id,
+      sub: user?.userId,
       type: JWT_STRATEGY_NAME.CUSTOMER
     }
     return {
       access_token: await this.getJwtToken(payload),
-      user: contextUser
+      user: user
     }
   }
 
@@ -159,6 +172,7 @@ export class CustomerUserService {
 
     const updatedCustomerData = await this.getCustomerById(customerId)
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = updatedCustomerData
 
     return rest
@@ -185,29 +199,35 @@ export class CustomerUserService {
     return { success: true, message: 'Password of customer has been updated' }
   }
 
-  async updateCustomerEmail(user: any, email: string): Promise<CustomerEmailUpdateResponse> {
+  async updateCustomerEmail(userId: string, email: string): Promise<CustomerEmailUpdateResponse> {
     const emailExists = await this.isEmailExist(email)
     if (emailExists) throw new BadRequestException('Email already exists')
     try {
-      const customerData: Partial<Customer> = await this.getCustomerById(user.userId)
-      if (customerData) {
+      const customerData: Partial<Customer> = await this.getCustomerById(userId)
+      if (customerData.id) {
         await this.customerRepository.update(customerData.id, {
           email,
           updatedDate: new Date()
         })
       }
 
-      const updatedCustomerData: Partial<Customer> = await this.getCustomerById(user.id)
+      const updatedCustomerData: Partial<Customer> = await this.getCustomerById(userId)
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...rest } = updatedCustomerData
-      const payload = {
-        email: updatedCustomerData?.email,
-        sub: updatedCustomerData?.id,
-        type: JWT_STRATEGY_NAME.CUSTOMER
-      }
-      return {
-        access_token: await this.getJwtToken(payload),
-        user: rest
+      if (updatedCustomerData.id && updatedCustomerData.email) {
+        const payload: JwtDto = {
+          email: updatedCustomerData.email,
+          sub: updatedCustomerData.id,
+          type: JWT_STRATEGY_NAME.ADMIN
+        }
+
+        return {
+          access_token: await this.getJwtToken(payload),
+          user: rest
+        }
+      } else {
+        throw new BadRequestException("Couldn't update email")
       }
     } catch (err) {
       throw new BadRequestException("Couldn't update email")
@@ -219,7 +239,7 @@ export class CustomerUserService {
     customerId: string
   ): Promise<SuccessResponse> {
     await this.getCustomerById(customerId)
-    const organizerData = await this.getOrganizerByName(organizerInput.name, customerId)    
+    const organizerData = await this.getOrganizerByName(organizerInput.name, customerId)
     if (organizerData)
       throw new BadRequestException('This organizer already exist. Enter a valid name')
 
@@ -236,11 +256,11 @@ export class CustomerUserService {
   }
 
   async updateOrganizerData(
-    organizerInput: Partial<Organizer>,
+    organizerInput: UpdateOrganizerInput,
     customerId: string
   ): Promise<Partial<Organizer>> {
     await this.getCustomerById(customerId)
-    const organizerData = await this.getOrganizerByName(organizerInput.name, customerId)
+    const organizerData = await this.getOrganizerById(organizerInput.idOrganizerUser, customerId)
     if (!organizerData)
       throw new BadRequestException('Unable to find the organizer. Please enter a valid organizer')
     try {
@@ -253,7 +273,10 @@ export class CustomerUserService {
       throw new BadRequestException('Failed to update data')
     }
 
-    const updatedOrganizerData = await this.getOrganizerByName(organizerInput.name, customerId)
+    const updatedOrganizerData = await this.getOrganizerById(
+      organizerInput.idOrganizerUser,
+      customerId
+    )
 
     return updatedOrganizerData
   }
