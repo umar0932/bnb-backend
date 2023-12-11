@@ -35,7 +35,8 @@ export class CategoryService {
     const findCategory = await this.categoryRepository.findOne({
       where: { categoryName }
     })
-
+    if (!findCategory)
+      throw new BadRequestException('Unable to find the category. Please enter valid category name')
     return findCategory
   }
 
@@ -61,6 +62,10 @@ export class CategoryService {
       where: { subCategoryName },
       relations: ['category']
     })
+    if (!findSubCategory)
+      throw new BadRequestException(
+        'Unable to find sub category. Please enter valid sub category name'
+      )
 
     return findSubCategory
   }
@@ -96,9 +101,10 @@ export class CategoryService {
 
     await this.adminService.getAdminById(idAdminUser)
 
-    const categoryData = await this.getCategoryById(idCategory)
+    if (!idCategory) throw new BadRequestException('category Id is invalid')
 
     try {
+      const categoryData = await this.getCategoryById(idCategory)
       await this.categoryRepository.update(categoryData.idCategory, {
         ...categoryInput,
         updatedBy: idAdminUser,
@@ -157,7 +163,6 @@ export class CategoryService {
         updatedBy: idAdminUser,
         updatedDate: new Date()
       })
-      console.log('Update successful')
     } catch (e) {
       throw new BadRequestException('Failed to update data')
     }

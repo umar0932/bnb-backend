@@ -9,11 +9,11 @@ import * as dotenv from 'dotenv'
 import { join } from 'path'
 
 import { AdminModule } from '@app/admin'
-import { AppResolver } from './app.resolver'
 import { CategoryModule } from '@app/category'
 import { CustomerUserModule } from '@app/customer-user'
 import { dataSourceOptions } from 'db/data-source'
 import EnvConfig from './config/config'
+import { EventModule } from '@app/events'
 
 dotenv.config()
 
@@ -29,9 +29,6 @@ const env = `${process.env.NODE_ENV}`
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      definitions: {
-        path: join(process.cwd(), 'src/graphql.schema.ts')
-      },
       playground: env !== 'prod',
       introspection: env !== 'prod',
       sortSchema: true,
@@ -52,8 +49,8 @@ const env = `${process.env.NODE_ENV}`
     TypeOrmModule.forRoot(dataSourceOptions),
     AdminModule,
     CustomerUserModule,
-    CategoryModule
-  ],
-  providers: [AppResolver]
+    CategoryModule,
+    EventModule
+  ]
 })
 export class AppModule {}
