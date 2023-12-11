@@ -19,6 +19,6 @@ async function bootstrap() {
     })
   )
 
-  await app.listen(configService.get('APP_PORT'))
+  await app.listen(configService.get<number>('APP_PORT', 4000))
 }
 bootstrap()

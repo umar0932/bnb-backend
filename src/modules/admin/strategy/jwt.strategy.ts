@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwtAdmin') {
     return {
       userId: payload.sub,
       email: payload.email,
-      type: JWT_STRATEGY_NAME.ADMIN,
+      type: JWT_STRATEGY_NAME.ADMIN
     }
   }
 }

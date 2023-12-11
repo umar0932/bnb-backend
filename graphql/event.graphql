@@ -1,0 +1,10 @@
+#QUERIES
+
+#MUTATIONS
+
+mutation createEvent($input: CreateEventInput!) {
+  createEvent(input: $input) {
+    success
+    message
+  }
+}

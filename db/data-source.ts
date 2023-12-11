@@ -4,7 +4,6 @@ import { DataSource, DataSourceOptions } from 'typeorm'
 import * as dotenv from 'dotenv'
 import { join } from 'path'
 
-
 const env = `${process.env.NODE_ENV}`
 
 dotenv.config({

@@ -65,7 +65,7 @@ export class AdminService {
 
   async getAdminById(idAdminUser: string): Promise<Admin> {
     try {
-      const findAdmin = this.adminRepository.findOne({ where: { idAdminUser } })
+      const findAdmin = await this.adminRepository.findOne({ where: { idAdminUser } })
       if (!findAdmin) throw new ForbiddenException('Invalid Admin user')
 
       return findAdmin
@@ -73,6 +73,7 @@ export class AdminService {
       throw new BadRequestException('Failed to fetch admin')
     }
   }
+
   async isEmailExist(email: string): Promise<SuccessResponse> {
     const emailExists = await this.adminRepository.count({ where: { email } })
     if (emailExists > 0) return { success: true, message: 'Email is valid' }
@@ -122,29 +123,35 @@ export class AdminService {
     return { success: true, message: 'Password of admin has been updated' }
   }
 
-  async updateAdminEmail(user: any, email: string): Promise<AdminEmailUpdateResponse> {
+  async updateAdminEmail(userId: string, email: string): Promise<AdminEmailUpdateResponse> {
     const emailExists = await this.isEmailExist(email)
     if (emailExists) throw new BadRequestException('Email already exists')
     try {
-      const adminData: Partial<Admin> = await this.getAdminById(user.userId)
-      if (adminData) {
+      const adminData: Partial<Admin> = await this.getAdminById(userId)
+      if (adminData.idAdminUser) {
         await this.adminRepository.update(adminData.idAdminUser, {
           email,
           updatedDate: new Date()
         })
       }
 
-      const updatedAdminData: Partial<Admin> = await this.getAdminById(user.id)
+      const updatedAdminData: Partial<Admin> = await this.getAdminById(userId)
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...rest } = updatedAdminData
-      const payload = {
-        email: updatedAdminData?.email,
-        sub: updatedAdminData?.idAdminUser,
-        type: JWT_STRATEGY_NAME.ADMIN
-      }
-      return {
-        access_token: await this.getJwtToken(payload),
-        user: rest
+      if (updatedAdminData.idAdminUser && updatedAdminData.email) {
+        const payload: JwtDto = {
+          email: updatedAdminData.email,
+          sub: updatedAdminData.idAdminUser,
+          type: JWT_STRATEGY_NAME.ADMIN
+        }
+
+        return {
+          access_token: await this.getJwtToken(payload),
+          user: rest
+        }
+      } else {
+        throw new BadRequestException("Couldn't update email")
       }
     } catch (err) {
       throw new BadRequestException("Couldn't update email")
