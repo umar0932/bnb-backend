@@ -1,11 +1,9 @@
 #QUERIES
 
 query getAllCustomers {
-  customers {
+  getCustomers {
     email
     id
-    password
-    role
   }
 }
 

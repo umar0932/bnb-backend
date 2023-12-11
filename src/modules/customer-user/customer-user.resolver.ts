@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 
-import { Allow, CurrentUser, SuccessResponse } from '@app/common'
+import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
 
 import { CreateCustomerInput, LoginCustomerInput, UpdateCustomerInput } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
@@ -20,7 +20,7 @@ export class CustomerUserResolver {
   @UseGuards(GqlAuthGuard)
   async loginAsCustomer(
     @Args('input') loginCustomerInput: LoginCustomerInput,
-    @CurrentUser() user: any
+    @CurrentUser() user: JwtUserPayload
   ) {
     return await this.customerUserService.login(loginCustomerInput, user)
   }
@@ -41,7 +41,7 @@ export class CustomerUserResolver {
 
   @Query(() => [Customer], { description: 'The List of Customers' })
   @Allow()
-  getCustomers(@CurrentUser() user: any): Promise<Customer[]> {
+  getCustomers(@CurrentUser() user: JwtUserPayload): Promise<Customer[]> {
     return this.customerUserService.getAllCustomers(user.userId)
   }
 
@@ -49,7 +49,7 @@ export class CustomerUserResolver {
   @Allow()
   async updateCustomer(
     @Args('input') updateCustomerInput: UpdateCustomerInput,
-    @CurrentUser() user: any
+    @CurrentUser() user: JwtUserPayload
   ): Promise<Partial<Customer>> {
     return await this.customerUserService.updateCustomerData(updateCustomerInput, user.userId)
   }
@@ -59,7 +59,7 @@ export class CustomerUserResolver {
   })
   @Allow()
   async updateCustomerPassword(
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtUserPayload,
     @Args('password') password: string
   ): Promise<SuccessResponse> {
     return await this.customerUserService.updatePassword(password, user.userId)
@@ -69,8 +69,8 @@ export class CustomerUserResolver {
     description: 'Update customer email'
   })
   @Allow()
-  async updateCustomerEmail(@CurrentUser() user: any, @Args('input') email: string) {
-    return this.customerUserService.updateCustomerEmail(user, email)
+  async updateCustomerEmail(@CurrentUser() user: JwtUserPayload, @Args('input') email: string) {
+    return this.customerUserService.updateCustomerEmail(user.userId, email)
   }
 
   @Mutation(() => SuccessResponse, {
@@ -78,7 +78,7 @@ export class CustomerUserResolver {
   })
   @Allow()
   async createOrganizer(
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtUserPayload,
     @Args('input') createOrganizerInput: CreateOrganizerInput
   ): Promise<SuccessResponse> {
     return await this.customerUserService.createOrganizer(createOrganizerInput, user.userId)
@@ -89,7 +89,7 @@ export class CustomerUserResolver {
   })
   @Allow()
   async updateOrganizer(
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtUserPayload,
     @Args('input') updateOrganizerInput: UpdateOrganizerInput
   ): Promise<Partial<Organizer>> {
     return await this.customerUserService.updateOrganizerData(updateOrganizerInput, user.userId)

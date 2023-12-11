@@ -5,6 +5,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 
 import { Category } from './category.entity'
+import { Event } from '@app/events/entities'
 
 @Entity({ name: 'sub_category' })
 @ObjectType()
@@ -18,7 +19,12 @@ export class SubCategory extends CustomBaseEntity {
   subCategoryName!: string
 
   @ManyToOne(() => Category, category => category.subCategories)
-  @JoinColumn({ name: 'category_id' })
+  @JoinColumn({ name: 'ref_id_category' })
   @Field(() => Category, { nullable: true })
   category: Category
+
+  @ManyToOne(() => Event, event => event.subCategories)
+  @JoinColumn({ name: 'ref_id_event' })
+  @Field(() => Event, { nullable: true })
+  event: Event
 }

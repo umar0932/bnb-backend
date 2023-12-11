@@ -1,10 +1,11 @@
-import { ObjectType, Field, ID, InputType } from '@nestjs/graphql'
+import { ObjectType, Field, ID } from '@nestjs/graphql'
 
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 
 import { SubCategory } from './sub-category.entity'
+import { Event } from '@app/events/entities'
 
 @Entity({ name: 'category' })
 @ObjectType()
@@ -22,4 +23,9 @@ export class Category extends CustomBaseEntity {
   })
   @Field(() => [SubCategory], { nullable: true })
   subCategories: SubCategory[]
+
+  @ManyToOne(() => Event, event => event.categories)
+  @JoinColumn({ name: 'ref_id_event' })
+  @Field(() => Event, { nullable: true })
+  event: Event
 }
