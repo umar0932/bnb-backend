@@ -19,7 +19,6 @@ export class Event extends CustomBaseEntity {
 
   @Field(() => Category, { nullable: true })
   @OneToMany(() => Category, Category => Category.event, {
-    cascade: ['insert', 'update', 'remove'],
     nullable: true,
     eager: true
   })
@@ -27,7 +26,6 @@ export class Event extends CustomBaseEntity {
   categories?: Category[]
 
   @OneToMany(() => SubCategory, subCategory => subCategory.event, {
-    cascade: ['insert', 'update', 'remove'],
     nullable: true,
     eager: true
   })
