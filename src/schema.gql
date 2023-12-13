@@ -8,6 +8,7 @@ type Admin {
   idAdminUser: ID!
   isActive: Boolean
   lastName: String!
+  mediaUrl: String
   password: String!
 }
 
@@ -184,6 +185,9 @@ type Mutation {
   """Customer Login"""
   loginAsCustomer(input: LoginCustomerInput!): CustomerLoginResponse!
 
+  """Update admin data"""
+  updateAdminData(input: UpdateAdminUserInput!): String!
+
   """Update admin email"""
   updateAdminEmail(input: String!): AdminEmailUpdateResponse!
 
@@ -224,6 +228,7 @@ type Query {
 
   """This will get all categories"""
   getAllSubCategories: [SubCategory!]!
+  getCustomerUploadUrl: S3SignedUrlResponse!
 
   """The List of Customers"""
   getCustomers: [Customer!]!
@@ -233,6 +238,11 @@ type Query {
 
   """check if email already exist"""
   validEmailCustomer(input: String!): SuccessResponse!
+}
+
+type S3SignedUrlResponse {
+  fileName: String!
+  signedUrl: String!
 }
 
 type SubCategory {
@@ -245,6 +255,13 @@ type SubCategory {
 type SuccessResponse {
   message: String
   success: Boolean
+}
+
+input UpdateAdminUserInput {
+  email: String
+  firstName: String
+  lastName: String
+  mediaUrl: String
 }
 
 input UpdateCategoryInput {

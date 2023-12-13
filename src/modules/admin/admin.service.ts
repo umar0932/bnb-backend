@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
 
@@ -15,12 +16,13 @@ import {
 
 import { Admin } from './entities'
 import { AdminEmailUpdateResponse, AdminLoginResponse } from './dto/args'
-import { CreateAdminUserInput, LoginAdminInput } from './dto/inputs'
+import { CreateAdminUserInput, LoginAdminInput, UpdateAdminUserInput } from './dto/inputs'
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
+    private configService: ConfigService,
     private jwtService: JwtService
   ) {}
 
@@ -51,6 +53,7 @@ export class AdminService {
 
     return true
   }
+
   async login(loginAdminInput: LoginAdminInput, contextUser: Admin): Promise<AdminLoginResponse> {
     const payload = {
       email: loginAdminInput?.email,
@@ -102,9 +105,37 @@ export class AdminService {
     }
   }
 
+  async updateAdminData(
+    updateAdminUserInput: UpdateAdminUserInput,
+    userId: string
+  ): Promise<Partial<Admin>> {
+    const { mediaUrl } = updateAdminUserInput
+    const adminData = await this.getAdminById(userId)
+    let signedUrl
+
+    if (mediaUrl) {
+      signedUrl = await this.saveMediaUrl(mediaUrl)
+    }
+    try {
+      await this.adminRepository.update(adminData.idAdminUser, {
+        ...updateAdminUserInput,
+        mediaUrl: signedUrl,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      throw new BadRequestException('Failed to update data')
+    }
+
+    const updatedAdminData = await this.getAdminById(userId)
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...rest } = updatedAdminData
+
+    return rest
+  }
+
   async updatePassword(password: string, adminId: string): Promise<SuccessResponse> {
     const adminData = await this.getAdminById(adminId)
-    if (!adminData) throw new BadRequestException('Unable to find the admin data')
     // const checkPwd = await isValidPassword(password)
     // if (!checkPwd) {
     //   throw new BadRequestException('Invalid username or password')
@@ -150,11 +181,16 @@ export class AdminService {
           access_token: await this.getJwtToken(payload),
           user: rest
         }
-      } else {
-        throw new BadRequestException("Couldn't update email")
-      }
+      } else throw new BadRequestException("Couldn't update email")
     } catch (err) {
       throw new BadRequestException("Couldn't update email")
     }
+  }
+
+  async saveMediaUrl(fileName: string): Promise<string> {
+    const bucketName = this.configService.get('ADMIN_UPLOADS_BUCKET')
+    const urlPrefix = this.configService.get('S3_MEDIA_PREFIX')
+    const url = `${urlPrefix}${bucketName}/${fileName}`
+    return url
   }
 }

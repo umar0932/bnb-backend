@@ -4,11 +4,14 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
 
 import { Repository } from 'typeorm'
+import { uuid } from 'uuidv4'
 
+import { AwsS3ClientService } from '@app/aws-s3-client'
 import {
   JWT_STRATEGY_NAME,
   JwtDto,
@@ -18,6 +21,7 @@ import {
   encodePassword,
   isValidPassword
 } from '@app/common'
+import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
 import { Admin } from '@app/admin/entities'
 import { CreateCustomerInput, LoginCustomerInput } from './dto/inputs'
@@ -26,17 +30,21 @@ import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
 import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
 import { Organizer } from './entities/organizer.entity'
 import { UpdateOrganizerInput } from './dto/inputs/update-organizer.input'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
 
 @Injectable()
 export class CustomerUserService {
   constructor(
     @InjectRepository(Admin)
     private adminRepository: Repository<Admin>,
+    private configService: ConfigService,
     @InjectRepository(Customer)
     private customerRepository: Repository<Customer>,
     @InjectRepository(Organizer)
     private organizerRepository: Repository<Organizer>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private s3Service: AwsS3ClientService
   ) {}
 
   async validateCustomer(email: string, password: string): Promise<any> {
@@ -279,5 +287,22 @@ export class CustomerUserService {
     )
 
     return updatedOrganizerData
+  }
+
+  async getCustomerUploadUrl(): Promise<S3SignedUrlResponse> {
+    const key = `${uuid()}-user-profile`
+    const bucketName = this.configService.get('USER_UPLOADS_BUCKET')
+    // const urlPrefix = this.configService.get('S3_MEDIA_PREFIX')
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key
+    })
+    const url = await getSignedUrl(this.s3Service.getClient(), command, {
+      expiresIn: 3600
+    })
+    return {
+      signedUrl: url,
+      fileName: key
+    }
   }
 }
