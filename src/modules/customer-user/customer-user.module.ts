@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
+import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { JWTConfigTypes } from '@app/common'
 
 import { Admin } from '@app/admin/entities/admin.entity'
@@ -27,7 +28,8 @@ import { Organizer } from './entities/organizer.entity'
         return { ...jwtConfig }
       },
       inject: [ConfigService]
-    })
+    }),
+    AwsS3ClientModule
   ],
   providers: [CustomerUserResolver, CustomerUserService, JwtStrategy, LocalStrategy],
   exports: [CustomerUserService]

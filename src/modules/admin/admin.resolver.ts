@@ -6,7 +6,7 @@ import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common
 import { Admin } from './entities'
 import { AdminEmailUpdateResponse, AdminLoginResponse } from './dto/args'
 import { AdminService } from './admin.service'
-import { CreateAdminUserInput, LoginAdminInput } from './dto/inputs'
+import { CreateAdminUserInput, LoginAdminInput, UpdateAdminUserInput } from './dto/inputs'
 import { GqlAuthGuard } from './guards'
 
 @Resolver(() => Admin)
@@ -50,5 +50,16 @@ export class AdminResolver {
   @Allow()
   async updateAdminEmail(@CurrentUser() user: JwtUserPayload, @Args('input') email: string) {
     return this.adminService.updateAdminEmail(user.userId, email)
+  }
+
+  @Mutation(() => String, {
+    description: 'Update admin data'
+  })
+  @Allow()
+  async updateAdminData(
+    @Args('input') updateAdminUserData: UpdateAdminUserInput,
+    @CurrentUser() user: JwtUserPayload
+  ) {
+    return this.adminService.updateAdminData(updateAdminUserData, user.userId)
   }
 }
