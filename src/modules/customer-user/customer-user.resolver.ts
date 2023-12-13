@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 
 import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
+import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
 import { CreateCustomerInput, LoginCustomerInput, UpdateCustomerInput } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
@@ -93,5 +94,11 @@ export class CustomerUserResolver {
     @Args('input') updateOrganizerInput: UpdateOrganizerInput
   ): Promise<Partial<Organizer>> {
     return await this.customerUserService.updateOrganizerData(updateOrganizerInput, user.userId)
+  }
+
+  @Query(() => S3SignedUrlResponse)
+  @Allow()
+  async getCustomerUploadUrl(): Promise<S3SignedUrlResponse> {
+    return this.customerUserService.getCustomerUploadUrl()
   }
 }

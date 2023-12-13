@@ -27,6 +27,10 @@ export class Admin extends CustomBaseEntity {
   @Field()
   password!: string
 
+  @Field(() => String, { nullable: true })
+  @Column({ length: 250, nullable: true })
+  mediaUrl?: string
+
   @Column({ nullable: true, default: true, name: 'is_active' })
   @Field({ nullable: true })
   isActive?: boolean
