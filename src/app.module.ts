@@ -9,6 +9,7 @@ import * as dotenv from 'dotenv'
 import { join } from 'path'
 
 import { AdminModule } from '@app/admin'
+import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { CategoryModule } from '@app/category'
 import { CustomerUserModule } from '@app/customer-user'
 import { dataSourceOptions } from 'db/data-source'
@@ -50,7 +51,8 @@ const env = `${process.env.NODE_ENV}`
     AdminModule,
     CustomerUserModule,
     CategoryModule,
-    EventModule
+    EventModule,
+    AwsS3ClientModule
   ]
 })
 export class AppModule {}
