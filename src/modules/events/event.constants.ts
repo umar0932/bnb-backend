@@ -19,3 +19,9 @@ export const Type = {
   TOURNAMENT: 'Tournament',
   TRADESHOW_CONSUMER_SHOW_OR_EXPO: 'Tradeshow_Consumer_Show_or_Expo'
 }
+
+export enum EventStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  SOLD = 'SOLD'
+}

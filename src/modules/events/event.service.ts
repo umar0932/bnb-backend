@@ -6,9 +6,9 @@ import { Repository } from 'typeorm'
 import { LocationsEntity } from '@app/common/entities'
 import { CreateLocationInput, SuccessResponse } from '@app/common'
 
-import { Event } from './entities'
+import { Event, EventDetailsEntity } from './entities'
 import { CategoryService } from '@app/category'
-import { CreateEventInput } from './dto/inputs'
+import { CreateBasicEventInput, EventDetailsInput } from './dto/inputs'
 import { Type } from './event.constants'
 
 @Injectable()
@@ -17,20 +17,19 @@ export class EventService {
     private categoryService: CategoryService,
     @InjectRepository(Event)
     private eventRepository: Repository<Event>,
+    @InjectRepository(EventDetailsEntity)
+    private eventDetailsRepository: Repository<EventDetailsEntity>,
     @InjectRepository(LocationsEntity)
     private locationRepository: Repository<LocationsEntity>
   ) {}
 
   async getEventById(idEvent: number): Promise<Event> {
-    try {
-      const findEvent = await this.eventRepository.findOne({ where: { idEvent } })
-      if (!findEvent)
-        throw new BadRequestException('Unable to find the event. Please enter valid event id')
+    const findEvent = await this.eventRepository.findOne({
+      where: { idEvent }
+    })
+    if (!findEvent) throw new BadRequestException('Event with the provided ID does not exist')
 
-      return findEvent
-    } catch (e) {
-      throw new BadRequestException('Failed to fetch event. Check the eventId')
-    }
+    return findEvent
   }
 
   async getEventByName(eventTitle: string): Promise<Event> {
@@ -59,18 +58,16 @@ export class EventService {
     }
   }
 
-  async createEvent(createEventInput: CreateEventInput, userId: string): Promise<SuccessResponse> {
-    const { eventTitle, refIdCategory, refIdSubCategory, type, location } = createEventInput
+  async createBasicEvent(
+    createBasicEventInput: CreateBasicEventInput,
+    userId: string
+  ): Promise<SuccessResponse> {
+    const { eventTitle, refIdCategory, refIdSubCategory, type, location } = createBasicEventInput
     let category, subCategory
-    if (refIdCategory) {
-      category = await this.categoryService.getCategoryById(refIdCategory)
-      if (!category) throw new BadRequestException('Category with the provided ID does not exist')
-    }
-    if (refIdSubCategory && refIdCategory) {
+    if (refIdCategory) category = await this.categoryService.getCategoryById(refIdCategory)
+
+    if (refIdSubCategory && refIdCategory)
       subCategory = await this.categoryService.getSubCategoryById(refIdSubCategory, refIdCategory)
-      if (!subCategory)
-        throw new BadRequestException('SubCategory with the provided ID does not exist')
-    }
 
     const getlocation = await this.addLocation(location)
 
@@ -83,7 +80,7 @@ export class EventService {
 
     try {
       await this.eventRepository.save({
-        ...createEventInput,
+        ...createBasicEventInput,
         category,
         subCategory,
         location: getlocation,
@@ -94,5 +91,41 @@ export class EventService {
     }
 
     return { success: true, message: 'Event Created' }
+  }
+
+  async createOrUpdateEventDetails(
+    eventDetailsInput: EventDetailsInput,
+    userId: string
+  ): Promise<SuccessResponse> {
+    const { refIdEvent, ...rest } = eventDetailsInput
+    const event = await this.getEventById(refIdEvent)
+
+    try {
+      if (event.eventDetails) {
+        await this.eventDetailsRepository.update(event.eventDetails.idEventDetails, {
+          ...rest,
+          event,
+          updatedBy: userId,
+          updatedDate: new Date()
+        })
+      } else {
+        const newEventDetails = await this.eventDetailsRepository.save({
+          ...rest,
+          event,
+          createdBy: userId
+        })
+
+        await this.eventRepository.update(refIdEvent, {
+          eventDetails: newEventDetails,
+          createdBy: userId
+        })
+      }
+    } catch (error) {
+      console.log(error)
+
+      throw new BadRequestException('Failed to create or update event details')
+    }
+
+    return { success: true, message: 'Event Details Created or Updated' }
   }
 }

@@ -3,7 +3,7 @@ import { Resolver, Mutation, Args } from '@nestjs/graphql'
 import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
 
 import { Event } from './entities'
-import { CreateEventInput } from './dto/inputs'
+import { CreateBasicEventInput, EventDetailsInput } from './dto/inputs'
 import { EventService } from './event.service'
 
 @Resolver(() => Event)
@@ -14,10 +14,21 @@ export class EventResolver {
     description: 'This will crete new Events'
   })
   @Allow()
-  async createEvent(
-    @Args('input') createEventData: CreateEventInput,
+  async createBasicEvent(
+    @Args('input') createBasicEventInput: CreateBasicEventInput,
     @CurrentUser() user: JwtUserPayload
   ): Promise<SuccessResponse> {
-    return await this.eventService.createEvent(createEventData, user.userId)
+    return await this.eventService.createBasicEvent(createBasicEventInput, user.userId)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'This will crete new Events'
+  })
+  @Allow()
+  async createOrUpdateEventDetails(
+    @Args('input') eventDetailsInput: EventDetailsInput,
+    @CurrentUser() user: JwtUserPayload
+  ): Promise<SuccessResponse> {
+    return await this.eventService.createOrUpdateEventDetails(eventDetailsInput, user.userId)
   }
 }

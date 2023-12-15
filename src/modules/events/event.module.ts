@@ -6,13 +6,13 @@ import { CustomerUserModule } from '@app/customer-user'
 import { LocationsEntity } from '@app/common/entities'
 
 import { CategoryModule } from '@app/category'
-import { Event } from './entities'
+import { Event, EventDetailsEntity } from './entities'
 import { EventResolver } from './event.resolver'
 import { EventService } from './event.service'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Event, LocationsEntity]),
+    TypeOrmModule.forFeature([Event, EventDetailsEntity, LocationsEntity]),
     AdminModule,
     CustomerUserModule,
     CategoryModule
