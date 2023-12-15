@@ -23,7 +23,7 @@ export class CategoryService {
     try {
       const findCategory = await this.categoryRepository.findOne({ where: { idCategory } })
       if (!findCategory)
-        throw new BadRequestException('Unable to find the category. Please enter valid category id')
+        throw new BadRequestException('Category with the provided ID does not exist')
 
       return findCategory
     } catch (e) {
@@ -31,13 +31,13 @@ export class CategoryService {
     }
   }
 
-  async getCategoryByName(categoryName: string): Promise<Category> {
-    const findCategory = await this.categoryRepository.findOne({
+  async checkCategoryByName(categoryName: string): Promise<boolean> {
+    const findCategory = await this.categoryRepository.count({
       where: { categoryName }
     })
-    if (!findCategory)
-      throw new BadRequestException('Unable to find the category. Please enter valid category name')
-    return findCategory
+
+    if (findCategory > 0) return false
+    return true
   }
 
   async getSubCategoryById(idSubCategory: number, idCategory: number): Promise<SubCategory> {
@@ -47,9 +47,7 @@ export class CategoryService {
         relations: ['category']
       })
       if (!findSubCategory)
-        throw new BadRequestException(
-          'Unable to find sub category. Please enter valid sub category id'
-        )
+        throw new BadRequestException('SubCategory with the provided ID does not exist')
 
       return findSubCategory
     } catch (e) {
@@ -57,17 +55,17 @@ export class CategoryService {
     }
   }
 
-  async getSubCategoryByName(subCategoryName: string): Promise<SubCategory> {
+  async getSubCategoryByName(subCategoryName: string): Promise<boolean> {
     const findSubCategory = await this.subCategoryRepository.findOne({
       where: { subCategoryName },
       relations: ['category']
     })
-    if (!findSubCategory)
+    if (findSubCategory)
       throw new BadRequestException(
-        'Unable to find sub category. Please enter valid sub category name'
+        'SubCategory name already exist. Please enter valid sub category name'
       )
 
-    return findSubCategory
+    return true
   }
 
   async createCategory(
@@ -76,7 +74,7 @@ export class CategoryService {
   ): Promise<SuccessResponse> {
     await this.adminService.getAdminById(idAdminUser)
 
-    const category = await this.getCategoryByName(categoryInput.categoryName)
+    const category = await this.checkCategoryByName(categoryInput.categoryName)
     if (category) throw new BadRequestException('Category already exists')
 
     await this.categoryRepository.save({
@@ -126,10 +124,8 @@ export class CategoryService {
     const { idCategory, subCategoryName } = createSubCategoryInput
 
     const category = await this.getCategoryById(idCategory)
-    if (!category) throw new BadRequestException('Category does not exists')
 
-    const subCategory = await this.getSubCategoryByName(subCategoryName)
-    if (subCategory) throw new BadRequestException('This Sub Category already exists')
+    await this.getSubCategoryByName(subCategoryName)
 
     await this.subCategoryRepository.save({
       ...createSubCategoryInput,

@@ -36,6 +36,17 @@ input CreateAdminUserInput {
   password: String!
 }
 
+input CreateBasicEventInput {
+  endDate: DateTime!
+  eventTitle: String!
+  location: CreateLocationInput!
+  refIdCategory: Float
+  refIdSubCategory: Float
+  startDate: DateTime!
+  tags: [String!]
+  type: String
+}
+
 input CreateCategoryInput {
   categoryName: String!
 }
@@ -45,17 +56,6 @@ input CreateCustomerInput {
   firstName: String!
   lastName: String!
   password: String!
-}
-
-input CreateEventInput {
-  endDate: DateTime!
-  eventTitle: String!
-  location: CreateLocationInput!
-  refIdCategory: Float
-  refIdSubCategory: Float
-  startDate: DateTime!
-  tags: [String!]
-  type: String
 }
 
 input CreateLocationInput {
@@ -121,6 +121,8 @@ scalar DateTime
 type Event {
   categories: Category
   endDate: DateTime!
+  eventDetails: EventDetailsEntity
+  eventStatus: EventStatus!
   eventTitle: String!
   idEvent: ID!
   location: LocationsEntity!
@@ -128,6 +130,26 @@ type Event {
   subCategories: [SubCategory!]
   tags: [String!]
   type: String
+}
+
+type EventDetailsEntity {
+  event: Event!
+  eventDescription: String!
+  eventSummary: String!
+  idEventDetails: ID!
+}
+
+input EventDetailsInput {
+  eventDescription: String
+  eventSummary: String
+  refIdEvent: Float
+}
+
+"""The status of event"""
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  SOLD
 }
 
 """The type of location for an event (ONLINE_EVENT or VENUE_EVENT)"""
@@ -164,6 +186,9 @@ type Mutation {
   """Create new admin user"""
   createAdminUser(input: CreateAdminUserInput!): SuccessResponse!
 
+  """This will crete new Events"""
+  createBasicEvent(input: CreateBasicEventInput!): SuccessResponse!
+
   """This will crete new Categories"""
   createCategory(input: CreateCategoryInput!): SuccessResponse!
 
@@ -171,7 +196,7 @@ type Mutation {
   createCustomer(input: CreateCustomerInput!): CustomerLoginResponse!
 
   """This will crete new Events"""
-  createEvent(input: CreateEventInput!): SuccessResponse!
+  createOrUpdateEventDetails(input: EventDetailsInput!): SuccessResponse!
 
   """This will signup new `Organizers"""
   createOrganizer(input: CreateOrganizerInput!): SuccessResponse!
