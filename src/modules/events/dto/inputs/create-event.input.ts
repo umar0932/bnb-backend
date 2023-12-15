@@ -5,7 +5,7 @@ import { Type } from 'class-transformer'
 import { CreateLocationInput } from '@app/common'
 
 @InputType()
-export class CreateEventInput {
+export class CreateBasicEventInput {
   @Field()
   @IsNotEmpty({ message: 'Event title cannot be empty' })
   @IsString({ message: 'Event title must be a string' })
