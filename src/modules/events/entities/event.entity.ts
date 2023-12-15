@@ -1,10 +1,17 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql'
+import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql'
 
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 import { Category, SubCategory } from '@app/category/entities'
 import { LocationsEntity } from '@app/common/entities'
+import { EventStatus } from '../event.constants'
+import { EventDetailsEntity } from './event-details.entity'
+
+registerEnumType(EventStatus, {
+  name: 'EventStatus',
+  description: 'The status of event'
+})
 
 @Entity({ name: 'event' })
 @ObjectType()
@@ -44,6 +51,19 @@ export class Event extends CustomBaseEntity {
   @OneToOne(() => LocationsEntity, { eager: true })
   @JoinColumn({ name: 'ref_id_location' })
   location: LocationsEntity
+
+  @Field(() => EventDetailsEntity, { nullable: true })
+  @OneToOne(() => EventDetailsEntity, eventDetails => eventDetails.event, {
+    eager: true,
+    nullable: true,
+    cascade: true
+  })
+  @JoinColumn({ name: 'ref_id_event_details' })
+  eventDetails?: EventDetailsEntity
+
+  @Field(() => EventStatus)
+  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.DRAFT, name: 'event_status' })
+  eventStatus!: EventStatus
 
   @Column('timestamptz', { name: 'start_date' })
   @Field(() => Date)

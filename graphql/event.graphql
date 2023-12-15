@@ -2,8 +2,8 @@
 
 #MUTATIONS
 
-mutation createEvent($input: CreateEventInput!) {
-  createEvent(input: $input) {
+mutation createBasicEvent($input: CreateBasicEventInput!) {
+  createBasicEvent(input: $input) {
     success
     message
   }
