@@ -7,6 +7,7 @@ import { Category, SubCategory } from '@app/category/entities'
 import { LocationsEntity } from '@app/common/entities'
 import { EventStatus } from '../event.constants'
 import { EventDetailsEntity } from './event-details.entity'
+import { EventTicketsEntity } from './tickets.entity'
 
 registerEnumType(EventStatus, {
   name: 'EventStatus',
@@ -64,6 +65,14 @@ export class Event extends CustomBaseEntity {
   @Field(() => EventStatus)
   @Column({ type: 'enum', enum: EventStatus, default: EventStatus.DRAFT, name: 'event_status' })
   eventStatus!: EventStatus
+
+  @Field(() => EventTicketsEntity, { nullable: true })
+  @OneToMany(() => EventTicketsEntity, eventTicketsEntity => eventTicketsEntity.event, {
+    nullable: true,
+    eager: true
+  })
+  @JoinColumn({ name: 'ref_id_event_tickets_entity' })
+  eventTickets?: EventTicketsEntity[]
 
   @Column('timestamptz', { name: 'start_date' })
   @Field(() => Date)
