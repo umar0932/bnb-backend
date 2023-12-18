@@ -58,6 +58,19 @@ input CreateCustomerInput {
   password: String!
 }
 
+input CreateEventTicketsInput {
+  availableQuantity: Float!
+  endDate: DateTime!
+  isVisible: Boolean
+  maxQuantity: Float!
+  minQuantity: Float!
+  refIdEvent: Float!
+  startDate: DateTime!
+  ticketDescription: String
+  ticketName: String!
+  ticketPrice: Float!
+}
+
 input CreateLocationInput {
   city: String!
   country: String!
@@ -123,6 +136,7 @@ type Event {
   endDate: DateTime!
   eventDetails: EventDetailsEntity
   eventStatus: EventStatus!
+  eventTickets: EventTicketsEntity
   eventTitle: String!
   idEvent: ID!
   location: LocationsEntity!
@@ -142,7 +156,7 @@ type EventDetailsEntity {
 input EventDetailsInput {
   eventDescription: String
   eventSummary: String
-  refIdEvent: Float
+  refIdEvent: Float!
 }
 
 """The status of event"""
@@ -150,6 +164,20 @@ enum EventStatus {
   DRAFT
   PUBLISHED
   SOLD
+}
+
+type EventTicketsEntity {
+  availableQuantity: Float!
+  endDate: DateTime!
+  event: Event
+  idEventTickets: ID!
+  isVisible: Boolean
+  maxQuantity: Float!
+  minQuantity: Float!
+  startDate: DateTime!
+  ticketDescription: String
+  ticketName: String!
+  ticketPrice: Float!
 }
 
 """The type of location for an event (ONLINE_EVENT or VENUE_EVENT)"""
@@ -194,6 +222,9 @@ type Mutation {
 
   """This will signup new `Customers"""
   createCustomer(input: CreateCustomerInput!): CustomerLoginResponse!
+
+  """This will crete new Tickets for the Event"""
+  createEventTickets(input: CreateEventTicketsInput!): SuccessResponse!
 
   """This will crete new Events"""
   createOrUpdateEventDetails(input: EventDetailsInput!): SuccessResponse!

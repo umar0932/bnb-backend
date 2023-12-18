@@ -1,9 +1,10 @@
 import { InputType, Field } from '@nestjs/graphql'
+
 import { IsNotEmpty, IsString, MinLength, MaxLength, IsNumber } from 'class-validator'
 
 @InputType()
 export class EventDetailsInput {
-  @Field(() => Number, { nullable: true })
+  @Field(() => Number)
   @IsNotEmpty({ message: 'Event ID cannot be empty' })
   @IsNumber({}, { message: 'Event ID must be a number' })
   refIdEvent!: number

@@ -25,3 +25,7 @@ export enum EventStatus {
   PUBLISHED = 'PUBLISHED',
   SOLD = 'SOLD'
 }
+
+export enum TicketsSalesChannel {
+  ONLINE = 'ONLINE'
+}
