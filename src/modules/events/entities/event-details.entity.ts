@@ -3,6 +3,7 @@ import { ObjectType, Field, ID } from '@nestjs/graphql'
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
+
 import { Event } from './event.entity'
 
 @Entity({ name: 'event_details' })

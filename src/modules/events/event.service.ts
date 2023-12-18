@@ -6,9 +6,9 @@ import { Repository } from 'typeorm'
 import { LocationsEntity } from '@app/common/entities'
 import { CreateLocationInput, SuccessResponse } from '@app/common'
 
-import { Event, EventDetailsEntity } from './entities'
+import { Event, EventDetailsEntity, EventTicketsEntity } from './entities'
 import { CategoryService } from '@app/category'
-import { CreateBasicEventInput, EventDetailsInput } from './dto/inputs'
+import { CreateBasicEventInput, CreateEventTicketsInput, EventDetailsInput } from './dto/inputs'
 import { Type } from './event.constants'
 
 @Injectable()
@@ -19,6 +19,8 @@ export class EventService {
     private eventRepository: Repository<Event>,
     @InjectRepository(EventDetailsEntity)
     private eventDetailsRepository: Repository<EventDetailsEntity>,
+    @InjectRepository(EventTicketsEntity)
+    private eventTicketsRepository: Repository<EventTicketsEntity>,
     @InjectRepository(LocationsEntity)
     private locationRepository: Repository<LocationsEntity>
   ) {}
@@ -32,18 +34,19 @@ export class EventService {
     return findEvent
   }
 
-  async getEventByName(eventTitle: string): Promise<Event> {
-    try {
-      const findEvent = await this.eventRepository.findOne({ where: { eventTitle } })
-      if (!findEvent)
-        throw new BadRequestException('Unable to find the event. Please enter valid event name')
-
-      return findEvent
-    } catch (e) {
-      throw new BadRequestException('Failed to fetch event. Check the eventName')
-    }
+  async getEventByName(eventTitle: string): Promise<boolean> {
+    const findEventByName = await this.eventRepository.count({ where: { eventTitle } })
+    if (findEventByName > 0) return true
+    return false
   }
 
+  async getEventTicketsByName(ticketName: string, customerId: string): Promise<boolean> {
+    const findEventTickets = await this.eventTicketsRepository.count({
+      where: { ticketName, createdBy: customerId }
+    })
+    if (findEventTickets > 0) return true
+    return false
+  }
   async checkValidTypeEvent(type: string): Promise<boolean> {
     if (Object.values(Type).includes(type)) return true
     else throw new BadRequestException('Invalid type')
@@ -127,5 +130,27 @@ export class EventService {
     }
 
     return { success: true, message: 'Event Details Created or Updated' }
+  }
+
+  async createEventTickets(
+    createEventTicketsInput: CreateEventTicketsInput,
+    userId: string
+  ): Promise<SuccessResponse> {
+    const { refIdEvent, ...rest } = createEventTicketsInput
+    const event = await this.getEventById(refIdEvent)
+    const ticketData = await this.getEventTicketsByName(createEventTicketsInput.ticketName, userId)
+    if (ticketData)
+      throw new BadRequestException('This Ticket name already exist. Enter a valid name')
+    try {
+      await this.eventTicketsRepository.save({
+        ...rest,
+        event,
+        createdBy: userId
+      })
+    } catch (error) {
+      throw new BadRequestException('Failed to create Ticketss')
+    }
+
+    return { success: true, message: 'Event Tickets created' }
   }
 }

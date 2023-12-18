@@ -36,8 +36,8 @@ export class CategoryService {
       where: { categoryName }
     })
 
-    if (findCategory > 0) return false
-    return true
+    if (findCategory > 0) return true
+    return false
   }
 
   async getSubCategoryById(idSubCategory: number, idCategory: number): Promise<SubCategory> {

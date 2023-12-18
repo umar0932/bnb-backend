@@ -8,3 +8,10 @@ mutation createBasicEvent($input: CreateBasicEventInput!) {
     message
   }
 }
+
+mutation CreateOrUpdateEventDetails($input: EventDetailsInput!) {
+    createOrUpdateEventDetails(input: $input) {
+        message
+        success
+    }
+}
