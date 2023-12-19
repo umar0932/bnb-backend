@@ -20,15 +20,11 @@ export class CategoryService {
   ) {}
 
   async getCategoryById(idCategory: number): Promise<Category> {
-    try {
-      const findCategory = await this.categoryRepository.findOne({ where: { idCategory } })
-      if (!findCategory)
-        throw new BadRequestException('Category with the provided ID does not exist')
+    const findCategoryById = await this.categoryRepository.findOne({ where: { idCategory } })
+    if (!findCategoryById)
+      throw new BadRequestException('Category with the provided ID does not exist')
 
-      return findCategory
-    } catch (e) {
-      throw new BadRequestException('Failed to fetch category. Check the categoryId')
-    }
+    return findCategoryById
   }
 
   async checkCategoryByName(categoryName: string): Promise<boolean> {
@@ -51,7 +47,7 @@ export class CategoryService {
 
       return findSubCategory
     } catch (e) {
-      throw new BadRequestException('Failed to fetch sub category. Check the subCategoryId')
+      throw new BadRequestException('SubCategory with the provided ID does not exist')
     }
   }
 
@@ -149,13 +145,16 @@ export class CategoryService {
     const { idSubCategory, idCategory, subCategoryName } = updateSubCategoryInput
     await this.adminService.getAdminById(idAdminUser)
 
+    let category
+
     const subCategoryData = await this.getSubCategoryById(idSubCategory, idCategory)
+    if (idCategory) category = await this.getCategoryById(idCategory)
 
     try {
       await this.subCategoryRepository.update(subCategoryData.idSubCategory, {
         idSubCategory,
         subCategoryName,
-        category: { idCategory },
+        category,
         updatedBy: idAdminUser,
         updatedDate: new Date()
       })

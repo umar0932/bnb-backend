@@ -20,7 +20,7 @@ export class AdminResolver {
   }
 
   @Mutation(() => SuccessResponse, { description: 'Create new admin user' })
-  @Allow()
+  // @Allow()
   async createAdminUser(
     @Args('input') createAdminUserData: CreateAdminUserInput,
     @CurrentUser() user: JwtUserPayload

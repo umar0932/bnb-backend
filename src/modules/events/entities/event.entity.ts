@@ -1,13 +1,21 @@
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql'
 
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn
+} from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 import { Category, SubCategory } from '@app/category/entities'
 import { LocationsEntity } from '@app/common/entities'
 import { EventStatus } from '../event.constants'
 import { EventDetailsEntity } from './event-details.entity'
-import { EventTicketsEntity } from './tickets.entity'
+import { EventTicketsEntity } from './event-tickets.entity'
 
 registerEnumType(EventStatus, {
   name: 'EventStatus',
@@ -25,20 +33,21 @@ export class Event extends CustomBaseEntity {
   @Field()
   eventTitle!: string
 
-  @Field(() => Category, { nullable: true })
-  @OneToMany(() => Category, Category => Category.event, {
-    nullable: true,
-    eager: true
+  @ManyToOne(() => Category, category => category.events, {
+    eager: true,
+    nullable: true
   })
   @JoinColumn({ name: 'ref_id_category' })
-  categories?: Category[]
+  @Field(() => Category, { nullable: true })
+  category: Category
 
-  @OneToMany(() => SubCategory, subCategory => subCategory.event, {
-    nullable: true,
-    eager: true
+  @ManyToOne(() => SubCategory, subCategory => subCategory.events, {
+    eager: true,
+    nullable: true
   })
-  @Field(() => [SubCategory], { nullable: true })
-  subCategories: SubCategory[]
+  @JoinColumn({ name: 'ref_id_subCategory' })
+  @Field(() => SubCategory, { nullable: true })
+  subCategory: SubCategory
 
   @Column('simple-array', { name: 'tags', nullable: true })
   @Field(() => [String], { nullable: true })
@@ -51,15 +60,13 @@ export class Event extends CustomBaseEntity {
   @Field(() => LocationsEntity)
   @OneToOne(() => LocationsEntity, { eager: true })
   @JoinColumn({ name: 'ref_id_location' })
-  location: LocationsEntity
+  location!: LocationsEntity
 
   @Field(() => EventDetailsEntity, { nullable: true })
   @OneToOne(() => EventDetailsEntity, eventDetails => eventDetails.event, {
     eager: true,
-    nullable: true,
-    cascade: true
+    nullable: true
   })
-  @JoinColumn({ name: 'ref_id_event_details' })
   eventDetails?: EventDetailsEntity
 
   @Field(() => EventStatus)
@@ -68,8 +75,9 @@ export class Event extends CustomBaseEntity {
 
   @Field(() => EventTicketsEntity, { nullable: true })
   @OneToMany(() => EventTicketsEntity, eventTicketsEntity => eventTicketsEntity.event, {
+    eager: true,
     nullable: true,
-    eager: true
+    cascade: true
   })
   @JoinColumn({ name: 'ref_id_event_tickets_entity' })
   eventTickets?: EventTicketsEntity[]
