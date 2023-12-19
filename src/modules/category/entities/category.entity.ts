@@ -1,6 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 
@@ -19,13 +19,16 @@ export class Category extends CustomBaseEntity {
   categoryName!: string
 
   @OneToMany(() => SubCategory, subCategory => subCategory.category, {
-    cascade: ['insert', 'update', 'remove']
+    eager: true,
+    nullable: true,
+    cascade: true
   })
   @Field(() => [SubCategory], { nullable: true })
-  subCategories: SubCategory[]
+  subCategories?: SubCategory[]
 
-  @ManyToOne(() => Event, event => event.categories)
-  @JoinColumn({ name: 'ref_id_event' })
   @Field(() => Event, { nullable: true })
-  event: Event
+  @OneToMany(() => Event, event => event.category, {
+    nullable: true
+  })
+  events?: Event[]
 }

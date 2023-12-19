@@ -17,7 +17,7 @@ registerEnumType(TicketsSalesChannel, {
 export class EventTicketsEntity extends CustomBaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
-  idEventTickets!: number
+  idEventTicket!: number
 
   @Column({ length: 50, name: 'ticket_name' })
   @Field(() => String)
@@ -55,7 +55,7 @@ export class EventTicketsEntity extends CustomBaseEntity {
   @Field(() => Number)
   maxQuantity: number
 
-  @ManyToOne(() => Event, event => event.categories)
+  @ManyToOne(() => Event, event => event.eventTickets)
   @JoinColumn({ name: 'ref_id_event' })
   @Field(() => Event, { nullable: true })
   event: Event
