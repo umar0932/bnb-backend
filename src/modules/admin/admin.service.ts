@@ -87,7 +87,9 @@ export class AdminService {
   async create(data: CreateAdminUserInput, idAdminUser: string): Promise<SuccessResponse> {
     const { email } = data
 
-    await this.getAdminById(idAdminUser)
+    console.log(idAdminUser)
+
+    // await this.getAdminById(idAdminUser)
 
     const adminUser = await this.adminRepository.findOne({ where: { email } })
     if (adminUser) throw new BadRequestException('Email already exists')

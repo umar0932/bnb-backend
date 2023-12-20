@@ -22,7 +22,7 @@ export class EventDetailsEntity extends CustomBaseEntity {
   eventDescription: string
 
   @Field(() => Event)
-  @OneToOne(() => Event, event => event.eventDetails)
+  @OneToOne(() => Event, event => event.eventDetails, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'ref_id_event' })
   event: Event
 }
