@@ -46,6 +46,12 @@ export class CustomerUserResolver {
     return this.customerUserService.getAllCustomers(user.userId)
   }
 
+  @Query(() => Customer, { description: 'Get the Customer' })
+  @Allow()
+  async getCustomerData(@CurrentUser() user: JwtUserPayload): Promise<Customer> {
+    return await this.customerUserService.getCustomerById(user.userId)
+  }
+
   @Mutation(() => Customer, { description: 'This will update Customer' })
   @Allow()
   async updateCustomer(
