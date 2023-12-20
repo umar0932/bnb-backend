@@ -6,11 +6,12 @@ import {
   MaxLength,
   IsNumber,
   IsBoolean,
-  IsDate
+  IsDate,
+  Min
 } from 'class-validator'
 
 @InputType()
-export class CreateEventTicketsInput {
+export class CreateEventTicketInput {
   @Field(() => Number)
   @IsNotEmpty({ message: 'Event ID cannot be empty' })
   @IsNumber({}, { message: 'Event ID must be a number' })
@@ -56,12 +57,12 @@ export class CreateEventTicketsInput {
   @Field(() => Number)
   @IsNotEmpty({ message: 'Minimum quantity cannot be empty' })
   @IsNumber({}, { message: 'Minimum quantity must be a number' })
-  // @MinLength(1, { message: 'Minimum quantity must be at least 1' })
+  @Min(1, { message: 'Minimum quantity must be at least 1' })
   minQuantity!: number
 
   @Field(() => Number)
   @IsNotEmpty({ message: 'Maximum quantity cannot be empty' })
   @IsNumber({}, { message: 'Maximum quantity must be a number' })
-  // @MinLength(1, { message: 'Maximum quantity must be at least 1' })
+  @Min(1, { message: 'Maximum quantity must be at least 1' })
   maxQuantity!: number
 }

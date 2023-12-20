@@ -15,3 +15,24 @@ mutation CreateOrUpdateEventDetails($input: EventDetailsInput!) {
         success
     }
 }
+
+mutation CreateEventTicket($input: CreateEventTicketInput!) {
+    createEventTickets(input: $input) {
+        message
+        success
+    }
+}
+
+mutation UpdateBasicEvent($input: UpdateBasicEventInput!) {
+    updateBasicEvent(input: $input) {
+        message
+        success
+    }
+}
+
+mutation updateEventTicket($input: UpdateEventTicketInput!) {
+    updateEventTicket(input: $input) {
+        message
+        success
+    }
+}

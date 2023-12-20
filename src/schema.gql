@@ -24,7 +24,7 @@ type AdminLoginResponse {
 
 type Category {
   categoryName: String!
-  event: Event
+  events: Event
   idCategory: ID!
   subCategories: [SubCategory!]
 }
@@ -58,7 +58,7 @@ input CreateCustomerInput {
   password: String!
 }
 
-input CreateEventTicketsInput {
+input CreateEventTicketInput {
   availableQuantity: Float!
   endDate: DateTime!
   isVisible: Boolean
@@ -132,7 +132,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Event {
-  categories: Category
+  category: Category
   endDate: DateTime!
   eventDetails: EventDetailsEntity
   eventStatus: EventStatus!
@@ -141,7 +141,7 @@ type Event {
   idEvent: ID!
   location: LocationsEntity!
   startDate: DateTime!
-  subCategories: [SubCategory!]
+  subCategory: SubCategory
   tags: [String!]
   type: String
 }
@@ -170,7 +170,7 @@ type EventTicketsEntity {
   availableQuantity: Float!
   endDate: DateTime!
   event: Event
-  idEventTickets: ID!
+  idEventTicket: ID!
   isVisible: Boolean
   maxQuantity: Float!
   minQuantity: Float!
@@ -223,8 +223,8 @@ type Mutation {
   """This will signup new `Customers"""
   createCustomer(input: CreateCustomerInput!): CustomerLoginResponse!
 
-  """This will crete new Tickets for the Event"""
-  createEventTickets(input: CreateEventTicketsInput!): SuccessResponse!
+  """This will create new Ticket for the Event"""
+  createEventTickets(input: CreateEventTicketInput!): SuccessResponse!
 
   """This will crete new Events"""
   createOrUpdateEventDetails(input: EventDetailsInput!): SuccessResponse!
@@ -250,6 +250,9 @@ type Mutation {
   """This will update Admin Password"""
   updateAdminPassword(password: String!): SuccessResponse!
 
+  """This will update ticket for the Event"""
+  updateBasicEvent(input: UpdateBasicEventInput!): SuccessResponse!
+
   """This will update Category"""
   updateCategory(input: UpdateCategoryInput!): Category!
 
@@ -261,6 +264,9 @@ type Mutation {
 
   """This will update Customer Password"""
   updateCustomerPassword(password: String!): SuccessResponse!
+
+  """This will update ticket for the Event"""
+  updateEventTicket(input: UpdateEventTicketInput!): SuccessResponse!
 
   """This will signup new `Organizers"""
   updateOrganizer(input: UpdateOrganizerInput!): Organizer!
@@ -302,8 +308,8 @@ type S3SignedUrlResponse {
 }
 
 type SubCategory {
-  category: Category
-  event: Event
+  category: Category!
+  events: [Event!]
   idSubCategory: ID!
   subCategoryName: String!
 }
@@ -318,6 +324,18 @@ input UpdateAdminUserInput {
   firstName: String
   lastName: String
   mediaUrl: String
+}
+
+input UpdateBasicEventInput {
+  endDate: DateTime!
+  eventTitle: String!
+  idEvent: ID!
+  location: CreateLocationInput!
+  refIdCategory: Float
+  refIdSubCategory: Float
+  startDate: DateTime!
+  tags: [String!]
+  type: String
 }
 
 input UpdateCategoryInput {
@@ -340,6 +358,20 @@ input UpdateCustomerInput {
   state: String
   website: String
   zipCode: String
+}
+
+input UpdateEventTicketInput {
+  availableQuantity: Float!
+  endDate: DateTime!
+  idEventTicket: ID!
+  isVisible: Boolean
+  maxQuantity: Float!
+  minQuantity: Float!
+  refIdEvent: Float!
+  startDate: DateTime!
+  ticketDescription: String
+  ticketName: String!
+  ticketPrice: Float!
 }
 
 input UpdateOrganizerInput {
