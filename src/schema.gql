@@ -290,6 +290,9 @@ type Query {
 
   """This will get all categories"""
   getAllSubCategories: [SubCategory!]!
+
+  """Get the Customer"""
+  getCustomerData: Customer!
   getCustomerUploadUrl: S3SignedUrlResponse!
 
   """The List of Customers"""
