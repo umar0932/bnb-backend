@@ -71,16 +71,14 @@ export class CustomerUserService {
   }
 
   async getCustomerById(id: string): Promise<Customer> {
-    if (!id) throw new BadRequestException('Id is invalid')
-    try {
-      const findCustomer = await this.customerRepository.findOne({ where: { id, isActive: true } })
-      if (!findCustomer)
-        throw new BadRequestException('Unable to find the customer. Please enter valid customer id')
+    if (!id) throw new BadRequestException('Customer Id is invalid')
+    const findCustomerById = await this.customerRepository.findOne({
+      where: { id, isActive: true }
+    })
+    if (!findCustomerById)
+      throw new BadRequestException('Customer with the provided ID does not exist')
 
-      return findCustomer
-    } catch (e) {
-      throw new BadRequestException('Failed to fetch customer. Check the customerID')
-    }
+    return findCustomerById
   }
 
   async getOrganizerByName(name: string, customerId: string): Promise<Organizer> {
