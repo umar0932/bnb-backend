@@ -97,7 +97,6 @@ input CreateSubCategoryInput {
 }
 
 type Customer {
-  JobTitle: String
   cellPhone: String
   city: String
   companyName: String
@@ -108,6 +107,7 @@ type Customer {
   homePhone: String
   id: ID!
   isActive: Boolean
+  jobTitle: String
   lastName: String!
   password: String!
   secondAddress: String
@@ -119,6 +119,24 @@ type Customer {
 type CustomerEmailUpdateResponse {
   access_token: String!
   user: Customer!
+}
+
+input CustomerFilterInput {
+  cellPhone: String
+  city: String
+  companyName: String
+  country: String
+  email: String
+  firstAddress: String
+  firstName: String
+  homePhone: String
+  id: ID
+  jobTitle: String
+  lastName: String
+  secondAddress: String
+  state: String
+  website: String
+  zipCode: String
 }
 
 type CustomerLoginResponse {
@@ -178,6 +196,17 @@ type EventTicketsEntity {
   ticketDescription: String
   ticketName: String!
   ticketPrice: Float!
+}
+
+input ListCustomersInputs {
+  filter: CustomerFilterInput
+  limit: Float!
+  offset: Float = 0
+}
+
+type ListCustomersResponse {
+  results: [Customer!]!
+  totalRows: Float
 }
 
 """The type of location for an event (ONLINE_EVENT or VENUE_EVENT)"""
@@ -284,6 +313,12 @@ type Organizer {
   websiteLink: String
 }
 
+type PageData {
+  count: Float!
+  limit: Int
+  offset: Int
+}
+
 type Query {
   """This will get all categories"""
   getAllCategories: [Category!]!
@@ -295,8 +330,8 @@ type Query {
   getCustomerData: Customer!
   getCustomerUploadUrl: S3SignedUrlResponse!
 
-  """The List of Customers"""
-  getCustomers: [Customer!]!
+  """The List of Customers with Pagination and filters"""
+  getCustomersAdmin(input: ListCustomersInputs!): ListCustomersResponse!
 
   """check if email already exist"""
   validEmailAdmin(input: String!): SuccessResponse!
@@ -347,7 +382,6 @@ input UpdateCategoryInput {
 }
 
 input UpdateCustomerInput {
-  JobTitle: String
   cellPhone: String
   city: String
   companyName: String
@@ -356,6 +390,7 @@ input UpdateCustomerInput {
   firstName: String
   homePhone: String
   isActive: Boolean
+  jobTitle: String
   lastName: String
   secondAddress: String
   state: String
