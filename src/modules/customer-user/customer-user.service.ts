@@ -18,7 +18,6 @@ import { AwsS3ClientService } from '@app/aws-s3-client'
 import {
   JWT_STRATEGY_NAME,
   JwtDto,
-  JwtUserPayload,
   SuccessResponse,
   comparePassword,
   encodePassword,
@@ -107,13 +106,10 @@ export class CustomerUserService {
     return { success: false, message: 'Email is invalid' }
   }
 
-  async login(
-    loginCustomerInput: LoginCustomerInput,
-    user: JwtUserPayload
-  ): Promise<CustomerLoginResponse> {
+  async login(loginCustomerInput: LoginCustomerInput, user: any): Promise<CustomerLoginResponse> {
     const payload = {
       email: loginCustomerInput?.email,
-      sub: user?.userId,
+      sub: user?.id,
       type: JWT_STRATEGY_NAME.CUSTOMER
     }
     return {
