@@ -4,9 +4,18 @@ import { UseGuards } from '@nestjs/common'
 import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
-import { CreateCustomerInput, LoginCustomerInput, UpdateCustomerInput } from './dto/inputs'
+import {
+  CreateCustomerInput,
+  ListCustomersInputs,
+  LoginCustomerInput,
+  UpdateCustomerInput
+} from './dto/inputs'
 import { Customer } from './entities/customer.entity'
-import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
+import {
+  CustomerEmailUpdateResponse,
+  CustomerLoginResponse,
+  ListCustomersResponse
+} from './dto/args'
 import { CustomerUserService } from './customer-user.service'
 import { GqlAuthGuard } from './guards'
 import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
@@ -40,10 +49,20 @@ export class CustomerUserResolver {
     return await this.customerUserService.create(createCustomerData)
   }
 
-  @Query(() => [Customer], { description: 'The List of Customers' })
+  @Query(() => ListCustomersResponse, {
+    description: 'The List of Customers with Pagination and filters'
+  })
   @Allow()
-  getCustomers(@CurrentUser() user: JwtUserPayload): Promise<Customer[]> {
-    return this.customerUserService.getAllCustomers(user.userId)
+  async getCustomersAdmin(
+    @Args('input') args: ListCustomersInputs
+  ): Promise<ListCustomersResponse> {
+    const { limit, offset, filter } = args
+    const [customers, count] = await this.customerUserService.findAllCustomersWithPagination({
+      limit,
+      offset,
+      filter
+    })
+    return { results: customers, totalRows: count }
   }
 
   @Query(() => Customer, { description: 'Get the Customer' })

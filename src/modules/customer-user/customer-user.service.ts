@@ -8,9 +8,12 @@ import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
 
-import { Repository } from 'typeorm'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { FindOptionsWhere, Repository } from 'typeorm'
+import { validate as uuidValidate } from 'uuid'
 import { uuid } from 'uuidv4'
 
+import { AdminService } from '@app/admin'
 import { AwsS3ClientService } from '@app/aws-s3-client'
 import {
   JWT_STRATEGY_NAME,
@@ -23,21 +26,19 @@ import {
 } from '@app/common'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
-import { Admin } from '@app/admin/entities'
-import { CreateCustomerInput, LoginCustomerInput } from './dto/inputs'
+import { CreateCustomerInput, ListCustomersInputs, LoginCustomerInput } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
 import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
 import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
 import { Organizer } from './entities/organizer.entity'
 import { UpdateOrganizerInput } from './dto/inputs/update-organizer.input'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { CustomerWithoutPasswordResponse } from './dto/args/customer-data-without-password-response'
 
 @Injectable()
 export class CustomerUserService {
   constructor(
-    @InjectRepository(Admin)
-    private adminRepository: Repository<Admin>,
+    private adminService: AdminService,
     private configService: ConfigService,
     @InjectRepository(Customer)
     private customerRepository: Repository<Customer>,
@@ -82,21 +83,21 @@ export class CustomerUserService {
   }
 
   async getOrganizerByName(name: string, customerId: string): Promise<Organizer> {
-    const findOrganizer = await this.organizerRepository.findOne({
+    const findOrganizerByName = await this.organizerRepository.findOne({
       where: { name, isActive: true, createdBy: customerId }
     })
-    if (!findOrganizer)
-      throw new BadRequestException('Unable to find the organizer. Please enter valid input ')
-    return findOrganizer
+    if (!findOrganizerByName)
+      throw new BadRequestException('Organizer with the provided Name does not exist')
+    return findOrganizerByName
   }
 
   async getOrganizerById(idOrganizerUser: string, customerId: string): Promise<Organizer> {
-    const findOrganizer = await this.organizerRepository.findOne({
+    const findOrganizerById = await this.organizerRepository.findOne({
       where: { idOrganizerUser, isActive: true, createdBy: customerId }
     })
-    if (!findOrganizer)
-      throw new BadRequestException('Unable to find the organizer. Please enter valid input')
-    return findOrganizer
+    if (!findOrganizerById)
+      throw new BadRequestException('Organizer with the provided ID does not exist')
+    return findOrganizerById
   }
 
   async isEmailExist(email: string): Promise<SuccessResponse> {
@@ -151,14 +152,103 @@ export class CustomerUserService {
     return await this.jwtService.sign(payload)
   }
 
-  async getAllCustomers(userId: string): Promise<Customer[]> {
-    const isAdmin = await this.adminRepository.findOne({
-      where: { idAdminUser: userId }
+  async findAllCustomersWithPagination({
+    limit,
+    offset,
+    filter
+  }: ListCustomersInputs): Promise<[Customer[], number]> {
+    const {
+      email,
+      id,
+      firstName,
+      lastName,
+      homePhone,
+      cellPhone,
+      jobTitle,
+      companyName,
+      website,
+      firstAddress,
+      secondAddress,
+      city,
+      country,
+      zipCode,
+      state
+    } = filter || {}
+
+    const query: FindOptionsWhere<Customer> | FindOptionsWhere<Customer>[] = {
+      ...(email ? { email } : {}),
+      ...(id && uuidValidate(id) ? { id } : {}),
+      ...(firstName ? { firstName } : {}),
+      ...(lastName ? { lastName } : {}),
+      ...(homePhone ? { homePhone } : {}),
+      ...(cellPhone ? { cellPhone } : {}),
+      ...(jobTitle ? { jobTitle } : {}),
+      ...(companyName ? { companyName } : {}),
+      ...(website ? { website } : {}),
+      ...(firstAddress ? { firstAddress } : {}),
+      ...(secondAddress ? { secondAddress } : {}),
+      ...(city ? { city } : {}),
+      ...(country ? { country } : {}),
+      ...(zipCode ? { zipCode } : {}),
+      ...(state ? { state } : {})
+    }
+
+    // if (filter?.email) {
+    //   query.email = ILike(`%${filter.email.toLowerCase()}%`)
+    // } else if (filter?.id && uuidValidate(filter?.id)) {
+    //   query.id = filter.id
+    // } else if (filter?.jobTitle) {
+    //   query.jobTitle = ILike(`%${filter.jobTitle}%`)
+    // } else if (filter?.name) {
+    //   const [firstName, ...lastNameArray] = filter.name.split(' ')
+    //   const lastName = lastNameArray.join(' ')
+
+    //   query
+    //     .orWhere('first_name ILIKE :firstName', { firstName: `%${firstName.toLowerCase()}%` })
+    //     .orWhere('last_name ILIKE :lastName', { lastName: `%${lastName.toLowerCase()}%` })
+    // } else if (filter?.homePhone) {
+    //   query.home_phone = ILike(`%${filter.homePhone}%`)
+    // } else if (filter?.cellPhone) {
+    //   query.cell_phone = ILike(`%${filter.cellPhone}%`)
+    // } else if (filter?.companyName) {
+    //   query.company_name = ILike(`%${filter.companyName}%`)
+    // } else if (filter?.website) {
+    //   query.website = ILike(`%${filter.website}%`)
+    // } else if (filter?.firstAddress) {
+    //   query.first_address = ILike(`%${filter.firstAddress}%`)
+    // } else if (filter?.secondAddress) {
+    //   query.second_address = ILike(`%${filter.secondAddress}%`)
+    // } else if (filter?.city) {
+    //   query.city = ILike(`%${filter.city}%`)
+    // } else if (filter?.country) {
+    //   query.country = ILike(`%${filter.country}%`)
+    // } else if (filter?.zipCode) {
+    //   query.zip_code = ILike(`%${filter.zipCode}%`)
+    // } else if (filter?.state) {
+    //   query.state = ILike(`%${filter.state}%`)
+    // }
+
+    const [customers, total] = await this.customerRepository.findAndCount({
+      where: query,
+      take: limit,
+      skip: offset
     })
+
+    return [customers, total]
+  }
+
+  async getAllCustomers(userId: string): Promise<Partial<CustomerWithoutPasswordResponse[]>> {
+    const isAdmin = await this.adminService.getAdminById(userId)
 
     if (!isAdmin) throw new ForbiddenException('Only admin can access this data.')
 
-    return await this.customerRepository.find()
+    const customersData: Partial<Customer>[] = await this.customerRepository.find()
+
+    const customersWithoutPasswords: Partial<CustomerWithoutPasswordResponse>[] = customersData.map(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ({ password, ...rest }) => rest
+    )
+    return customersWithoutPasswords
   }
 
   async updateCustomerData(
@@ -186,7 +276,7 @@ export class CustomerUserService {
 
   async updatePassword(password: string, customerId: string): Promise<SuccessResponse> {
     const customerData = await this.getCustomerById(customerId)
-    if (!customerData) throw new BadRequestException('Unable to find the customer data')
+    if (!customerData) throw new BadRequestException('Customer with the provided ID does not exist')
     // const checkPwd = await isValidPassword(password)
     // if (!checkPwd) {
     //   throw new BadRequestException('Invalid username or password')
@@ -232,9 +322,7 @@ export class CustomerUserService {
           access_token: await this.getJwtToken(payload),
           user: rest
         }
-      } else {
-        throw new BadRequestException("Couldn't update email")
-      }
+      } else throw new BadRequestException("Couldn't update email")
     } catch (err) {
       throw new BadRequestException("Couldn't update email")
     }
@@ -268,7 +356,7 @@ export class CustomerUserService {
     await this.getCustomerById(customerId)
     const organizerData = await this.getOrganizerById(organizerInput.idOrganizerUser, customerId)
     if (!organizerData)
-      throw new BadRequestException('Unable to find the organizer. Please enter a valid organizer')
+      throw new BadRequestException('Organizer with the provided ID does not exist')
     try {
       await this.organizerRepository.update(organizerData.idOrganizerUser, {
         ...organizerInput,

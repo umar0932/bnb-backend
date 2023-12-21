@@ -4,10 +4,10 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
+import { AdminModule } from '@app/admin'
 import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { JWTConfigTypes } from '@app/common'
 
-import { Admin } from '@app/admin/entities/admin.entity'
 import { Customer } from './entities/customer.entity'
 import { CustomerUserResolver } from './customer-user.resolver'
 import { CustomerUserService } from './customer-user.service'
@@ -17,7 +17,7 @@ import { Organizer } from './entities/organizer.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Admin, Customer, Organizer]),
+    TypeOrmModule.forFeature([Customer, Organizer]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -29,6 +29,7 @@ import { Organizer } from './entities/organizer.entity'
       },
       inject: [ConfigService]
     }),
+    AdminModule,
     AwsS3ClientModule
   ],
   providers: [CustomerUserResolver, CustomerUserService, JwtStrategy, LocalStrategy],

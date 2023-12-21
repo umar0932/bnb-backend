@@ -59,6 +59,7 @@
     "dotenv": "^16.3.1",
     "fbjs-scripts": "^3.0.1",
     "graphql": "^16.8.1",
+    "graphql-relay": "^0.10.0",
     "graphql-tools": "^9.0.0",
     "joi": "^17.11.0",
     "passport": "^0.6.0",

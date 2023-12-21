@@ -67,14 +67,10 @@ export class AdminService {
   }
 
   async getAdminById(idAdminUser: string): Promise<Admin> {
-    try {
-      const findAdmin = await this.adminRepository.findOne({ where: { idAdminUser } })
-      if (!findAdmin) throw new ForbiddenException('Invalid Admin user')
+    const findAdminById = await this.adminRepository.findOne({ where: { idAdminUser } })
+    if (!findAdminById) throw new ForbiddenException('Invalid Admin user')
 
-      return findAdmin
-    } catch (e) {
-      throw new BadRequestException('Failed to fetch admin')
-    }
+    return findAdminById
   }
 
   async isEmailExist(email: string): Promise<SuccessResponse> {
