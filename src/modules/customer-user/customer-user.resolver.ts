@@ -30,7 +30,7 @@ export class CustomerUserResolver {
   @UseGuards(GqlAuthGuard)
   async loginAsCustomer(
     @Args('input') loginCustomerInput: LoginCustomerInput,
-    @CurrentUser() user: JwtUserPayload
+    @CurrentUser() user: any
   ) {
     return await this.customerUserService.login(loginCustomerInput, user)
   }
@@ -77,6 +77,9 @@ export class CustomerUserResolver {
     @Args('input') updateCustomerInput: UpdateCustomerInput,
     @CurrentUser() user: JwtUserPayload
   ): Promise<Partial<Customer>> {
+    console.log('updateCustomerInput----->>>>', updateCustomerInput)
+    console.log('user----->>>>', user)
+
     return await this.customerUserService.updateCustomerData(updateCustomerInput, user.userId)
   }
 
