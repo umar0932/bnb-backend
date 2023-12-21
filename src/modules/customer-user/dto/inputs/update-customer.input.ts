@@ -25,7 +25,7 @@ export class UpdateCustomerInput {
   @IsString()
   @IsOptional()
   @Field(() => String, { nullable: true })
-  JobTitle?: string
+  jobTitle?: string
 
   @IsString()
   @IsOptional()
