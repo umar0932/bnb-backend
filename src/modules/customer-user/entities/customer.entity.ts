@@ -1,11 +1,12 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 import { Transform } from 'class-transformer'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 
 @Entity({ name: 'customer_user' })
+@Index(['email'])
 @ObjectType()
 export class Customer extends CustomBaseEntity {
   @Field(() => ID)
@@ -40,7 +41,7 @@ export class Customer extends CustomBaseEntity {
 
   @Column({ length: 50, name: 'job_title', nullable: true })
   @Field({ nullable: true })
-  JobTitle?: string
+  jobTitle?: string
 
   @Column({ length: 50, name: 'company_name', nullable: true })
   @Field({ nullable: true })

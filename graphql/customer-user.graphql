@@ -1,9 +1,14 @@
 #QUERIES
 
-query getAllCustomers {
-  getCustomers {
-    email
-    id
+query GetCustomersAdmin($input: ListCustomersInputs!) {
+  getCustomersAdmin(input: $input) {
+    totalRows
+    results {
+      firstName
+      email
+      id
+      lastName
+    }
   }
 }
 
@@ -36,7 +41,7 @@ mutation createCustomer($input: CreateCustomerInput!) {
 
 mutation updateCustomer($input: UpdateCustomerInput!) {
   updateCustomer(input: $input) {
-    JobTitle
+    jobTitle
     cellPhone
     city
     companyName
