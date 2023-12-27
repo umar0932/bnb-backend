@@ -12,9 +12,12 @@ import { AdminModule } from '@app/admin'
 import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { CategoryModule } from '@app/category'
 import { CustomerUserModule } from '@app/customer-user'
+import { EventModule } from '@app/events'
+import { OrderModule } from '@app/order'
+import { PaymentModule } from '@app/payment'
+
 import { dataSourceOptions } from 'db/data-source'
 import EnvConfig from './config/config'
-import { EventModule } from '@app/events'
 
 dotenv.config()
 
@@ -49,10 +52,12 @@ const env = `${process.env.NODE_ENV}`
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     AdminModule,
+    AwsS3ClientModule,
     CustomerUserModule,
     CategoryModule,
     EventModule,
-    AwsS3ClientModule
+    OrderModule,
+    PaymentModule
   ]
 })
 export class AppModule {}
