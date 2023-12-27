@@ -1,5 +1,5 @@
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { TypeOrmModule } from '@nestjs/typeorm'
@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AdminModule } from '@app/admin'
 import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { JWTConfigTypes } from '@app/common'
+import { PaymentModule } from '@app/payment'
 
 import { Customer } from './entities/customer.entity'
 import { CustomerUserResolver } from './customer-user.resolver'
@@ -30,7 +31,8 @@ import { Organizer } from './entities/organizer.entity'
       inject: [ConfigService]
     }),
     AdminModule,
-    AwsS3ClientModule
+    AwsS3ClientModule,
+    forwardRef(() => PaymentModule)
   ],
   providers: [CustomerUserResolver, CustomerUserService, JwtStrategy, LocalStrategy],
   exports: [CustomerUserService]

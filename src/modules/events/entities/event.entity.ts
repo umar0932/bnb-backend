@@ -13,6 +13,7 @@ import {
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 import { Category, SubCategory } from '@app/category/entities'
 import { LocationsEntity } from '@app/common/entities'
+
 import { EventStatus } from '../event.constants'
 import { EventDetailsEntity } from './event-details.entity'
 import { EventTicketsEntity } from './event-tickets.entity'

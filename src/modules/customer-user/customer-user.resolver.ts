@@ -77,9 +77,6 @@ export class CustomerUserResolver {
     @Args('input') updateCustomerInput: UpdateCustomerInput,
     @CurrentUser() user: JwtUserPayload
   ): Promise<Partial<Customer>> {
-    console.log('updateCustomerInput----->>>>', updateCustomerInput)
-    console.log('user----->>>>', user)
-
     return await this.customerUserService.updateCustomerData(updateCustomerInput, user.userId)
   }
 

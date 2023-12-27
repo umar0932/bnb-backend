@@ -16,10 +16,10 @@ export default () => ({
       secret: process.env.JWT_KEY_ADMIN,
       signOptions: { expiresIn: process.env.JWT_KEY_ADMIN_EXPIRY }
     }
+  },
+  stripe: {
+    secret: process.env.STRIPE_SECRET_KEY,
+    publish: process.env.STRIPE_PUBLISH_KEY,
+    currency: process.env.STRIPE_CURRENCY
   }
-  //   stripe: {
-  //     secret: process.env.STRIPE_KEY,
-  //     publish: process.env.STRIPE_PUBLISH_KEY,
-  //     currency: process.env.STRIPE_CURRENCY
-  //   },
 })

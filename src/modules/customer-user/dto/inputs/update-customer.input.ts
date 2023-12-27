@@ -1,15 +1,15 @@
 import { InputType, Field } from '@nestjs/graphql'
 
-import { IsUrl, IsString, IsOptional } from 'class-validator'
+import { IsUrl, IsString, IsOptional, IsBoolean, ValidateIf, MaxLength } from 'class-validator'
 
 @InputType()
 export class UpdateCustomerInput {
-  @IsString()
+  @IsString({ message: 'First name should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   firstName?: string
 
-  @IsString()
+  @IsString({ message: 'Last name should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   lastName?: string
@@ -22,52 +22,59 @@ export class UpdateCustomerInput {
   @Field(() => String, { nullable: true })
   cellPhone?: string
 
-  @IsString()
+  @IsString({ message: 'Job title should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   jobTitle?: string
 
-  @IsString()
+  @IsString({ message: 'Company name should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   companyName?: string
 
-  @IsUrl()
-  @IsOptional()
   @Field(() => String, { nullable: true })
+  @IsOptional()
+  @ValidateIf((_, value) => value.websiteLink !== undefined && value.websiteLink !== null)
+  @IsUrl({}, { message: 'Invalid URL format' })
+  @MaxLength(150, { message: 'Website link should not exceed 150 characters' })
   website?: string
 
-  @IsString()
+  @IsString({ message: 'First address should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   firstAddress?: string
 
-  @IsString()
+  @IsString({ message: 'Second address should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   secondAddress?: string
 
-  @IsString()
+  @IsString({ message: 'City should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   city?: string
 
-  @IsString()
+  @IsString({ message: 'Country should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   country?: string
 
-  @IsString()
+  @IsString({ message: 'Zip code should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   zipCode?: string
 
-  @IsString()
+  @IsString({ message: 'State should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
   state?: string
 
-  @IsString()
+  @IsString({ message: 'Stripe Customer ID should be a string' })
+  @IsOptional()
+  @Field(() => String, { nullable: true })
+  stripeCustomerId?: string
+
+  @IsBoolean({ message: 'isActive should be a boolean value' })
   @IsOptional()
   @Field({ nullable: true })
   isActive?: boolean
