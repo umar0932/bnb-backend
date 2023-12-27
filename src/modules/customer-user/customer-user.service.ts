@@ -1,8 +1,10 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
-  NotFoundException
+  NotFoundException,
+  forwardRef
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -10,6 +12,7 @@ import { JwtService } from '@nestjs/jwt'
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { FindOptionsWhere, Repository } from 'typeorm'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { validate as uuidValidate } from 'uuid'
 import { uuid } from 'uuidv4'
 
@@ -23,16 +26,19 @@ import {
   encodePassword,
   isValidPassword
 } from '@app/common'
+import { PaymentService } from '@app/payment'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
 import { CreateCustomerInput, ListCustomersInputs, LoginCustomerInput } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
-import { CustomerEmailUpdateResponse, CustomerLoginResponse } from './dto/args'
+import {
+  CustomerEmailUpdateResponse,
+  CustomerLoginResponse,
+  CustomerWithoutPasswordResponse
+} from './dto/args'
 import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
 import { Organizer } from './entities/organizer.entity'
 import { UpdateOrganizerInput } from './dto/inputs/update-organizer.input'
-import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { CustomerWithoutPasswordResponse } from './dto/args/customer-data-without-password-response'
 
 @Injectable()
 export class CustomerUserService {
@@ -43,6 +49,8 @@ export class CustomerUserService {
     private customerRepository: Repository<Customer>,
     @InjectRepository(Organizer)
     private organizerRepository: Repository<Organizer>,
+    @Inject(forwardRef(() => PaymentService))
+    private paymentService: PaymentService,
     private jwtService: JwtService,
     private s3Service: AwsS3ClientService
   ) {}
@@ -119,7 +127,10 @@ export class CustomerUserService {
   }
 
   async create(data: CreateCustomerInput): Promise<CustomerLoginResponse> {
-    const { email } = data
+    const { email, firstName, lastName } = data
+    const name = firstName.concat(' ').concat(lastName)
+
+    const stripeCustomer = await this.paymentService.createStripeCustomer(name, email)
 
     const user = await this.customerRepository.findOne({ where: { email } })
     if (user) throw new BadRequestException('Email already exists')
@@ -128,8 +139,11 @@ export class CustomerUserService {
 
     const currentUser = await this.customerRepository.save({
       ...data,
-      password
+      password,
+      stripeCustomerId: stripeCustomer.id
     })
+
+    if (!currentUser) throw new BadRequestException('User not registered')
 
     const payload = {
       sub: currentUser?.id,
@@ -369,6 +383,19 @@ export class CustomerUserService {
     )
 
     return updatedOrganizerData
+  }
+
+  async updateStripeId(stripeCustomerId: string, customerId: string): Promise<Customer> {
+    const customerData = await this.getCustomerById(customerId)
+    try {
+      await this.customerRepository.update(customerData.id, {
+        stripeCustomerId,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      throw new BadRequestException('Failed to update data')
+    }
+    return customerData
   }
 
   async getCustomerUploadUrl(): Promise<S3SignedUrlResponse> {

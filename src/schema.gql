@@ -51,6 +51,12 @@ input CreateCategoryInput {
   categoryName: String!
 }
 
+input CreateChargeInput {
+  amount: Float!
+  customerId: String!
+  paymentMethodId: String!
+}
+
 input CreateCustomerInput {
   email: String!
   firstName: String!
@@ -84,6 +90,12 @@ input CreateLocationInput {
   venueName: String!
 }
 
+input CreateOrderInput {
+  idEvent: Int!
+  tickets: [TicketTypeInput!]!
+  totalPrice: Int!
+}
+
 input CreateOrganizerInput {
   description: String
   name: String!
@@ -112,6 +124,7 @@ type Customer {
   password: String!
   secondAddress: String
   state: String
+  stripeCustomerId: String
   website: String
   zipCode: String
 }
@@ -270,6 +283,9 @@ type Mutation {
   """Customer Login"""
   loginAsCustomer(input: LoginCustomerInput!): CustomerLoginResponse!
 
+  """This will charge the Customer on test stripe"""
+  testCharge(chargeInput: CreateChargeInput!, orderInput: CreateOrderInput!): SuccessResponse!
+
   """Update admin data"""
   updateAdminData(input: UpdateAdminUserInput!): String!
 
@@ -304,6 +320,21 @@ type Mutation {
   updateSubCategories(input: UpdateSubCategoryInput!): SubCategory!
 }
 
+type OrderEntity {
+  idEvent: Int!
+  idOrder: ID!
+  orderStatus: OrderStatus!
+  tickets: TicketType!
+  totalPrice: Float!
+}
+
+"""The status of order"""
+enum OrderStatus {
+  FAILED
+  PENDING
+  SUCCEEDED
+}
+
 type Organizer {
   description: String
   idOrganizerUser: ID!
@@ -333,6 +364,9 @@ type Query {
   """The List of Customers with Pagination and filters"""
   getCustomersAdmin(input: ListCustomersInputs!): ListCustomersResponse!
 
+  """This will get all Orders of Current Customer"""
+  getOrdersOfCustomer: [OrderEntity!]!
+
   """check if email already exist"""
   validEmailAdmin(input: String!): SuccessResponse!
 
@@ -355,6 +389,18 @@ type SubCategory {
 type SuccessResponse {
   message: String
   success: Boolean
+}
+
+type TicketType {
+  id: ID!
+  quantity: Int!
+  ticketPrice: Int!
+}
+
+input TicketTypeInput {
+  id: Int!
+  quantity: Int!
+  ticketPrice: Int!
 }
 
 input UpdateAdminUserInput {
@@ -394,6 +440,7 @@ input UpdateCustomerInput {
   lastName: String
   secondAddress: String
   state: String
+  stripeCustomerId: String
   website: String
   zipCode: String
 }
