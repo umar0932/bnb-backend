@@ -22,6 +22,14 @@ export class OrderEntity extends CustomBaseEntity {
   @Field(() => Int)
   idEvent: number
 
+  @Column({ name: 'payment_intent_id' })
+  @Field(() => String)
+  paymentIntentId: string
+
+  @Column({ name: 'stripe_customer_id' })
+  @Field(() => String)
+  stripeCustomerId: string
+
   @Column('numeric', { default: 0.0, name: 'total_price' })
   @Field(() => Number)
   totalPrice: number
