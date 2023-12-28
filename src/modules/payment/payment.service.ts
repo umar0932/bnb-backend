@@ -4,7 +4,10 @@ import { ConfigService } from '@nestjs/config'
 import * as _ from 'lodash'
 import Stripe from 'stripe'
 
+import { CreateOrderInput } from '@app/order/dto/inputs'
 import { CustomerUserService } from '@app/customer-user'
+import { OrderService } from '@app/order'
+import { SuccessResponse } from '@app/common'
 
 import { CreateChargeInput } from './dto/input'
 
@@ -16,7 +19,8 @@ export class PaymentService {
   constructor(
     private configService: ConfigService,
     @Inject(forwardRef(() => CustomerUserService))
-    private customerService: CustomerUserService
+    private customerService: CustomerUserService,
+    private readonly orderService: OrderService
   ) {
     const stripeSecretKey = configService.get<string>('stripe.secret')
 
@@ -39,16 +43,19 @@ export class PaymentService {
     }
   }
 
-  async charge(chargeInput: CreateChargeInput): Promise<boolean> {
+  async charge(
+    chargeInput: CreateChargeInput,
+    orderInput: CreateOrderInput
+  ): Promise<SuccessResponse> {
     try {
       const customer = await this.customerService.getCustomerById(chargeInput.customerId)
 
-      const stripeStripeCurrency = await this.configService.get<string>('stripe.currency')
+      const stripeStripeCurrency = this.configService.get<string>('stripe.currency')
 
       if (stripeStripeCurrency === undefined)
         throw new Error('Stripe currency is missing in the configuration')
 
-      await this.stripe.paymentIntents.create({
+      const paymentIntent = await this.stripe.paymentIntents.create({
         amount: _.round(chargeInput.amount * 100, 2),
         customer: customer.stripeCustomerId,
         payment_method: chargeInput.paymentMethodId,
@@ -57,7 +64,10 @@ export class PaymentService {
         off_session: true
       })
 
-      return true
+      if (paymentIntent.id)
+        await this.orderService.createOrder(orderInput, chargeInput.customerId, paymentIntent.id)
+
+      return { success: true, message: 'Charge and Order Created' }
     } catch (err) {
       this.logger.error(err?.message, err, 'PaymentService')
       throw new BadRequestException("Something went wrong while charging the customer's card.")

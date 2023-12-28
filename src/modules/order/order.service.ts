@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import { DeepPartial, Repository } from 'typeorm'
@@ -22,19 +22,25 @@ export class OrderService {
   async createOrder(
     orderInput: CreateOrderInput,
     userId: string,
-    charge: boolean
+    paymentIntentId: string
   ): Promise<SuccessResponse> {
-    await this.customerService.getCustomerById(userId)
+    const customer = await this.customerService.getCustomerById(userId)
 
-    const order = await this.orderRepository.create({
-      ...orderInput,
-      orderStatus: charge ? OrderStatus.SUCCEEDED : OrderStatus.FAILED,
-      createdBy: userId
-    } as unknown as DeepPartial<OrderEntity>)
+    try {
+      const order = await this.orderRepository.create({
+        ...orderInput,
+        orderStatus: paymentIntentId ? OrderStatus.SUCCEEDED : OrderStatus.FAILED,
+        paymentIntentId,
+        stripeCustomerId: customer.stripeCustomerId,
+        createdBy: userId
+      } as unknown as DeepPartial<OrderEntity>)
 
-    await this.orderRepository.save(order)
+      await this.orderRepository.save(order)
 
-    return { success: true, message: 'Order Created' }
+      return { success: true, message: 'Order Created' }
+    } catch (error) {
+      throw new BadRequestException('Order does not Created')
+    }
   }
 
   async getOrdersOfCustomer(userId: string): Promise<OrderEntity[]> {
