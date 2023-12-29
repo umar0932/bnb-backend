@@ -218,7 +218,7 @@ export class CustomerUserService {
     return this.handleCustomerLogin(currentUser)
   }
 
-  async registerSocial(
+  async continueWithSocialSite(
     profile: Profile,
     provider: SocialProviderTypes
   ): Promise<CustomerLoginOrRegisterResponse> {
@@ -248,7 +248,6 @@ export class CustomerUserService {
 
       return this.handleCustomerLogin(customer)
     } catch (err) {
-      console.log('err--->>>', err)
       throw new BadRequestException('User addition transaction failed')
     }
   }
