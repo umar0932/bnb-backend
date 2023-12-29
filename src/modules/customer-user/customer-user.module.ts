@@ -8,17 +8,19 @@ import { AdminModule } from '@app/admin'
 import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { JWTConfigTypes } from '@app/common'
 import { PaymentModule } from '@app/payment'
+import { SocialProvider } from '@app/common/entities'
+import googleConfig from '@config/google.config'
 
 import { Customer } from './entities/customer.entity'
 import { CustomerUserResolver } from './customer-user.resolver'
 import { CustomerUserService } from './customer-user.service'
-import { JwtStrategy } from './strategy/jwt.strategy'
-import { LocalStrategy } from './strategy/local.strategy'
+import { GoogleStrategy, JwtStrategy, LocalStrategy } from './strategy'
 import { Organizer } from './entities/organizer.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Customer, Organizer]),
+    TypeOrmModule.forFeature([Customer, Organizer, SocialProvider]),
+    ConfigModule.forFeature(googleConfig),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -34,7 +36,13 @@ import { Organizer } from './entities/organizer.entity'
     AwsS3ClientModule,
     forwardRef(() => PaymentModule)
   ],
-  providers: [CustomerUserResolver, CustomerUserService, JwtStrategy, LocalStrategy],
+  providers: [
+    CustomerUserResolver,
+    CustomerUserService,
+    GoogleStrategy,
+    JwtStrategy,
+    LocalStrategy
+  ],
   exports: [CustomerUserService]
 })
 export class CustomerUserModule {}
