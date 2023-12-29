@@ -3,6 +3,6 @@ import { AdminLoginResponse } from './admin-login-response'
 
 @ObjectType()
 export class AdminEmailUpdateResponse extends PickType(AdminLoginResponse, [
-  'access_token',
+  'accessToken',
   'user'
 ]) {}

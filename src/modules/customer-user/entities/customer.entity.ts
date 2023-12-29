@@ -1,9 +1,10 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { Transform } from 'class-transformer'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
+import { SocialProvider } from '@app/common/entities'
 
 @Entity({ name: 'customer_user' })
 @Index(['email'])
@@ -78,6 +79,13 @@ export class Customer extends CustomBaseEntity {
   @Column({ length: 50, name: 'state', nullable: true })
   @Field({ nullable: true })
   state?: string
+
+  @Field(() => SocialProvider, { nullable: true })
+  @OneToOne(() => SocialProvider, socialProvider => socialProvider.customer, {
+    eager: true,
+    nullable: true
+  })
+  socialProvider?: SocialProvider
 
   @Column({ nullable: true, default: true, name: 'is_active' })
   @Field({ nullable: true })

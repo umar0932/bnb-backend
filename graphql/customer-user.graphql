@@ -23,7 +23,7 @@ query validEmailCustomer($input: String!) {
 
 mutation loginAsCustomer($input: LoginCustomerInput!) {
   loginAsCustomer(input: $input) {
-    access_token
+    accessToken
     user {
       email
     }
@@ -32,7 +32,7 @@ mutation loginAsCustomer($input: LoginCustomerInput!) {
 
 mutation createCustomer($input: CreateCustomerInput!) {
   createCustomer(input: $input) {
-    access_token
+    accessToken
     user {
       email
     }
@@ -70,7 +70,7 @@ mutation updateCustomerPassword($input: String!) {
 
 mutation updateCustomerEmail($input: String!) {
   updateCustomerEmail(input: $input) {
-    access_token
+    accessToken
     user {
       email
     }

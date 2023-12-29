@@ -13,12 +13,12 @@ type Admin {
 }
 
 type AdminEmailUpdateResponse {
-  access_token: String!
+  accessToken: String!
   user: Admin!
 }
 
 type AdminLoginResponse {
-  access_token: String!
+  accessToken: String!
   user: Admin!
 }
 
@@ -123,6 +123,7 @@ type Customer {
   lastName: String!
   password: String!
   secondAddress: String
+  socialProvider: SocialProvider
   state: String
   stripeCustomerId: String
   website: String
@@ -130,7 +131,7 @@ type Customer {
 }
 
 type CustomerEmailUpdateResponse {
-  access_token: String!
+  accessToken: String!
   user: Customer!
 }
 
@@ -152,8 +153,8 @@ input CustomerFilterInput {
   zipCode: String
 }
 
-type CustomerLoginResponse {
-  access_token: String!
+type CustomerLoginOrRegisterResponse {
+  accessToken: String!
   user: Customer!
 }
 
@@ -263,7 +264,7 @@ type Mutation {
   createCategory(input: CreateCategoryInput!): SuccessResponse!
 
   """This will signup new `Customers"""
-  createCustomer(input: CreateCustomerInput!): CustomerLoginResponse!
+  createCustomer(input: CreateCustomerInput!): CustomerLoginOrRegisterResponse!
 
   """This will create new Ticket for the Event"""
   createEventTickets(input: CreateEventTicketInput!): SuccessResponse!
@@ -281,7 +282,10 @@ type Mutation {
   loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
 
   """Customer Login"""
-  loginAsCustomer(input: LoginCustomerInput!): CustomerLoginResponse!
+  loginAsCustomer(input: LoginCustomerInput!): CustomerLoginOrRegisterResponse!
+
+  """Customer Social Registration"""
+  registerSocial(input: RegisterOrLoginSocialInput!): CustomerLoginOrRegisterResponse!
 
   """This will charge the Customer on test stripe"""
   testCharge(chargeInput: CreateChargeInput!, orderInput: CreateOrderInput!): SuccessResponse!
@@ -371,14 +375,31 @@ type Query {
 
   """check if email already exist"""
   validEmailAdmin(input: String!): SuccessResponse!
+}
 
-  """check if email already exist"""
-  validEmailCustomer(input: String!): SuccessResponse!
+input RegisterOrLoginSocialInput {
+  accessToken: String!
+  email: String!
+  provider: SocialAuthProviders!
 }
 
 type S3SignedUrlResponse {
   fileName: String!
   signedUrl: String!
+}
+
+"""Social provider types"""
+enum SocialAuthProviders {
+  FACEBOOK
+  GOOGLE
+}
+
+type SocialProvider {
+  createdDate: DateTime!
+  customer: Customer!
+  id: ID!
+  provider: SocialAuthProviders!
+  socialId: String!
 }
 
 type SubCategory {
