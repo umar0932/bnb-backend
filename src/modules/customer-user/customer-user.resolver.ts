@@ -40,11 +40,11 @@ export class CustomerUserResolver {
 
   @UseGuards(SocialAuthGuard)
   @Mutation(() => CustomerLoginOrRegisterResponse, { description: 'Customer Social Registration' })
-  async registerSocial(
+  async continueWithSocialSite(
     @SocialProfile() profile: Profile,
     @Args('input') input: RegisterOrLoginSocialInput
   ): Promise<CustomerLoginOrRegisterResponse> {
-    return await this.customerUserService.registerSocial(profile, input.provider)
+    return await this.customerUserService.continueWithSocialSite(profile, input.provider)
   }
 
   @Mutation(() => CustomerLoginOrRegisterResponse, {
