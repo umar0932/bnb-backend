@@ -1,23 +1,26 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 
-import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
+import { Profile } from 'passport'
+
+import { Allow, CurrentUser, JwtUserPayload, SocialProfile, SuccessResponse } from '@app/common'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
 import {
   CreateCustomerInput,
   ListCustomersInputs,
   LoginCustomerInput,
+  RegisterOrLoginSocialInput,
   UpdateCustomerInput
 } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
 import {
   CustomerEmailUpdateResponse,
-  CustomerLoginResponse,
+  CustomerLoginOrRegisterResponse,
   ListCustomersResponse
 } from './dto/args'
 import { CustomerUserService } from './customer-user.service'
-import { GqlAuthGuard } from './guards'
+import { GqlAuthGuard, SocialAuthGuard } from './guards'
 import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
 import { Organizer } from './entities/organizer.entity'
 import { UpdateOrganizerInput } from './dto/inputs/update-organizer.input'
@@ -26,7 +29,7 @@ import { UpdateOrganizerInput } from './dto/inputs/update-organizer.input'
 export class CustomerUserResolver {
   constructor(private readonly customerUserService: CustomerUserService) {}
 
-  @Mutation(() => CustomerLoginResponse, { description: 'Customer Login' })
+  @Mutation(() => CustomerLoginOrRegisterResponse, { description: 'Customer Login' })
   @UseGuards(GqlAuthGuard)
   async loginAsCustomer(
     @Args('input') loginCustomerInput: LoginCustomerInput,
@@ -35,18 +38,22 @@ export class CustomerUserResolver {
     return await this.customerUserService.login(loginCustomerInput, user)
   }
 
-  @Query(() => SuccessResponse, { description: 'check if email already exist' })
-  async validEmailCustomer(@Args('input') emailId: string): Promise<SuccessResponse> {
-    return await this.customerUserService.isEmailExist(emailId)
+  @UseGuards(SocialAuthGuard)
+  @Mutation(() => CustomerLoginOrRegisterResponse, { description: 'Customer Social Registration' })
+  async registerSocial(
+    @SocialProfile() profile: Profile,
+    @Args('input') input: RegisterOrLoginSocialInput
+  ): Promise<CustomerLoginOrRegisterResponse> {
+    return await this.customerUserService.registerSocial(profile, input.provider)
   }
 
-  @Mutation(() => CustomerLoginResponse, {
+  @Mutation(() => CustomerLoginOrRegisterResponse, {
     description: 'This will signup new `Customers'
   })
   async createCustomer(
     @Args('input') createCustomerData: CreateCustomerInput
-  ): Promise<CustomerLoginResponse> {
-    return await this.customerUserService.create(createCustomerData)
+  ): Promise<CustomerLoginOrRegisterResponse> {
+    return await this.customerUserService.createCustomer(createCustomerData)
   }
 
   @Query(() => ListCustomersResponse, {

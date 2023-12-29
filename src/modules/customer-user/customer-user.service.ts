@@ -7,11 +7,13 @@ import {
   forwardRef
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { InjectRepository } from '@nestjs/typeorm'
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util'
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { FindOptionsWhere, Repository } from 'typeorm'
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm'
+import { Profile } from 'passport'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { validate as uuidValidate } from 'uuid'
 import { uuid } from 'uuidv4'
@@ -21,19 +23,21 @@ import { AwsS3ClientService } from '@app/aws-s3-client'
 import {
   JWT_STRATEGY_NAME,
   JwtDto,
+  SocialProviderTypes,
   SuccessResponse,
   comparePassword,
   encodePassword,
   isValidPassword
 } from '@app/common'
 import { PaymentService } from '@app/payment'
+import { SocialProvider } from '@app/common/entities'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
 import { CreateCustomerInput, ListCustomersInputs, LoginCustomerInput } from './dto/inputs'
 import { Customer } from './entities/customer.entity'
 import {
   CustomerEmailUpdateResponse,
-  CustomerLoginResponse,
+  CustomerLoginOrRegisterResponse,
   CustomerWithoutPasswordResponse
 } from './dto/args'
 import { CreateOrganizerInput } from './dto/inputs/create-organizer.input'
@@ -47,17 +51,48 @@ export class CustomerUserService {
     private configService: ConfigService,
     @InjectRepository(Customer)
     private customerRepository: Repository<Customer>,
+    @InjectEntityManager() private readonly manager: EntityManager,
     @InjectRepository(Organizer)
     private organizerRepository: Repository<Organizer>,
     @Inject(forwardRef(() => PaymentService))
     private paymentService: PaymentService,
     private jwtService: JwtService,
-    private s3Service: AwsS3ClientService
+    private s3Service: AwsS3ClientService,
+    @InjectRepository(SocialProvider)
+    private socialProviderRepository: Repository<SocialProvider>
   ) {}
 
+  private async handleCustomerLogin(
+    customer: Partial<Customer>
+  ): Promise<CustomerLoginOrRegisterResponse> {
+    if (customer.id && customer.email) {
+      const payload: JwtDto = {
+        email: customer.email,
+        sub: customer.id,
+        type: JWT_STRATEGY_NAME.CUSTOMER
+      }
+
+      return {
+        accessToken: await this.getJwtToken(payload),
+        user: customer
+      }
+    } else {
+      throw new BadRequestException('Token failed to create')
+    }
+  }
+
+  private async checkEmailExist(email: string): Promise<boolean> {
+    if (!email) throw new BadRequestException('Customer Email is invalid')
+    const checkCustomerEmail = await this.customerRepository.count({
+      where: { email }
+    })
+    if (checkCustomerEmail > 1) return true
+
+    return false
+  }
+
   async validateCustomer(email: string, password: string): Promise<any> {
-    const user = await this.customerRepository.findOne({ where: { email } })
-    if (!user) throw new NotFoundException('Invalid email or password')
+    const user = await this.getCustomerByEmail(email)
     const isValidPwd = await this.validatePassword(password, user?.password)
     if (isValidPwd) return user
     throw new BadRequestException('Invalid email or password')
@@ -89,6 +124,17 @@ export class CustomerUserService {
     return findCustomerById
   }
 
+  async getCustomerByEmail(email: string): Promise<Customer> {
+    if (!email) throw new BadRequestException('Customer Email is invalid')
+    const findCustomerByEmail = await this.customerRepository.findOne({
+      where: { email, isActive: true }
+    })
+    if (!findCustomerByEmail)
+      throw new NotFoundException('Customer with the provided email does not exist')
+
+    return findCustomerByEmail
+  }
+
   async getOrganizerByName(name: string, customerId: string): Promise<Organizer> {
     const findOrganizerByName = await this.organizerRepository.findOne({
       where: { name, isActive: true, createdBy: customerId }
@@ -107,26 +153,50 @@ export class CustomerUserService {
     return findOrganizerById
   }
 
-  async isEmailExist(email: string): Promise<SuccessResponse> {
-    const emailExists = await this.customerRepository.count({ where: { email } })
-    if (emailExists > 0) return { success: true, message: 'Email is valid' }
+  async findOneBySocialId(socialId: string): Promise<SocialProvider> {
+    const findsocialProviderById = await this.socialProviderRepository.findOne({
+      where: { socialId }
+    })
+    if (!findsocialProviderById)
+      throw new BadRequestException('Social Provider with the provided ID does not exist')
 
-    return { success: false, message: 'Email is invalid' }
+    return findsocialProviderById
   }
 
-  async login(loginCustomerInput: LoginCustomerInput, user: any): Promise<CustomerLoginResponse> {
+  async existsBySocialId(socialId: string, provider: SocialProviderTypes): Promise<number> {
+    const count = await this.socialProviderRepository.count({ where: { socialId, provider } })
+
+    return count
+  }
+
+  async saveProviderAndCustomer(customer: Partial<Customer>, provider: Partial<SocialProvider>) {
+    return this.manager.transaction(async transactionalManager => {
+      const createdCustomer = transactionalManager.create(Customer, customer)
+      const savedCustomer = await transactionalManager.save(createdCustomer)
+      await transactionalManager.save(SocialProvider, {
+        customer: savedCustomer,
+        ...provider
+      })
+      return savedCustomer
+    })
+  }
+
+  async login(
+    loginCustomerInput: LoginCustomerInput,
+    user: any
+  ): Promise<CustomerLoginOrRegisterResponse> {
     const payload = {
       email: loginCustomerInput?.email,
       sub: user?.id,
       type: JWT_STRATEGY_NAME.CUSTOMER
     }
     return {
-      access_token: await this.getJwtToken(payload),
+      accessToken: await this.getJwtToken(payload),
       user: user
     }
   }
 
-  async create(data: CreateCustomerInput): Promise<CustomerLoginResponse> {
+  async createCustomer(data: CreateCustomerInput): Promise<CustomerLoginOrRegisterResponse> {
     const { email, firstName, lastName } = data
     const name = firstName.concat(' ').concat(lastName)
 
@@ -145,15 +215,41 @@ export class CustomerUserService {
 
     if (!currentUser) throw new BadRequestException('User not registered')
 
-    const payload = {
-      sub: currentUser?.id,
-      email: currentUser?.email,
-      type: JWT_STRATEGY_NAME.CUSTOMER
+    return this.handleCustomerLogin(currentUser)
+  }
+
+  async registerSocial(
+    profile: Profile,
+    provider: SocialProviderTypes
+  ): Promise<CustomerLoginOrRegisterResponse> {
+    const email = profile.emails![0].value
+    const firstName = profile.name?.givenName
+    const lastName = profile.name?.familyName
+    const socialId = profile.id
+
+    const socialLoginById = await this.existsBySocialId(socialId, provider)
+
+    if (socialLoginById) {
+      const customer = await this.getCustomerByEmail(email)
+      return this.handleCustomerLogin(customer)
     }
 
-    return {
-      access_token: await this.getJwtToken(payload),
-      user: currentUser
+    const checkCustomerEmail = await this.checkEmailExist(email)
+    if (checkCustomerEmail)
+      throw new BadRequestException('User is already registered with other account')
+
+    try {
+      const randomPassword = await randomStringGenerator()
+      const pwd = await encodePassword(randomPassword)
+      const customer: Partial<Customer> = await this.saveProviderAndCustomer(
+        { email, firstName, lastName, password: pwd },
+        { provider, socialId }
+      )
+
+      return this.handleCustomerLogin(customer)
+    } catch (err) {
+      console.log('err--->>>', err)
+      throw new BadRequestException('User addition transaction failed')
     }
   }
 
@@ -306,10 +402,8 @@ export class CustomerUserService {
   }
 
   async updateCustomerEmail(userId: string, email: string): Promise<CustomerEmailUpdateResponse> {
-    const emailExists = await this.isEmailExist(email)
-    if (emailExists) throw new BadRequestException('Email already exists')
     try {
-      const customerData: Partial<Customer> = await this.getCustomerById(userId)
+      const customerData: Partial<Customer> = await this.getCustomerByEmail(email)
       if (customerData.id) {
         await this.customerRepository.update(customerData.id, {
           email,
@@ -329,7 +423,7 @@ export class CustomerUserService {
         }
 
         return {
-          access_token: await this.getJwtToken(payload),
+          accessToken: await this.getJwtToken(payload),
           user: rest
         }
       } else throw new BadRequestException("Couldn't update email")

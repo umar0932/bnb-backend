@@ -5,7 +5,7 @@ import { Admin } from '@app/admin/entities/admin.entity'
 @ObjectType()
 export class AdminLoginResponse {
   @Field()
-  access_token: string
+  accessToken: string
 
   @Field(() => Admin)
   user: Partial<Admin>
