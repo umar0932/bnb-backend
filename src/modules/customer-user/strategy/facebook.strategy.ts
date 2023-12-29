@@ -2,27 +2,28 @@ import { ConfigType } from '@nestjs/config'
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 
+import * as Strategy from 'passport-facebook-token'
 import { Profile } from 'passport'
-import { Strategy } from 'passport-google-token'
 
 import { AuthTypes } from '@app/common'
-import googleConfig from '@config/google.config'
+import facebookConfig from '@config/facebook.config'
 
 @Injectable()
-export class GoogleStrategy extends PassportStrategy(Strategy, AuthTypes.GOOGLE) {
+export class FacebookStrategy extends PassportStrategy(Strategy, AuthTypes.FACEBOOK) {
   constructor(
-    @Inject(googleConfig.KEY)
-    private googleConf: ConfigType<typeof googleConfig>
+    @Inject(facebookConfig.KEY)
+    private facebookConf: ConfigType<typeof facebookConfig>
   ) {
     super({
-      clientID: googleConf.clientID,
-      clientSecret: googleConf.clientSecret
+      clientID: facebookConf.clientID,
+      clientSecret: facebookConf.clientSecret
     })
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
   async validate(accessToken: string, refreshToken: string, profile: Profile, done: Function) {
     if (!profile) return done(new UnauthorizedException('Profile is invalid'), false)
+
     return done(null, profile)
   }
 }
