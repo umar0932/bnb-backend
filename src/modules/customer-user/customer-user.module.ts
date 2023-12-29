@@ -9,17 +9,19 @@ import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { JWTConfigTypes } from '@app/common'
 import { PaymentModule } from '@app/payment'
 import { SocialProvider } from '@app/common/entities'
+import facebookConfig from '@config/facebook.config'
 import googleConfig from '@config/google.config'
 
 import { Customer } from './entities/customer.entity'
 import { CustomerUserResolver } from './customer-user.resolver'
 import { CustomerUserService } from './customer-user.service'
-import { GoogleStrategy, JwtStrategy, LocalStrategy } from './strategy'
+import { FacebookStrategy, GoogleStrategy, JwtStrategy, LocalStrategy } from './strategy'
 import { Organizer } from './entities/organizer.entity'
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Customer, Organizer, SocialProvider]),
+    ConfigModule.forFeature(facebookConfig),
     ConfigModule.forFeature(googleConfig),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -39,6 +41,7 @@ import { Organizer } from './entities/organizer.entity'
   providers: [
     CustomerUserResolver,
     CustomerUserService,
+    FacebookStrategy,
     GoogleStrategy,
     JwtStrategy,
     LocalStrategy
