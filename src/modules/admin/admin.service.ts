@@ -61,7 +61,7 @@ export class AdminService {
       type: JWT_STRATEGY_NAME.ADMIN
     }
     return {
-      access_token: await this.getJwtToken(payload),
+      accessToken: await this.getJwtToken(payload),
       user: contextUser
     }
   }
@@ -176,7 +176,7 @@ export class AdminService {
         }
 
         return {
-          access_token: await this.getJwtToken(payload),
+          accessToken: await this.getJwtToken(payload),
           user: rest
         }
       } else throw new BadRequestException("Couldn't update email")

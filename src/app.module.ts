@@ -30,6 +30,7 @@ const env = `${process.env.NODE_ENV}`
       load: [EnvConfig],
       isGlobal: true
     }),
+    // ConfigModule.forFeature(facebookConfig),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),

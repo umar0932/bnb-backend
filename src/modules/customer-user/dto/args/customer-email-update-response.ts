@@ -1,9 +1,9 @@
 import { ObjectType, PickType } from '@nestjs/graphql'
 
-import { CustomerLoginResponse } from './customer-login-response'
+import { CustomerLoginOrRegisterResponse } from './customer-login-or-register-response'
 
 @ObjectType()
-export class CustomerEmailUpdateResponse extends PickType(CustomerLoginResponse, [
-  'access_token',
+export class CustomerEmailUpdateResponse extends PickType(CustomerLoginOrRegisterResponse, [
+  'accessToken',
   'user'
 ]) {}

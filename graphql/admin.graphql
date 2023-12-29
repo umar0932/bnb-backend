@@ -11,7 +11,7 @@ query validEmailAdmin($input: String!) {
 
 mutation loginAsAdmin($input: LoginAdminInput!) {
   loginAsAdmin(input: $input) {
-    access_token
+    accessToken
     user {
       email
     }
@@ -34,7 +34,7 @@ mutation updateAdminPassword($input: String!) {
 
 mutation updateAdminEmail($input: String!) {
   updateAdminEmail(input: $input) {
-    access_token
+    accessToken
     user {
       email
     }
