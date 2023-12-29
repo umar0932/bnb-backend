@@ -254,6 +254,9 @@ input LoginCustomerInput {
 }
 
 type Mutation {
+  """Customer Social Registration"""
+  continueWithSocialSite(input: RegisterOrLoginSocialInput!): CustomerLoginOrRegisterResponse!
+
   """Create new admin user"""
   createAdminUser(input: CreateAdminUserInput!): SuccessResponse!
 
@@ -283,9 +286,6 @@ type Mutation {
 
   """Customer Login"""
   loginAsCustomer(input: LoginCustomerInput!): CustomerLoginOrRegisterResponse!
-
-  """Customer Social Registration"""
-  registerSocial(input: RegisterOrLoginSocialInput!): CustomerLoginOrRegisterResponse!
 
   """This will charge the Customer on test stripe"""
   testCharge(chargeInput: CreateChargeInput!, orderInput: CreateOrderInput!): SuccessResponse!
@@ -379,7 +379,6 @@ type Query {
 
 input RegisterOrLoginSocialInput {
   accessToken: String!
-  email: String!
   provider: SocialAuthProviders!
 }
 
