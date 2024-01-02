@@ -17,8 +17,16 @@ export default () => ({
       signOptions: { expiresIn: process.env.JWT_KEY_ADMIN_EXPIRY }
     }
   },
+  stripeConfig: {
+    apiKey: process.env.STRIPE_SECRET_KEY,
+    webhookConfig: {
+      requestBodyProperty: 'rawBody',
+      stripeSecrets: {
+        account: process.env.STRIPE_WEBHOOK_SECRET
+      }
+    }
+  },
   stripe: {
-    secret: process.env.STRIPE_SECRET_KEY,
     publish: process.env.STRIPE_PUBLISH_KEY,
     currency: process.env.STRIPE_CURRENCY
   }
