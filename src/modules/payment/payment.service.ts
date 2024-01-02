@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable, Logger, forwardRef } from '@ne
 import { ConfigService } from '@nestjs/config'
 
 import * as _ from 'lodash'
+import { InjectStripeClient } from '@golevelup/nestjs-stripe'
 import Stripe from 'stripe'
 
 import { CreateOrderInput } from '@app/order/dto/inputs'
@@ -14,23 +15,14 @@ import { CreateChargeInput } from './dto/input'
 @Injectable()
 export class PaymentService {
   private readonly logger = new Logger(PaymentService.name)
-  private stripe: Stripe
 
   constructor(
     private configService: ConfigService,
     @Inject(forwardRef(() => CustomerUserService))
     private customerService: CustomerUserService,
-    private readonly orderService: OrderService
-  ) {
-    const stripeSecretKey = configService.get<string>('stripe.secret')
-
-    if (stripeSecretKey === undefined)
-      throw new Error('Stripe secret key is missing in the configuration')
-
-    this.stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2023-10-16'
-    })
-  }
+    private readonly orderService: OrderService,
+    @InjectStripeClient() private stripe: Stripe
+  ) {}
 
   async createStripeCustomer(name: string, email: string) {
     try {
@@ -72,5 +64,32 @@ export class PaymentService {
       this.logger.error(err?.message, err, 'PaymentService')
       throw new BadRequestException("Something went wrong while charging the customer's card.")
     }
+  }
+
+  async createSubscriptionSession(
+    user: any, // we haven't a userDto, it's to keep it simple
+    priceId: string // change it to your dto with validations
+  ): Promise<Stripe.Response<Stripe.Checkout.Session> | undefined> {
+    try {
+      return this.stripe.checkout.sessions.create({
+        success_url: 'https://example.com/',
+        customer: user.customerId, // it should not work
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1
+          }
+        ],
+        mode: 'subscription'
+      })
+    } catch (error) {
+      console.error('Error from stripe:', error)
+    }
+  }
+
+  async getPortal(customerId: string): Promise<Stripe.Response<Stripe.BillingPortal.Session>> {
+    return this.stripe.billingPortal.sessions.create({
+      customer: customerId
+    })
   }
 }

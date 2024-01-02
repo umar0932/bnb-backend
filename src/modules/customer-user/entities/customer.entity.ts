@@ -60,7 +60,7 @@ export class Customer extends CustomBaseEntity {
   @Field({ nullable: true })
   secondAddress?: string
 
-  @Column({ length: 200, nullable: true, name: 'stripe_customer_id' })
+  @Column({ length: 200, nullable: true, name: 'stripe_customer_id', unique: true })
   @Field(() => String, { nullable: true })
   stripeCustomerId?: string
 
