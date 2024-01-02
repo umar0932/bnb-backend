@@ -1,13 +1,19 @@
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import { ValidationPipe } from '@nestjs/common'
+import { Logger, ValidationPipe } from '@nestjs/common'
 
 import { AppModule } from './app.module'
 
+const logger = new Logger('App')
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    cors: true
+    cors: true,
+    rawBody: true
   })
+
+  app.useLogger(logger)
+
   const configService = app.get(ConfigService)
   app.useGlobalPipes(
     new ValidationPipe({
