@@ -121,6 +121,7 @@ type Customer {
   isActive: Boolean
   jobTitle: String
   lastName: String!
+  mediaUrl: String
   password: String!
   secondAddress: String
   socialProvider: SocialProvider
@@ -266,7 +267,7 @@ type Mutation {
   """This will crete new Categories"""
   createCategory(input: CreateCategoryInput!): SuccessResponse!
 
-  """This will signup new `Customers"""
+  """This will signup new Customers"""
   createCustomer(input: CreateCustomerInput!): CustomerLoginOrRegisterResponse!
 
   """This will create new Ticket for the Event"""
@@ -275,7 +276,7 @@ type Mutation {
   """This will crete new Events"""
   createOrUpdateEventDetails(input: EventDetailsInput!): SuccessResponse!
 
-  """This will signup new `Organizers"""
+  """This will signup new Organizers"""
   createOrganizer(input: CreateOrganizerInput!): SuccessResponse!
 
   """This will crete new SubCategories"""
@@ -286,6 +287,9 @@ type Mutation {
 
   """Customer Login"""
   loginAsCustomer(input: LoginCustomerInput!): CustomerLoginOrRegisterResponse!
+
+  """ in This will save/update user profile image in DB"""
+  saveCustomerMediaUrl(fileName: String!): String!
 
   """This will charge the Customer on test stripe"""
   testCharge(chargeInput: CreateChargeInput!, orderInput: CreateOrderInput!): SuccessResponse!
@@ -317,7 +321,7 @@ type Mutation {
   """This will update ticket for the Event"""
   updateEventTicket(input: UpdateEventTicketInput!): SuccessResponse!
 
-  """This will signup new `Organizers"""
+  """This will signup update Organizers"""
   updateOrganizer(input: UpdateOrganizerInput!): Organizer!
 
   """This will update SubCategory"""
@@ -365,6 +369,8 @@ type Query {
 
   """Get the Customer"""
   getCustomerData: Customer!
+
+  """Get S3 bucket Signed Url"""
   getCustomerUploadUrl: S3SignedUrlResponse!
 
   """The List of Customers with Pagination and filters"""

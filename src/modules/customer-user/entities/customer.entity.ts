@@ -30,6 +30,10 @@ export class Customer extends CustomBaseEntity {
   @Field()
   password!: string
 
+  @Column({ length: 250, nullable: true })
+  @Field(() => String, { nullable: true })
+  mediaUrl?: string
+
   @Column({ length: 20, name: 'home_phone', nullable: true })
   @Field({ nullable: true })
   @Transform(value => value.toString())
