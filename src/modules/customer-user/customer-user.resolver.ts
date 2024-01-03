@@ -48,7 +48,7 @@ export class CustomerUserResolver {
   }
 
   @Mutation(() => CustomerLoginOrRegisterResponse, {
-    description: 'This will signup new `Customers'
+    description: 'This will signup new Customers'
   })
   async createCustomer(
     @Args('input') createCustomerData: CreateCustomerInput
@@ -107,7 +107,7 @@ export class CustomerUserResolver {
   }
 
   @Mutation(() => SuccessResponse, {
-    description: 'This will signup new `Organizers'
+    description: 'This will signup new Organizers'
   })
   @Allow()
   async createOrganizer(
@@ -118,7 +118,7 @@ export class CustomerUserResolver {
   }
 
   @Mutation(() => Organizer, {
-    description: 'This will signup new `Organizers'
+    description: 'This will signup update Organizers'
   })
   @Allow()
   async updateOrganizer(
@@ -128,9 +128,22 @@ export class CustomerUserResolver {
     return await this.customerUserService.updateOrganizerData(updateOrganizerInput, user.userId)
   }
 
-  @Query(() => S3SignedUrlResponse)
+  @Query(() => S3SignedUrlResponse, {
+    description: 'Get S3 bucket Signed Url'
+  })
   @Allow()
   async getCustomerUploadUrl(): Promise<S3SignedUrlResponse> {
     return this.customerUserService.getCustomerUploadUrl()
+  }
+
+  @Mutation(() => String, {
+    description: ' in This will save/update user profile image in DB'
+  })
+  @Allow()
+  async saveCustomerMediaUrl(
+    @Args('fileName') fileName: string,
+    @CurrentUser() user: JwtUserPayload
+  ): Promise<any> {
+    return this.customerUserService.saveMediaUrl(user.userId, fileName)
   }
 }
