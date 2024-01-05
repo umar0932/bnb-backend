@@ -182,12 +182,14 @@ type Event {
 type EventDetailsEntity {
   event: Event!
   eventDescription: String!
+  eventImages: [String!]!
   eventSummary: String!
   idEventDetails: ID!
 }
 
 input EventDetailsInput {
   eventDescription: String
+  eventImages: [String!]!
   eventSummary: String
   refIdEvent: Float!
 }
@@ -288,7 +290,7 @@ type Mutation {
   """Customer Login"""
   loginAsCustomer(input: LoginCustomerInput!): CustomerLoginOrRegisterResponse!
 
-  """ in This will save/update user profile image in DB"""
+  """This will save/update user profile image in DB"""
   saveCustomerMediaUrl(fileName: String!): String!
 
   """This will charge the Customer on test stripe"""
@@ -375,6 +377,9 @@ type Query {
 
   """The List of Customers with Pagination and filters"""
   getCustomersAdmin(input: ListCustomersInputs!): ListCustomersResponse!
+
+  """This will return signed Urls for Events"""
+  getEventUploadUrls(count: Float!): [S3SignedUrlResponse!]!
 
   """This will get all Orders of Current Customer"""
   getOrdersOfCustomer: [OrderEntity!]!
@@ -466,6 +471,7 @@ input UpdateCustomerInput {
   isActive: Boolean
   jobTitle: String
   lastName: String
+  mediaUrl: String
   secondAddress: String
   state: String
   stripeCustomerId: String

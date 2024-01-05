@@ -15,11 +15,15 @@ export class EventDetailsEntity extends CustomBaseEntity {
 
   @Column({ length: 150, name: 'event_summary' })
   @Field(() => String)
-  eventSummary: string
+  eventSummary!: string
 
   @Column({ length: 350, name: 'event_description' })
   @Field(() => String)
-  eventDescription: string
+  eventDescription!: string
+
+  @Column({ type: 'simple-array', name: 'event_images_array' })
+  @Field(() => [String])
+  eventImages!: string[]
 
   @Field(() => Event)
   @OneToOne(() => Event, event => event.eventDetails, { onDelete: 'CASCADE' })

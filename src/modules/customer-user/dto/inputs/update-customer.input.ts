@@ -22,6 +22,12 @@ export class UpdateCustomerInput {
   @Field(() => String, { nullable: true })
   cellPhone?: string
 
+  @IsString({ message: 'MediaUrl should be a string' })
+  @IsOptional()
+  @Field(() => String, { nullable: true })
+  @MaxLength(50, { message: 'MediaUrl should not exceed 50 characters' })
+  mediaUrl?: string
+
   @IsString({ message: 'Job title should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
