@@ -1,10 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { Repository } from 'typeorm'
+import { uuid } from 'uuidv4'
 
 import { LocationsEntity } from '@app/common/entities'
 import { CreateLocationInput, SuccessResponse } from '@app/common'
+import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
+import { AwsS3ClientService } from '@app/aws-s3-client'
 
 import { Event, EventDetailsEntity, EventTicketsEntity } from './entities'
 import { CategoryService } from '@app/category'
@@ -21,6 +27,7 @@ import { Type } from './event.constants'
 export class EventService {
   constructor(
     private categoryService: CategoryService,
+    private configService: ConfigService,
     @InjectRepository(Event)
     private eventRepository: Repository<Event>,
     @InjectRepository(EventDetailsEntity)
@@ -28,7 +35,8 @@ export class EventService {
     @InjectRepository(EventTicketsEntity)
     private eventTicketsRepository: Repository<EventTicketsEntity>,
     @InjectRepository(LocationsEntity)
-    private locationRepository: Repository<LocationsEntity>
+    private locationRepository: Repository<LocationsEntity>,
+    private s3Service: AwsS3ClientService
   ) {}
 
   async getEventById(idEvent: number, userId: string): Promise<Event> {
@@ -162,7 +170,7 @@ export class EventService {
 
     try {
       if (event.eventDetails) {
-        await this.eventDetailsRepository.update(event.eventDetails.idEventDetails, {
+        await this.eventDetailsRepository.update(event.eventDetails?.idEventDetails, {
           ...rest,
           event,
           updatedBy: userId,
@@ -225,4 +233,29 @@ export class EventService {
 
     return { success: true, message: 'Event Tickets updated' }
   }
+
+  async getEventUploadUrls(count: number): Promise<S3SignedUrlResponse[]> {
+    if (!count) throw new BadRequestException('Count cannot be less than 1')
+    const urls: S3SignedUrlResponse[] = []
+
+    for (let i = 0; i < count; i++) {
+      const key = `user_event_image_uploads/${uuid()}-event-upload`
+      const bucketName = this.configService.get('USER_UPLOADS_BUCKET')
+      // const urlPrefix = this.configService.get('S3_MEDIA_PREFIX')
+      const command = new PutObjectCommand({
+        Bucket: bucketName,
+        Key: key
+      })
+      const url = await getSignedUrl(this.s3Service.getClient(), command, {
+        expiresIn: 3600
+      })
+      urls.push({
+        signedUrl: url,
+        fileName: key
+      })
+    }
+
+    return urls
+  }
+
 }

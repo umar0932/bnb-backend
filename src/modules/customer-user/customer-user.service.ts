@@ -492,7 +492,7 @@ export class CustomerUserService {
   }
 
   async getCustomerUploadUrl(): Promise<S3SignedUrlResponse> {
-    const key = `user_image_uploads/${uuid()}-user-profile`
+    const key = `user_profile_image_uploads/${uuid()}-user-profile`
     const bucketName = this.configService.get('USER_UPLOADS_BUCKET')
     // const urlPrefix = this.configService.get('S3_MEDIA_PREFIX')
     const command = new PutObjectCommand({
