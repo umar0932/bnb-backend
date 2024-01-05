@@ -1,6 +1,7 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql'
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql'
 
 import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
+import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
 import { Event } from './entities'
 import {
@@ -69,5 +70,13 @@ export class EventResolver {
     @CurrentUser() user: JwtUserPayload
   ): Promise<SuccessResponse> {
     return await this.eventService.updateEventTicket(updateEventTicketsInput, user.userId)
+  }
+
+  @Query(() => [S3SignedUrlResponse], {
+    description: 'This will return signed Urls for Events'
+  })
+  @Allow()
+  async getEventUploadUrls(@Args({ name: 'count', type: () => Number }) count: number) {
+    return this.eventService.getEventUploadUrls(count)
   }
 }

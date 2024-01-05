@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { AdminModule } from '@app/admin'
+import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { CustomerUserModule } from '@app/customer-user'
 import { LocationsEntity } from '@app/common/entities'
 
@@ -14,6 +15,7 @@ import { EventService } from './event.service'
   imports: [
     TypeOrmModule.forFeature([Event, EventDetailsEntity, EventTicketsEntity, LocationsEntity]),
     AdminModule,
+    AwsS3ClientModule,
     CustomerUserModule,
     CategoryModule
   ],
