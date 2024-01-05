@@ -1,6 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql'
 
-import { IsNotEmpty, IsString, MinLength, MaxLength, IsNumber } from 'class-validator'
+import { IsNotEmpty, IsString, MinLength, MaxLength, IsNumber, IsArray } from 'class-validator'
 
 @InputType()
 export class EventDetailsInput {
@@ -15,6 +15,10 @@ export class EventDetailsInput {
   @MinLength(10, { message: 'EventSummary name must be at least 10 characters long' })
   @MaxLength(150, { message: 'EventSummary name cannot be longer than 150 characters' })
   eventSummary!: string
+
+  @Field(() => [String])
+  @IsArray({ message: 'Tags must be an array' })
+  eventImages?: string[]
 
   @Field(() => String, { nullable: true })
   @IsString({ message: 'EventDescrition name must be a string' })

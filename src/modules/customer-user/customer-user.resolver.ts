@@ -137,7 +137,7 @@ export class CustomerUserResolver {
   }
 
   @Mutation(() => String, {
-    description: ' in This will save/update user profile image in DB'
+    description: 'This will save/update user profile image in DB'
   })
   @Allow()
   async saveCustomerMediaUrl(
