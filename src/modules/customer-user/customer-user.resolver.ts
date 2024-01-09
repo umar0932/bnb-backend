@@ -61,9 +61,9 @@ export class CustomerUserResolver {
   })
   @Allow()
   async getCustomersAdmin(
-    @Args('input') args: ListCustomersInputs
+    @Args('input') listCustomersInputs: ListCustomersInputs
   ): Promise<ListCustomersResponse> {
-    const { limit, offset, filter } = args
+    const { limit, offset, filter } = listCustomersInputs
     const [customers, count] = await this.customerUserService.findAllCustomersWithPagination({
       limit,
       offset,

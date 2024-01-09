@@ -194,6 +194,15 @@ input EventDetailsInput {
   refIdEvent: Float!
 }
 
+input EventFilterInput {
+  categoryName: String
+  eventTitle: String
+  eventToday: String
+  eventWeekend: String
+  online: Boolean
+  search: String
+}
+
 """The status of event"""
 enum EventStatus {
   DRAFT
@@ -223,6 +232,17 @@ input ListCustomersInputs {
 
 type ListCustomersResponse {
   results: [Customer!]!
+  totalRows: Float
+}
+
+input ListEventsInputs {
+  filter: EventFilterInput
+  limit: Float!
+  offset: Float = 0
+}
+
+type ListEventsResponse {
+  results: [Event!]!
   totalRows: Float
 }
 
@@ -365,6 +385,9 @@ type PageData {
 type Query {
   """This will get all categories"""
   getAllCategories: [Category!]!
+
+  """The List of Events with Pagination and filters"""
+  getAllEventsWithPagination(input: ListEventsInputs!): ListEventsResponse!
 
   """This will get all categories"""
   getAllSubCategories: [SubCategory!]!
