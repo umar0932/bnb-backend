@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { Repository } from 'typeorm'
+import { Brackets, FindOptionsWhere, Repository } from 'typeorm'
 import { uuid } from 'uuidv4'
 
 import { LocationsEntity } from '@app/common/entities'
@@ -18,6 +18,7 @@ import {
   CreateBasicEventInput,
   CreateEventTicketInput,
   EventDetailsInput,
+  ListEventsInputs,
   UpdateBasicEventInput,
   UpdateEventTicketInput
 } from './dto/inputs'
@@ -258,4 +259,46 @@ export class EventService {
     return urls
   }
 
+  async findAllEventsWithPagination({
+    limit,
+    offset,
+    filter
+  }: ListEventsInputs): Promise<[Event[], number]> {
+    const { eventTitle, search, categoryName, online } = filter || {}
+
+    try {
+      const queryBuilder = await this.eventRepository.createQueryBuilder('event')
+
+      eventTitle && queryBuilder.andWhere('event.eventTitle = :eventTitle', { eventTitle })
+      online && queryBuilder.andWhere('event.online = :online', { online })
+
+      if (categoryName)
+        queryBuilder.andWhere('category.categoryName = :categoryName', { categoryName })
+
+      if (search) {
+        queryBuilder.andWhere(
+          new Brackets(qb => {
+            qb.where('LOWER(event.eventTitle) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(location.city) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(location.country) LIKE LOWER(:search)', { search: `${search}` })
+          })
+        )
+      }
+
+      const [events, total] = await queryBuilder
+        .leftJoinAndSelect('event.category', 'category')
+        .leftJoinAndSelect('event.subCategory', 'subCategory')
+        .leftJoinAndSelect('event.location', 'location')
+        .leftJoinAndSelect('event.eventDetails', 'eventDetails')
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount()
+
+      console.log('events', events)
+
+      return [events, total]
+    } catch (error) {
+      throw new BadRequestException('Failed to find Events')
+    }
+  }
 }
