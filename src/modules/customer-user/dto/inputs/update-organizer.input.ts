@@ -1,4 +1,5 @@
 import { InputType, Field, PickType, ID } from '@nestjs/graphql'
+
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 import { CreateOrganizerInput } from './create-organizer.input'

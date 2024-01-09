@@ -8,10 +8,12 @@ import {
   CreateBasicEventInput,
   CreateEventTicketInput,
   EventDetailsInput,
+  ListEventsInputs,
   UpdateBasicEventInput,
   UpdateEventTicketInput
 } from './dto/inputs'
 import { EventService } from './event.service'
+import { ListEventsResponse } from './dto/args'
 
 @Resolver(() => Event)
 export class EventResolver {
@@ -78,5 +80,21 @@ export class EventResolver {
   @Allow()
   async getEventUploadUrls(@Args({ name: 'count', type: () => Number }) count: number) {
     return this.eventService.getEventUploadUrls(count)
+  }
+
+  @Query(() => ListEventsResponse, {
+    description: 'The List of Events with Pagination and filters'
+  })
+  @Allow()
+  async getAllEventsWithPagination(
+    @Args('input') args: ListEventsInputs
+  ): Promise<ListEventsResponse> {
+    const { limit, offset, filter } = args
+    const [events, count] = await this.eventService.findAllEventsWithPagination({
+      limit,
+      offset,
+      filter
+    })
+    return { results: events, totalRows: count }
   }
 }

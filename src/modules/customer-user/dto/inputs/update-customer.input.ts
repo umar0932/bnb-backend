@@ -1,6 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql'
 
-import { IsUrl, IsString, IsOptional, IsBoolean, ValidateIf, MaxLength } from 'class-validator'
+import { IsUrl, IsString, IsOptional, IsBoolean, MaxLength } from 'class-validator'
 
 @InputType()
 export class UpdateCustomerInput {
@@ -25,7 +25,7 @@ export class UpdateCustomerInput {
   @IsString({ message: 'MediaUrl should be a string' })
   @IsOptional()
   @Field(() => String, { nullable: true })
-  @MaxLength(50, { message: 'MediaUrl should not exceed 50 characters' })
+  @MaxLength(250, { message: 'MediaUrl should not exceed 50 characters' })
   mediaUrl?: string
 
   @IsString({ message: 'Job title should be a string' })
@@ -40,7 +40,6 @@ export class UpdateCustomerInput {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  @ValidateIf((_, value) => value.websiteLink !== undefined && value.websiteLink !== null)
   @IsUrl({}, { message: 'Invalid URL format' })
   @MaxLength(150, { message: 'Website link should not exceed 150 characters' })
   website?: string
