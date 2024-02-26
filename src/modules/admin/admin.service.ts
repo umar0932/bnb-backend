@@ -187,8 +187,7 @@ export class AdminService {
 
   async saveMediaUrl(fileName: string): Promise<string> {
     const bucketName = this.configService.get('ADMIN_UPLOADS_BUCKET')
-    const urlPrefix = this.configService.get('S3_MEDIA_PREFIX')
-    const url = `${urlPrefix}${bucketName}/${fileName}`
+    const url = `${bucketName}/${fileName}`
     return url
   }
 }

@@ -16,7 +16,7 @@ export class CategoryResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Mutation(() => SuccessResponse, {
-    description: 'This will crete new Categories'
+    description: 'This will create new Categories'
   })
   @Allow()
   async createCategory(
@@ -42,7 +42,7 @@ export class CategoryResolver {
   }
 
   @Mutation(() => SuccessResponse, {
-    description: 'This will crete new SubCategories'
+    description: 'This will create new SubCategories'
   })
   @Allow()
   async createSubCategory(
