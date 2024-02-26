@@ -20,7 +20,7 @@ export class EventResolver {
   constructor(private readonly eventService: EventService) {}
 
   @Mutation(() => SuccessResponse, {
-    description: 'This will crete new Events'
+    description: 'This will create new Events'
   })
   @Allow()
   async createBasicEvent(
@@ -42,7 +42,7 @@ export class EventResolver {
   }
 
   @Mutation(() => SuccessResponse, {
-    description: 'This will crete new Events'
+    description: 'This will create new Events'
   })
   @Allow()
   async createOrUpdateEventDetails(
@@ -78,7 +78,9 @@ export class EventResolver {
     description: 'This will return signed Urls for Events'
   })
   @Allow()
-  async getEventUploadUrls(@Args({ name: 'count', type: () => Number }) count: number) {
+  async getEventUploadUrls(
+    @Args({ name: 'count', type: () => Number }) count: number
+  ): Promise<S3SignedUrlResponse[]> {
     return this.eventService.getEventUploadUrls(count)
   }
 

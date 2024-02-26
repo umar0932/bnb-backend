@@ -11,8 +11,8 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util'
 
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { EntityManager, FindOptionsWhere, Repository } from 'typeorm'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { Profile } from 'passport'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { validate as uuidValidate } from 'uuid'
@@ -298,41 +298,6 @@ export class CustomerUserService {
       ...(state ? { state } : {})
     }
 
-    // if (filter?.email) {
-    //   query.email = ILike(`%${filter.email.toLowerCase()}%`)
-    // } else if (filter?.id && uuidValidate(filter?.id)) {
-    //   query.id = filter.id
-    // } else if (filter?.jobTitle) {
-    //   query.jobTitle = ILike(`%${filter.jobTitle}%`)
-    // } else if (filter?.name) {
-    //   const [firstName, ...lastNameArray] = filter.name.split(' ')
-    //   const lastName = lastNameArray.join(' ')
-
-    //   query
-    //     .orWhere('first_name ILIKE :firstName', { firstName: `%${firstName.toLowerCase()}%` })
-    //     .orWhere('last_name ILIKE :lastName', { lastName: `%${lastName.toLowerCase()}%` })
-    // } else if (filter?.homePhone) {
-    //   query.home_phone = ILike(`%${filter.homePhone}%`)
-    // } else if (filter?.cellPhone) {
-    //   query.cell_phone = ILike(`%${filter.cellPhone}%`)
-    // } else if (filter?.companyName) {
-    //   query.company_name = ILike(`%${filter.companyName}%`)
-    // } else if (filter?.website) {
-    //   query.website = ILike(`%${filter.website}%`)
-    // } else if (filter?.firstAddress) {
-    //   query.first_address = ILike(`%${filter.firstAddress}%`)
-    // } else if (filter?.secondAddress) {
-    //   query.second_address = ILike(`%${filter.secondAddress}%`)
-    // } else if (filter?.city) {
-    //   query.city = ILike(`%${filter.city}%`)
-    // } else if (filter?.country) {
-    //   query.country = ILike(`%${filter.country}%`)
-    // } else if (filter?.zipCode) {
-    //   query.zip_code = ILike(`%${filter.zipCode}%`)
-    // } else if (filter?.state) {
-    //   query.state = ILike(`%${filter.state}%`)
-    // }
-
     const [customers, total] = await this.customerRepository.findAndCount({
       where: query,
       take: limit,
@@ -494,7 +459,7 @@ export class CustomerUserService {
   async getCustomerUploadUrl(): Promise<S3SignedUrlResponse> {
     const key = `user_profile_image_uploads/${uuid()}-user-profile`
     const bucketName = this.configService.get('USER_UPLOADS_BUCKET')
-    // const urlPrefix = this.configService.get('S3_MEDIA_PREFIX')
+
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: key

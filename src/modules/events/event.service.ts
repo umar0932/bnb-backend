@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { Brackets, FindOptionsWhere, Repository } from 'typeorm'
+import { Brackets, Repository } from 'typeorm'
 import { uuid } from 'uuidv4'
 
 import { LocationsEntity } from '@app/common/entities'
@@ -44,6 +44,7 @@ export class EventService {
     const findEvent = await this.eventRepository.findOne({
       where: { idEvent, createdBy: userId }
     })
+
     if (!findEvent) throw new BadRequestException('Event with the provided ID does not exist')
 
     return findEvent
@@ -242,7 +243,7 @@ export class EventService {
     for (let i = 0; i < count; i++) {
       const key = `user_event_image_uploads/${uuid()}-event-upload`
       const bucketName = this.configService.get('USER_UPLOADS_BUCKET')
-      // const urlPrefix = this.configService.get('S3_MEDIA_PREFIX')
+
       const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: key

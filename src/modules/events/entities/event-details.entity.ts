@@ -13,11 +13,11 @@ export class EventDetailsEntity extends CustomBaseEntity {
   @PrimaryGeneratedColumn()
   idEventDetails!: number
 
-  @Column({ length: 150, name: 'event_summary' })
+  @Column({ length: 500, name: 'event_summary' })
   @Field(() => String)
   eventSummary!: string
 
-  @Column({ length: 350, name: 'event_description' })
+  @Column({ length: 500, name: 'event_description' })
   @Field(() => String)
   eventDescription!: string
 

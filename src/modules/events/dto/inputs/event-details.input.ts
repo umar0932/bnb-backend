@@ -17,7 +17,7 @@ export class EventDetailsInput {
   eventSummary!: string
 
   @Field(() => [String])
-  @IsArray({ message: 'Tags must be an array' })
+  @IsArray({ message: 'Event Images must be an array' })
   eventImages?: string[]
 
   @Field(() => String, { nullable: true })
