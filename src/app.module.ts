@@ -34,8 +34,8 @@ const env = `${process.env.NODE_ENV}`
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: env !== 'prod',
-      introspection: env !== 'prod',
+      // playground: env !== 'prod',
+      // introspection: env !== 'prod',
       sortSchema: true,
       formatError: (error: GraphQLError | any) => {
         const graphQLFormattedError: GraphQLFormattedError & {
