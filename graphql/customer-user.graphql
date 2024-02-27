@@ -1,0 +1,268 @@
+#QUERIES
+
+query getCustomersAdmin($input: ListCustomersInputs!) {
+  getCustomersAdmin(input: $input) {
+    totalRows
+    results {
+      cellPhone
+      city
+      companyName
+      country
+      email
+      firstAddress
+      firstName
+      homePhone
+      id
+      isActive
+      jobTitle
+      lastName
+      profileImage
+      secondAddress
+      state
+      stripeCustomerId
+      website
+      zipCode
+    }
+  }
+}
+
+# {
+#     "input": {
+#         "filter": {
+#             "email": "xyz01@gmail.com"
+#         },
+#         "limit": 10,
+#         "offset": 0
+#     }
+# }
+
+query getCustomerData {
+  getCustomerData {
+    cellPhone
+    city
+    companyName
+    country
+    email
+    firstAddress
+    firstName
+    homePhone
+    id
+    isActive
+    jobTitle
+    lastName
+    profileImage
+    password
+    secondAddress
+    state
+    stripeCustomerId
+    website
+    zipCode
+  }
+}
+
+query getCustomerData {
+  getCustomerUploadUrl {
+    fileName
+    signedUrl
+  }
+}
+
+#MUTATIONS
+
+mutation loginAsCustomer($input: LoginCustomerInput!) {
+  loginAsCustomer(input: $input) {
+    accessToken
+    user {
+      cellPhone
+      city
+      companyName
+      country
+      email
+      firstAddress
+      firstName
+      homePhone
+      id
+      isActive
+      jobTitle
+      lastName
+      profileImage
+      secondAddress
+      state
+      stripeCustomerId
+      website
+      zipCode
+    }
+  }
+}
+
+# {
+#   "input": {
+#     "email": "xyz01@gmail.com",
+#     "password": "12345678"
+#   }
+# }
+
+mutation createCustomer($input: CreateCustomerInput!) {
+  createCustomer(input: $input) {
+    accessToken
+    user {
+      cellPhone
+      city
+      companyName
+      country
+      email
+      firstAddress
+      firstName
+      homePhone
+      id
+      isActive
+      jobTitle
+      lastName
+      profileImage
+      secondAddress
+      state
+      stripeCustomerId
+      website
+      zipCode
+    }
+  }
+}
+
+# {
+#   "input": {
+#     "email": "xyz01@gmail.com",
+#     "password": "12345678",
+#     "firstName": "xyz",
+#     "lastName": "xyz"
+#   }
+# }
+
+mutation updateCustomer($input: UpdateCustomerInput!) {
+  updateCustomer(input: $input) {
+    jobTitle
+    cellPhone
+    city
+    companyName
+    country
+    email
+    firstAddress
+    firstName
+    homePhone
+    id
+    isActive
+    lastName
+    secondAddress
+    state
+    website
+    zipCode
+    profileImage
+    password
+    socialProvider {
+      createdDate
+      id
+      provider
+      socialId
+    }
+    stripeCustomerId
+  }
+}
+
+# {
+#     "input": {
+#         "profileImage": "user_profile_image_uploads/aa3aeb97-0cdb-494f-aaec-535829613b97-user-profile",
+#         "jobTitle": "abcd",
+#         "cellPhone": "+14588576955",
+#         "city": "california",
+#         "companyName": "new companyName 3",
+#         "country": "US",
+#         "firstAddress": "abc",
+#         "firstName": "abc",
+#         "homePhone": "+14588576955",
+#         "lastName": "New Last Name",
+#         "secondAddress": "New Second Address",
+#         "state": "New state",
+#         "website": "http://www.newwebsite2.com",
+#         "zipCode": "New Zip Code"
+#     }
+# }
+
+mutation updateCustomerPassword($input: String!) {
+  updateCustomerPassword(password: $input) {
+    success
+    message
+  }
+}
+
+# {
+#   "input": "12345679"
+# }
+
+mutation updateCustomerEmail($input: String!) {
+  updateCustomerEmail(input: $input) {
+    accessToken
+    user {
+      cellPhone
+      city
+      companyName
+      country
+      email
+      firstAddress
+      firstName
+      homePhone
+      id
+      isActive
+      jobTitle
+      lastName
+      profileImage
+      password
+      secondAddress
+      state
+      stripeCustomerId
+      website
+      zipCode
+    }
+  }
+}
+
+# {
+#   "input": "umar04@gmail.com"
+# }
+
+mutation continueWithSocialSite($input: RegisterOrLoginSocialInput!) {
+  continueWithSocialSite(input: $input) {
+    accessToken
+    user {
+      cellPhone
+      city
+      companyName
+      country
+      email
+      firstAddress
+      firstName
+      homePhone
+      id
+      isActive
+      jobTitle
+      lastName
+      profileImage
+      secondAddress
+      state
+      stripeCustomerId
+      website
+      zipCode
+    }
+  }
+}
+
+# {
+#     "input": {
+#         "accessToken": "ya29.a0AfB_byAk1AwCT2GyhSe4VBEa3yw-blzZxwvFUCPfsBexZiizNwSlC3KjRZIXGD8inau0ZEPHUgDv_9k7oCbWheZ9fD38sfyfAsroSjW_9eKVY9tn7-wYVIOP2jpiWU2qsGIw4ZnX0gpwTK9S9MkbFDG1Pfx2ihBcY78aCgYKAQsSARMSFQHGX2MiWYRQwC1oc_pesGFzrCvPzw0170",
+#         "provider": "GOOGLE"
+#     }
+# }
+
+mutation saveCustomerMediaUrl {
+    saveCustomerMediaUrl(
+        fileName: "user_profile_image_uploads/37a268af-4575-4574-b0b5-00510d4b7d30-user-profile"
+    )
+}

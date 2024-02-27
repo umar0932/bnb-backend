@@ -1,18 +1,22 @@
 module.exports = {
-  env: {
-    browser: true,
-    es2021: true
-  },
-  extends: ['eslint:recommended', 'plugin:react/recommended', 'plugin:prettier/recommended'],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaFeatures: {
-      jsx: true
-    },
-    ecmaVersion: 12,
+    project: 'tsconfig.json',
     sourceType: 'module'
   },
-  plugins: ['react'],
+  plugins: ['@typescript-eslint/eslint-plugin'],
+  extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
+  root: true,
+  env: {
+    node: true,
+    jest: true
+  },
+  ignorePatterns: ['.eslintrc.js'],
   rules: {
+    '@typescript-eslint/interface-name-prefix': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
     'prettier/prettier': [
       'error',
       {
@@ -21,8 +25,6 @@ module.exports = {
         useTabs: false,
         semi: false,
         singleQuote: true,
-        'react/prop-types': 'off',
-        'react/display-name': 'off',
         'import/prefer-default-export': 'off',
         trailingComma: 'none',
         quoteProps: 'as-needed',
@@ -34,10 +36,6 @@ module.exports = {
       }
     ],
     'no-debugger': 'warn',
-    quotes: [0, 'double'],
-    'jsx-quotes': [2, 'prefer-single'],
-    'react/react-in-jsx-scope': 0,
-    'react/display-name': 0,
-    'react/prop-types': 0
+    quotes: [0, 'double']
   }
 }

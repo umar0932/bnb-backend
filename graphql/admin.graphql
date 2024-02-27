@@ -1,0 +1,77 @@
+#QUERIES
+
+query validEmailAdmin($input: String!) {
+  validEmailAdmin(input: $input) {
+    success
+    message
+  }
+}
+
+# {
+#   "input": "xyz01@gmail.com"
+# }
+
+#MUTATIONS
+
+mutation loginAsAdmin($input: LoginAdminInput!) {
+  loginAsAdmin(input: $input) {
+    accessToken
+    user {
+      email
+      firstName
+      id
+      isActive
+      lastName
+      profileImage
+    }
+  }
+}
+
+# {
+#   "input": "xyz@gmail.com"
+# }
+
+mutation createAdminUser($input: CreateAdminUserInput!) {
+  createAdminUser(input: $input) {
+    success
+    message
+  }
+}
+
+# {
+#   "input": {
+#     "email": "xyzabc01@gmail.com",
+#     "password": "12345678",
+#     "firstName": "xyz",
+#     "lastName": "abc"
+#   }
+# }
+
+mutation updateAdminPassword($input: String!) {
+  updateAdminPassword(password: $input) {
+    success
+    message
+  }
+}
+
+# {
+#   "input": "12345679"
+# }
+
+mutation updateAdminEmail($input: String!) {
+  updateAdminEmail(input: $input) {
+    accessToken
+    user {
+      email
+      firstName
+      id
+      isActive
+      lastName
+      profileImage
+    }
+  }
+}
+
+# {
+#   "input": "xyz@gmail.com"
+# }

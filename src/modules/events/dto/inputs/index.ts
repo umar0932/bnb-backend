@@ -1,0 +1,7 @@
+export * from './create-event-ticket.input'
+export * from './create-event.input'
+export * from './event-details.input'
+export * from './event-filter.input'
+export * from './list-events.input'
+export * from './update-event-ticket.input'
+export * from './update-event.input'
