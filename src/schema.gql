@@ -74,6 +74,7 @@ input CreateCustomerInput {
 
 input CreateEventTicketInput {
   availableQuantity: Int!
+  description: String
   endDate: DateTime!
   eventId: ID!
   isVisible: Boolean
@@ -81,7 +82,6 @@ input CreateEventTicketInput {
   minQuantity: Int!
   price: Int!
   startDate: DateTime!
-  description: String
   title: String!
 }
 
@@ -481,6 +481,7 @@ type Tickets {
   availableQuantity: Int!
   createdBy: String
   createdDate: DateTime
+  description: String
   endDate: DateTime!
   event: Event!
   id: ID!
@@ -489,7 +490,6 @@ type Tickets {
   minQuantity: Int!
   price: Float!
   startDate: DateTime!
-  description: String
   title: String!
   updatedBy: String
   updatedDate: DateTime
@@ -540,6 +540,7 @@ input UpdateCustomerInput {
 
 input UpdateEventTicketInput {
   availableQuantity: Int!
+  description: String
   endDate: DateTime!
   eventId: ID!
   id: ID!
@@ -548,7 +549,6 @@ input UpdateEventTicketInput {
   minQuantity: Int!
   price: Int!
   startDate: DateTime!
-  description: String
   title: String!
 }
 
