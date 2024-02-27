@@ -2,31 +2,39 @@ import { ObjectType, Field, ID } from '@nestjs/graphql'
 
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
-import { CustomBaseEntity } from '@app/common/entities/base.entity'
+import { CustomBaseEntity } from '@app/common/entities'
 
 import { Event } from './event.entity'
 
 @Entity({ name: 'event_details' })
 @ObjectType()
 export class EventDetailsEntity extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
-  idEventDetails!: number
+  @PrimaryGeneratedColumn('uuid')
+  id: string
 
-  @Column({ length: 500, name: 'event_summary' })
+  // Complusory Variables
+
+  @Column({ length: 500 })
   @Field(() => String)
-  eventSummary!: string
+  summary!: string
 
-  @Column({ length: 500, name: 'event_description' })
+  @Column({ length: 500 })
   @Field(() => String)
-  eventDescription!: string
+  description!: string
 
-  @Column({ type: 'simple-array', name: 'event_images_array' })
+  @Column({ type: 'simple-array' })
   @Field(() => [String])
   eventImages!: string[]
 
+  // Relations
+
   @Field(() => Event)
-  @OneToOne(() => Event, event => event.eventDetails, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'ref_id_event' })
+  @OneToOne(() => Event, (event: Event) => event.eventDetails, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn({ name: 'event_id' })
   event: Event
 }

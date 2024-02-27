@@ -1,97 +1,101 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
 
 import { Column, Entity, Index, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { Transform } from 'class-transformer'
 
-import { CustomBaseEntity } from '@app/common/entities/base.entity'
-import { SocialProvider } from '@app/common/entities'
+import { CustomBaseEntity, SocialProvider } from '@app/common/entities'
 
 @Entity({ name: 'customer_user' })
 @Index(['email'])
 @ObjectType()
 export class Customer extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string
 
+  // Complusory Variables
+
   @Column({ length: 50, unique: true })
-  @Field()
+  @Field(() => String)
   email!: string
 
   @Column({ length: 50, name: 'first_name' })
-  @Field()
+  @Field(() => String)
   firstName!: string
 
   @Column({ length: 50, name: 'last_name' })
-  @Field()
+  @Field(() => String)
   lastName!: string
 
   @Column({ name: 'password' })
-  @Field()
+  @Field(() => String)
   password!: string
 
-  @Column({ length: 250, nullable: true })
+  // Non Complusory Variables
+
+  @Column({ length: 250, name: 'profile_image', nullable: true })
   @Field(() => String, { nullable: true })
-  mediaUrl?: string
+  profileImage?: string
 
-  @Column({ length: 20, name: 'home_phone', nullable: true })
-  @Field({ nullable: true })
-  @Transform(value => value.toString())
-  homePhone?: string
+  @Column({ length: 50, name: 'city', nullable: true })
+  @Field(() => String, { nullable: true })
+  city?: string
 
-  @Column({ length: 20, name: 'cell_phone', nullable: true })
-  @Field({ nullable: true })
-  @Transform(value => value.toString())
-  cellPhone?: string
+  @Column({ length: 50, name: 'country', nullable: true })
+  @Field(() => String, { nullable: true })
+  country?: string
 
   @Column({ length: 50, name: 'job_title', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   jobTitle?: string
 
   @Column({ length: 50, name: 'company_name', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   companyName?: string
 
-  @Column({ name: 'website', nullable: true })
-  @Field({ nullable: true })
-  website?: string
+  @Column({ length: 20, name: 'home_phone', nullable: true })
+  @Field(() => String, { nullable: true })
+  homePhone?: string
+
+  @Column({ length: 20, name: 'cell_phone', nullable: true })
+  @Field(() => String, { nullable: true })
+  cellPhone?: string
 
   @Column({ name: 'first_address', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   firstAddress?: string
 
   @Column({ name: 'second_address', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   secondAddress?: string
 
   @Column({ length: 200, nullable: true, name: 'stripe_customer_id', unique: true })
   @Field(() => String, { nullable: true })
   stripeCustomerId?: string
 
-  @Column({ length: 50, name: 'city', nullable: true })
-  @Field({ nullable: true })
-  city?: string
+  @Column({ length: 50, name: 'state', nullable: true })
+  @Field(() => String, { nullable: true })
+  state?: string
 
-  @Column({ length: 50, name: 'country', nullable: true })
-  @Field({ nullable: true })
-  country?: string
+  @Column({ name: 'website', nullable: true })
+  @Field(() => String, { nullable: true })
+  website?: string
 
   @Column({ length: 50, name: 'zip_code', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   zipCode?: string
 
-  @Column({ length: 50, name: 'state', nullable: true })
-  @Field({ nullable: true })
-  state?: string
+  @Column({ nullable: true, default: false, name: 'is_active' })
+  @Field(() => Boolean, { nullable: true })
+  isActive?: boolean
+
+  // Enums
+
+  // Relations
 
   @Field(() => SocialProvider, { nullable: true })
   @OneToOne(() => SocialProvider, socialProvider => socialProvider.customer, {
-    eager: true,
     nullable: true
   })
   socialProvider?: SocialProvider
-
-  @Column({ nullable: true, default: true, name: 'is_active' })
-  @Field({ nullable: true })
-  isActive?: boolean
 }

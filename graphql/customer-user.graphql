@@ -16,7 +16,7 @@ query getCustomersAdmin($input: ListCustomersInputs!) {
       isActive
       jobTitle
       lastName
-      mediaUrl
+      profileImage
       secondAddress
       state
       stripeCustomerId
@@ -50,7 +50,7 @@ query getCustomerData {
     isActive
     jobTitle
     lastName
-    mediaUrl
+    profileImage
     password
     secondAddress
     state
@@ -85,7 +85,7 @@ mutation loginAsCustomer($input: LoginCustomerInput!) {
       isActive
       jobTitle
       lastName
-      mediaUrl
+      profileImage
       secondAddress
       state
       stripeCustomerId
@@ -118,7 +118,7 @@ mutation createCustomer($input: CreateCustomerInput!) {
       isActive
       jobTitle
       lastName
-      mediaUrl
+      profileImage
       secondAddress
       state
       stripeCustomerId
@@ -155,7 +155,7 @@ mutation updateCustomer($input: UpdateCustomerInput!) {
     state
     website
     zipCode
-    mediaUrl
+    profileImage
     password
     socialProvider {
       createdDate
@@ -169,7 +169,7 @@ mutation updateCustomer($input: UpdateCustomerInput!) {
 
 # {
 #     "input": {
-#         "mediaUrl": "user_profile_image_uploads/aa3aeb97-0cdb-494f-aaec-535829613b97-user-profile",
+#         "profileImage": "user_profile_image_uploads/aa3aeb97-0cdb-494f-aaec-535829613b97-user-profile",
 #         "jobTitle": "abcd",
 #         "cellPhone": "+14588576955",
 #         "city": "california",
@@ -213,7 +213,7 @@ mutation updateCustomerEmail($input: String!) {
       isActive
       jobTitle
       lastName
-      mediaUrl
+      profileImage
       password
       secondAddress
       state
@@ -244,7 +244,7 @@ mutation continueWithSocialSite($input: RegisterOrLoginSocialInput!) {
       isActive
       jobTitle
       lastName
-      mediaUrl
+      profileImage
       secondAddress
       state
       stripeCustomerId

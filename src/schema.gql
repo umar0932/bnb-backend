@@ -3,13 +3,17 @@
 # ------------------------------------------------------
 
 type Admin {
+  createdBy: String
+  createdDate: DateTime
   email: String!
   firstName: String!
-  idAdminUser: ID!
+  id: ID!
   isActive: Boolean
   lastName: String!
-  mediaUrl: String
   password: String!
+  profileImage: String
+  updatedBy: String
+  updatedDate: DateTime
 }
 
 type AdminEmailUpdateResponse {
@@ -24,9 +28,13 @@ type AdminLoginResponse {
 
 type Category {
   categoryName: String!
+  createdBy: String
+  createdDate: DateTime
   events: Event
-  idCategory: ID!
+  id: ID!
   subCategories: [SubCategory!]
+  updatedBy: String
+  updatedDate: DateTime
 }
 
 input CreateAdminUserInput {
@@ -37,13 +45,13 @@ input CreateAdminUserInput {
 }
 
 input CreateBasicEventInput {
+  categoryId: ID
   endDate: DateTime!
-  eventTitle: String!
   location: CreateLocationInput!
-  refIdCategory: Float
-  refIdSubCategory: Float
   startDate: DateTime!
+  subCategoryId: ID
   tags: [String!]
+  title: String!
   type: String
 }
 
@@ -52,7 +60,7 @@ input CreateCategoryInput {
 }
 
 input CreateChargeInput {
-  amount: Float!
+  amount: Int!
   customerId: String!
   paymentMethodId: String!
 }
@@ -67,10 +75,10 @@ input CreateCustomerInput {
 input CreateEventTicketInput {
   availableQuantity: Float!
   endDate: DateTime!
+  eventId: ID!
   isVisible: Boolean
   maxQuantity: Float!
   minQuantity: Float!
-  refIdEvent: Float!
   startDate: DateTime!
   ticketDescription: String
   ticketName: String!
@@ -91,7 +99,7 @@ input CreateLocationInput {
 }
 
 input CreateOrderInput {
-  idEvent: Int!
+  eventId: Int!
   tickets: [TicketTypeInput!]!
   totalPrice: Int!
 }
@@ -104,7 +112,7 @@ input CreateOrganizerInput {
 }
 
 input CreateSubCategoryInput {
-  idCategory: ID!
+  categoryId: ID!
   subCategoryName: String!
 }
 
@@ -113,6 +121,8 @@ type Customer {
   city: String
   companyName: String
   country: String
+  createdBy: String
+  createdDate: DateTime
   email: String!
   firstAddress: String
   firstName: String!
@@ -121,12 +131,14 @@ type Customer {
   isActive: Boolean
   jobTitle: String
   lastName: String!
-  mediaUrl: String
   password: String!
+  profileImage: String
   secondAddress: String
   socialProvider: SocialProvider
   state: String
   stripeCustomerId: String
+  updatedBy: String
+  updatedDate: DateTime
   website: String
   zipCode: String
 }
@@ -166,41 +178,49 @@ scalar DateTime
 
 type Event {
   category: Category
+  createdBy: String
+  createdDate: DateTime
   endDate: DateTime!
   eventDetails: EventDetailsEntity
-  eventStatus: EventStatus!
-  eventTickets: EventTicketsEntity
-  eventTitle: String!
-  idEvent: ID!
+  eventTickets: Tickets
+  id: ID!
   location: LocationsEntity!
   startDate: DateTime!
+  status: EventStatus!
   subCategory: SubCategory
   tags: [String!]
+  title: String!
   type: String
+  updatedBy: String
+  updatedDate: DateTime
 }
 
 type EventDetailsEntity {
+  createdBy: String
+  createdDate: DateTime
+  description: String!
   event: Event!
-  eventDescription: String!
   eventImages: [String!]!
-  eventSummary: String!
-  idEventDetails: ID!
+  id: ID!
+  summary: String!
+  updatedBy: String
+  updatedDate: DateTime
 }
 
 input EventDetailsInput {
-  eventDescription: String
+  description: String
+  eventId: String!
   eventImages: [String!]!
-  eventSummary: String
-  refIdEvent: Float!
+  summary: String
 }
 
 input EventFilterInput {
   categoryName: String
-  eventTitle: String
   eventToday: String
   eventWeekend: String
   online: Boolean
   search: String
+  title: String
 }
 
 """The status of event"""
@@ -208,20 +228,6 @@ enum EventStatus {
   DRAFT
   PUBLISHED
   SOLD
-}
-
-type EventTicketsEntity {
-  availableQuantity: Float!
-  endDate: DateTime!
-  event: Event
-  idEventTicket: ID!
-  isVisible: Boolean
-  maxQuantity: Float!
-  minQuantity: Float!
-  startDate: DateTime!
-  ticketDescription: String
-  ticketName: String!
-  ticketPrice: Float!
 }
 
 input ListCustomersInputs {
@@ -255,7 +261,7 @@ enum LocationTypes {
 type LocationsEntity {
   city: String!
   country: String!
-  idLocation: ID!
+  id: ID!
   lat: String!
   locationType: LocationTypes!
   long: String!
@@ -283,10 +289,10 @@ type Mutation {
   """Create new admin user"""
   createAdminUser(input: CreateAdminUserInput!): SuccessResponse!
 
-  """This will crete new Events"""
+  """This will create new Events"""
   createBasicEvent(input: CreateBasicEventInput!): SuccessResponse!
 
-  """This will crete new Categories"""
+  """This will create new Categories"""
   createCategory(input: CreateCategoryInput!): SuccessResponse!
 
   """This will signup new Customers"""
@@ -295,13 +301,13 @@ type Mutation {
   """This will create new Ticket for the Event"""
   createEventTickets(input: CreateEventTicketInput!): SuccessResponse!
 
-  """This will crete new Events"""
+  """This will create new Events"""
   createOrUpdateEventDetails(input: EventDetailsInput!): SuccessResponse!
 
   """This will signup new Organizers"""
   createOrganizer(input: CreateOrganizerInput!): SuccessResponse!
 
-  """This will crete new SubCategories"""
+  """This will create new SubCategories"""
   createSubCategory(input: CreateSubCategoryInput!): SuccessResponse!
 
   """Admin Login"""
@@ -351,13 +357,17 @@ type Mutation {
 }
 
 type OrderEntity {
-  idEvent: Int!
-  idOrder: ID!
+  createdBy: String
+  createdDate: DateTime
+  eventId: Int!
+  id: ID!
   orderStatus: OrderStatus!
   paymentIntentId: String!
   stripeCustomerId: String!
   tickets: TicketType!
-  totalPrice: Float!
+  totalPrice: Int!
+  updatedBy: String
+  updatedDate: DateTime
 }
 
 """The status of order"""
@@ -368,16 +378,20 @@ enum OrderStatus {
 }
 
 type Organizer {
+  createdBy: String
+  createdDate: DateTime
   description: String
-  idOrganizerUser: ID!
-  isActive: Boolean
+  id: ID!
+  isActive: String
   name: String!
   organizationBio: String
+  updatedBy: String
+  updatedDate: DateTime
   websiteLink: String
 }
 
 type PageData {
-  count: Float!
+  count: Int!
   limit: Int
   offset: Int
 }
@@ -437,9 +451,13 @@ type SocialProvider {
 
 type SubCategory {
   category: Category!
+  createdBy: String
+  createdDate: DateTime
   events: [Event!]
-  idSubCategory: ID!
+  id: ID!
   subCategoryName: String!
+  updatedBy: String
+  updatedDate: DateTime
 }
 
 type SuccessResponse {
@@ -459,28 +477,46 @@ input TicketTypeInput {
   ticketPrice: Int!
 }
 
+type Tickets {
+  availableQuantity: Float!
+  createdBy: String
+  createdDate: DateTime
+  endDate: DateTime!
+  event: Event
+  id: ID!
+  isVisible: Boolean
+  maxQuantity: Float!
+  minQuantity: Float!
+  startDate: DateTime!
+  ticketDescription: String
+  ticketName: String!
+  ticketPrice: Float!
+  updatedBy: String
+  updatedDate: DateTime
+}
+
 input UpdateAdminUserInput {
   email: String
   firstName: String
   lastName: String
-  mediaUrl: String
+  profileImage: String
 }
 
 input UpdateBasicEventInput {
+  categoryId: ID
   endDate: DateTime!
-  eventTitle: String!
-  idEvent: ID!
+  eventId: ID!
   location: CreateLocationInput!
-  refIdCategory: Float
-  refIdSubCategory: Float
   startDate: DateTime!
+  subCategoryId: ID
   tags: [String!]
+  title: String!
   type: String
 }
 
 input UpdateCategoryInput {
   categoryName: String!
-  idCategory: ID!
+  id: ID!
 }
 
 input UpdateCustomerInput {
@@ -491,10 +527,10 @@ input UpdateCustomerInput {
   firstAddress: String
   firstName: String
   homePhone: String
-  isActive: Boolean
+  isActive: String
   jobTitle: String
   lastName: String
-  mediaUrl: String
+  profileImage: String
   secondAddress: String
   state: String
   stripeCustomerId: String
@@ -505,11 +541,11 @@ input UpdateCustomerInput {
 input UpdateEventTicketInput {
   availableQuantity: Float!
   endDate: DateTime!
-  idEventTicket: ID!
+  eventId: ID!
+  id: ID!
   isVisible: Boolean
   maxQuantity: Float!
   minQuantity: Float!
-  refIdEvent: Float!
   startDate: DateTime!
   ticketDescription: String
   ticketName: String!
@@ -518,14 +554,14 @@ input UpdateEventTicketInput {
 
 input UpdateOrganizerInput {
   description: String
-  idOrganizerUser: ID!
+  id: ID!
   name: String!
   organizationBio: String
   websiteLink: String
 }
 
 input UpdateSubCategoryInput {
-  idCategory: ID!
-  idSubCategory: ID!
+  categoryId: ID!
+  id: ID!
   subCategoryName: String!
 }

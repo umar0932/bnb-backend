@@ -10,13 +10,12 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm'
 
-import { CustomBaseEntity } from '@app/common/entities/base.entity'
 import { Category, SubCategory } from '@app/category/entities'
-import { LocationsEntity } from '@app/common/entities'
+import { CustomBaseEntity, LocationsEntity } from '@app/common/entities'
 
-import { EventStatus } from '../event.constants'
 import { EventDetailsEntity } from './event-details.entity'
-import { EventTicketsEntity } from './event-tickets.entity'
+import { EventStatus } from '../event.constants'
+import { Tickets } from './tickets.entity'
 
 registerEnumType(EventStatus, {
   name: 'EventStatus',
@@ -26,29 +25,26 @@ registerEnumType(EventStatus, {
 @Entity({ name: 'event' })
 @ObjectType()
 export class Event extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
-  idEvent!: number
+  @PrimaryGeneratedColumn('uuid')
+  id: string
 
-  @Column({ length: 50, name: 'event_title', unique: true })
-  @Field()
-  eventTitle!: string
+  // Complusory Variables
 
-  @ManyToOne(() => Category, category => category.events, {
-    eager: true,
-    nullable: true
-  })
-  @JoinColumn({ name: 'ref_id_category' })
-  @Field(() => Category, { nullable: true })
-  category: Category
+  @Column({ length: 50, unique: true })
+  @Field(() => String)
+  title!: string
 
-  @ManyToOne(() => SubCategory, subCategory => subCategory.events, {
-    eager: true,
-    nullable: true
-  })
-  @JoinColumn({ name: 'ref_id_subCategory' })
-  @Field(() => SubCategory, { nullable: true })
-  subCategory: SubCategory
+  @Column('timestamptz', { name: 'start_date' })
+  @Field(() => Date)
+  startDate!: Date
+
+  @Column('timestamptz', { name: 'end_date' })
+  @Field(() => Date)
+  endDate!: Date
+
+  // Non Complusory Variables
 
   @Column('simple-array', { name: 'tags', nullable: true })
   @Field(() => [String], { nullable: true })
@@ -58,10 +54,34 @@ export class Event extends CustomBaseEntity {
   @Field(() => String, { nullable: true })
   type?: string
 
+  // Enums
+
+  @Field(() => EventStatus)
+  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.DRAFT, name: 'event_status' })
+  status!: EventStatus
+
+  // Relations
+
   @Field(() => LocationsEntity)
   @OneToOne(() => LocationsEntity, { eager: true })
-  @JoinColumn({ name: 'ref_id_location' })
+  @JoinColumn({ name: 'location_id' })
   location!: LocationsEntity
+
+  @Field(() => Category, { nullable: true })
+  @ManyToOne(() => Category, category => category.events, {
+    eager: true,
+    nullable: true
+  })
+  @JoinColumn({ name: 'category_id' })
+  category?: Category
+
+  @ManyToOne(() => SubCategory, subCategory => subCategory.events, {
+    eager: true,
+    nullable: true
+  })
+  @JoinColumn({ name: 'ref_id_subCategory' })
+  @Field(() => SubCategory, { nullable: true })
+  subCategory?: SubCategory
 
   @Field(() => EventDetailsEntity, { nullable: true })
   @OneToOne(() => EventDetailsEntity, eventDetails => eventDetails.event, {
@@ -70,24 +90,11 @@ export class Event extends CustomBaseEntity {
   })
   eventDetails?: EventDetailsEntity
 
-  @Field(() => EventStatus)
-  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.DRAFT, name: 'event_status' })
-  eventStatus!: EventStatus
-
-  @Field(() => EventTicketsEntity, { nullable: true })
-  @OneToMany(() => EventTicketsEntity, eventTicketsEntity => eventTicketsEntity.event, {
+  @Field(() => Tickets, { nullable: true })
+  @OneToMany(() => Tickets, eventTicketsEntity => eventTicketsEntity.event, {
     eager: true,
-    nullable: true,
-    cascade: true
+    nullable: true
   })
   @JoinColumn({ name: 'ref_id_event_tickets_entity' })
-  eventTickets?: EventTicketsEntity[]
-
-  @Column('timestamptz', { name: 'start_date' })
-  @Field(() => Date)
-  startDate!: Date
-
-  @Column('timestamptz', { name: 'end_date' })
-  @Field(() => Date)
-  endDate!: Date
+  eventTickets?: Tickets[]
 }

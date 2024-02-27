@@ -21,16 +21,17 @@ registerEnumType(SocialProviderTypes, {
 @Entity('social_provider')
 @ObjectType()
 export class SocialProvider {
+  // Primary key
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
-  id: number
+  @PrimaryGeneratedColumn('uuid')
+  id: string
 
   @Column({ type: 'enum', enum: SocialProviderTypes, name: 'social_provider' })
   @Field(() => SocialProviderTypes)
   provider: SocialProviderTypes
 
   @Column({ unique: true })
-  @Field()
+  @Field(() => String)
   socialId: string
 
   @Field(() => Customer)

@@ -33,11 +33,15 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "npm run build && npx typeorm -d dist/db/data-source.js",
-    "migration:generate": "NODE_ENV=dev npm run typeorm -- migration:generate",
-    "migration:run": "NODE_ENV=dev npm run typeorm -- migration:run",
+    "migration:generate": "NODE_ENV=prod npm run typeorm -- migration:generate",
+    "migration:run": "NODE_ENV=prod npm run typeorm -- migration:run",
+    "migration:run:staging": "npm run typeorm -- migration:run",
+    "db:drop": "NODE_ENV=prod npm run typeorm schema:drop",
+    "migration:generate:dev": "NODE_ENV=dev npm run typeorm -- migration:generate",
+    "migration:run:dev": "NODE_ENV=dev npm run typeorm -- migration:run",
     "migration:revert": "NODE_ENV=dev npm run typeorm -- migration:revert",
     "migration:show": "NODE_ENV=dev npm run typeorm -- migration:show",
-    "db:drop": "NODE_ENV=dev npm run typeorm schema:drop"
+    "db:drop:dev": "NODE_ENV=dev npm run typeorm schema:drop"
   },
   "dependencies": {
     "@apollo/server": "^4.9.4",

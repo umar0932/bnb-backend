@@ -18,5 +18,5 @@ export class UpdateOrganizerInput extends PickType(CreateOrganizerInput, [
   @Field(() => ID)
   @IsNotEmpty({ message: 'Organizer ID cannot be empty' })
   @IsString({ message: 'Organizer ID should be a string' })
-  idOrganizerUser!: string
+  id!: string
 }

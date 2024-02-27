@@ -2,7 +2,7 @@ import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql'
 
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
-import { CustomBaseEntity } from '@app/common/entities/base.entity'
+import { CustomBaseEntity } from '@app/common/entities'
 
 import { Event } from './event.entity'
 import { TicketsSalesChannel } from '../event.constants'
@@ -12,12 +12,13 @@ registerEnumType(TicketsSalesChannel, {
   description: 'The tickets sales channel'
 })
 
-@Entity({ name: 'event_ticket' })
+@Entity({ name: 'tickets' })
 @ObjectType()
-export class EventTicketsEntity extends CustomBaseEntity {
+export class Tickets extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
-  idEventTicket!: number
+  @PrimaryGeneratedColumn('uuid')
+  id: string
 
   @Column({ length: 50, name: 'ticket_name' })
   @Field(() => String)
@@ -44,7 +45,7 @@ export class EventTicketsEntity extends CustomBaseEntity {
   ticketDescription: string
 
   @Column({ nullable: true, default: true, name: 'is_visible' })
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   isVisible?: boolean
 
   @Column({ name: 'minimum_quantity' })
@@ -56,7 +57,7 @@ export class EventTicketsEntity extends CustomBaseEntity {
   maxQuantity: number
 
   @ManyToOne(() => Event, event => event.eventTickets)
-  @JoinColumn({ name: 'ref_id_event' })
+  @JoinColumn({ name: 'event_id' })
   @Field(() => Event, { nullable: true })
   event: Event
 }

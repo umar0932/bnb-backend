@@ -7,27 +7,32 @@ import { CustomBaseEntity } from '@app/common/entities/base.entity'
 @Entity({ name: 'organizer_user' })
 @ObjectType()
 export class Organizer extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
-  idOrganizerUser!: string
+  id: string
+
+  // Complusory Variables
 
   @Column({ length: 100, unique: true })
-  @Field()
+  @Field(() => String)
   name!: string
 
+  // Non Complusory Variables
+
   @Column({ length: 500, name: 'website_link', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   websiteLink?: string
 
   @Column({ name: 'organization_bio', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   organizationBio?: string
 
   @Column({ length: 500, name: 'description', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   description?: string
 
-  @Column({ nullable: true, default: true, name: 'is_active' })
-  @Field({ nullable: true })
+  @Column({ nullable: true, default: false, name: 'is_active' })
+  @Field(() => String, { nullable: true })
   isActive?: boolean
 }

@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql'
+import { InputType, Field, ID } from '@nestjs/graphql'
 import {
   IsNotEmpty,
   IsString,
@@ -7,15 +7,16 @@ import {
   IsNumber,
   IsBoolean,
   IsDate,
-  Min
+  Min,
+  IsUUID
 } from 'class-validator'
 
 @InputType()
 export class CreateEventTicketInput {
-  @Field(() => Number)
-  @IsNotEmpty({ message: 'Event ID cannot be empty' })
-  @IsNumber({}, { message: 'Event ID must be a number' })
-  refIdEvent!: number
+  @Field(() => ID)
+  @IsNotEmpty({ message: 'Event id cannot be empty' })
+  @IsUUID('4', { message: 'Invalid Event UUID format' })
+  eventId!: string
 
   @Field(() => String)
   @IsString({ message: 'Ticket name must be a string' })

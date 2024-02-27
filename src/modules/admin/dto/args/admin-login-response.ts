@@ -4,7 +4,7 @@ import { Admin } from '@app/admin/entities/admin.entity'
 
 @ObjectType()
 export class AdminLoginResponse {
-  @Field()
+  @Field(() => String)
   accessToken: string
 
   @Field(() => Admin)

@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql'
+import { Field, InputType, Int } from '@nestjs/graphql'
 
 import { IsString, IsNotEmpty, IsNumber } from 'class-validator'
 
@@ -6,16 +6,16 @@ import { IsString, IsNotEmpty, IsNumber } from 'class-validator'
 export class CreateChargeInput {
   @IsString()
   @IsNotEmpty()
-  @Field()
+  @Field(() => String)
   paymentMethodId: string
 
   @IsNumber()
-  @Field()
+  @Field(() => Int)
   amount: number
 
   @IsString()
   @IsNotEmpty()
-  @Field()
+  @Field(() => String)
   customerId: string
 }
 

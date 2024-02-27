@@ -4,7 +4,7 @@ import { Customer } from '@app/customer-user/entities/customer.entity'
 
 @ObjectType()
 export class CustomerLoginOrRegisterResponse {
-  @Field()
+  @Field(() => String)
   accessToken: string
 
   @Field(() => Customer)

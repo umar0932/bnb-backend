@@ -10,17 +10,25 @@ import { Event } from '@app/events/entities'
 @Entity({ name: 'sub_category' })
 @ObjectType()
 export class SubCategory extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
-  idSubCategory!: number
+  @PrimaryGeneratedColumn('uuid')
+  id: string
+
+  // Complusory Variables
 
   @Column({ length: 50, name: 'sub_category_name', unique: true })
-  @Field()
+  @Field(() => String)
   subCategoryName!: string
 
-  @ManyToOne(() => Category, category => category.subCategories)
-  @JoinColumn({ name: 'ref_id_category' })
+  // Relations
+
   @Field(() => Category)
+  @ManyToOne(() => Category, category => category.subCategories, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn({ name: 'category_id' })
   category!: Category
 
   @OneToMany(() => Event, event => event.subCategory, {
