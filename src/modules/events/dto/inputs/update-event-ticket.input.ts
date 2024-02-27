@@ -7,12 +7,12 @@ import { CreateEventTicketInput } from './create-event-ticket.input'
 @InputType()
 export class UpdateEventTicketInput extends PickType(CreateEventTicketInput, [
   'eventId',
-  'ticketName',
+  'title',
   'availableQuantity',
-  'ticketPrice',
+  'price',
   'startDate',
   'endDate',
-  'ticketDescription',
+  'description',
   'isVisible',
   'minQuantity',
   'maxQuantity'

@@ -24,7 +24,7 @@ export class EventDetailsEntity extends CustomBaseEntity {
   @Field(() => String)
   description!: string
 
-  @Column({ type: 'simple-array' })
+  @Column({ type: 'simple-array', name: 'event_images' })
   @Field(() => [String])
   eventImages!: string[]
 

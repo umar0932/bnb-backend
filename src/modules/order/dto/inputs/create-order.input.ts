@@ -32,5 +32,5 @@ class TicketTypeInput {
 
   @Field(() => Int)
   @IsNumber({}, { message: 'Ticket price must be a number' })
-  ticketPrice!: number
+  price!: number
 }

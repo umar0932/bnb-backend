@@ -9,5 +9,5 @@ export class TicketType {
   quantity: number
 
   @Field(() => Int)
-  ticketPrice: number
+  price: number
 }

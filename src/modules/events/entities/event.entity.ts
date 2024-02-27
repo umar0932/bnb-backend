@@ -79,7 +79,7 @@ export class Event extends CustomBaseEntity {
     eager: true,
     nullable: true
   })
-  @JoinColumn({ name: 'ref_id_subCategory' })
+  @JoinColumn({ name: 'subCategory_id' })
   @Field(() => SubCategory, { nullable: true })
   subCategory?: SubCategory
 
@@ -95,6 +95,6 @@ export class Event extends CustomBaseEntity {
     eager: true,
     nullable: true
   })
-  @JoinColumn({ name: 'ref_id_event_tickets_entity' })
+  @JoinColumn({ name: 'tickets_id' })
   eventTickets?: Tickets[]
 }
