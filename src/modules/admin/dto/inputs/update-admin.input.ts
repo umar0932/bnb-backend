@@ -23,9 +23,9 @@ export class UpdateAdminUserInput {
   @IsOptional()
   lastName?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsUrl()
   @IsString({ message: 'MediaUrl must be a string' })
   @IsOptional()
-  mediaUrl?: string
+  profileImage?: string
 }

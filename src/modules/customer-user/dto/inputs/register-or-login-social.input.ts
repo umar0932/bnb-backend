@@ -4,7 +4,7 @@ import { SocialProviderTypes } from '@app/common'
 
 @InputType()
 export class RegisterOrLoginSocialInput {
-  @Field()
+  @Field(() => String)
   accessToken: string
 
   @Field(() => SocialProviderTypes)

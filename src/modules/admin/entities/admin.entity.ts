@@ -4,34 +4,39 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities/base.entity'
 
-@Entity({ name: 'admin_user' })
+@Entity({ name: 'admin' })
 @ObjectType()
 export class Admin extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
-  idAdminUser!: string
+  id: string
+
+  // Complusory Variables
 
   @Column({ length: 50, unique: true })
-  @Field()
+  @Field(() => String)
   email!: string
 
   @Column({ length: 50, name: 'first_name' })
-  @Field()
+  @Field(() => String)
   firstName!: string
 
   @Column({ length: 50, name: 'last_name' })
-  @Field()
+  @Field(() => String)
   lastName!: string
 
   @Column({ name: 'password' })
-  @Field()
+  @Field(() => String)
   password!: string
 
-  @Field(() => String, { nullable: true })
-  @Column({ length: 250, nullable: true })
-  mediaUrl?: string
+  // Non Complusory Variables
 
-  @Column({ nullable: true, default: true, name: 'is_active' })
-  @Field({ nullable: true })
+  @Column({ length: 250, name: 'profile_image', nullable: true })
+  @Field(() => String, { nullable: true })
+  profileImage?: string
+
+  @Column({ nullable: true, default: false, name: 'is_active' })
+  @Field(() => Boolean, { nullable: true })
   isActive?: boolean
 }

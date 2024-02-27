@@ -2,21 +2,21 @@ import { InputType, Field } from '@nestjs/graphql'
 
 @InputType()
 export class EventFilterInput {
-  @Field({ nullable: true })
-  eventTitle?: string
+  @Field(() => String, { nullable: true })
+  title?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   search?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   categoryName?: string
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   online?: boolean
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   eventToday?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   eventWeekend?: string
 }

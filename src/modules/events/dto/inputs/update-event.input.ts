@@ -5,9 +5,9 @@ import { CreateBasicEventInput } from './create-event.input'
 
 @InputType()
 export class UpdateBasicEventInput extends PickType(CreateBasicEventInput, [
-  'eventTitle',
-  'refIdCategory',
-  'refIdSubCategory',
+  'title',
+  'categoryId',
+  'subCategoryId',
   'tags',
   'type',
   'location',
@@ -17,5 +17,5 @@ export class UpdateBasicEventInput extends PickType(CreateBasicEventInput, [
   @Field(() => ID)
   @IsNotEmpty({ message: 'Event ticket cannot be empty' })
   @IsNumber({}, { message: 'Event ID must be a number' })
-  idEvent!: number
+  eventId!: string
 }

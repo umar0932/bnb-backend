@@ -2,15 +2,15 @@ import { Field, ObjectType } from '@nestjs/graphql'
 
 @ObjectType()
 export class GetSaveCardIntentResponse {
-  @Field()
+  @Field(() => String)
   setupIntent: string
 
-  @Field()
+  @Field(() => String)
   ephemeralKey: string
 
-  @Field()
+  @Field(() => String)
   publishableKey: string
 
-  @Field()
+  @Field(() => String)
   customer: string
 }

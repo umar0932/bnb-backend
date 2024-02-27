@@ -11,47 +11,54 @@ registerEnumType(LocationTypes, {
 @Entity({ name: 'location' })
 @ObjectType()
 export class LocationsEntity {
+  // Primary key
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
-  idLocation!: number
+  @PrimaryGeneratedColumn('uuid')
+  id: string
 
-  @Field(() => String)
+  // Complusory Variables
+
   @Column({ name: 'venue_name' })
+  @Field(() => String)
   venueName!: string
 
-  @Field(() => String)
   @Column({ name: 'street_address' })
+  @Field(() => String)
   streetAddress!: string
 
-  @Field(() => String)
   @Column({ length: 70 })
+  @Field(() => String)
   country!: string
 
-  @Field(() => String)
   @Column({ length: 70 })
+  @Field(() => String)
   city!: string
 
-  @Field(() => String, { nullable: true })
-  @Column({ length: 70, nullable: true })
-  state?: string
-
-  @Field(() => String)
   @Column({ length: 10 })
+  @Field(() => String)
   postalCode!: string
 
-  @Field(() => String)
   @Column({ length: 50 })
+  @Field(() => String)
   lat!: string
 
-  @Field(() => String)
   @Column({ length: 50 })
+  @Field(() => String)
   long!: string
 
-  @Field(() => LocationTypes)
-  @Column({ type: 'enum', enum: LocationTypes, name: 'location_type' })
-  locationType!: LocationTypes
+  // Non Complusory Variables
 
+  @Column({ length: 70, nullable: true })
   @Field(() => String, { nullable: true })
-  @Column({ length: 100, nullable: true })
+  state?: string
+
+  @Column({ length: 100, name: 'place_id', nullable: true })
+  @Field(() => String, { nullable: true })
   placeId?: string
+
+  // Enums
+
+  @Column({ type: 'enum', enum: LocationTypes, name: 'location_type' })
+  @Field(() => LocationTypes)
+  locationType!: LocationTypes
 }

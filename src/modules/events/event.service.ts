@@ -12,7 +12,7 @@ import { CreateLocationInput, SuccessResponse } from '@app/common'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 import { AwsS3ClientService } from '@app/aws-s3-client'
 
-import { Event, EventDetailsEntity, EventTicketsEntity } from './entities'
+import { Event, EventDetailsEntity, Tickets } from './entities'
 import { CategoryService } from '@app/category'
 import {
   CreateBasicEventInput,
@@ -33,16 +33,16 @@ export class EventService {
     private eventRepository: Repository<Event>,
     @InjectRepository(EventDetailsEntity)
     private eventDetailsRepository: Repository<EventDetailsEntity>,
-    @InjectRepository(EventTicketsEntity)
-    private eventTicketsRepository: Repository<EventTicketsEntity>,
+    @InjectRepository(Tickets)
+    private eventTicketsRepository: Repository<Tickets>,
     @InjectRepository(LocationsEntity)
     private locationRepository: Repository<LocationsEntity>,
     private s3Service: AwsS3ClientService
   ) {}
 
-  async getEventById(idEvent: number, userId: string): Promise<Event> {
+  async getEventById(id: string, userId: string): Promise<Event> {
     const findEvent = await this.eventRepository.findOne({
-      where: { idEvent, createdBy: userId }
+      where: { id, createdBy: userId }
     })
 
     if (!findEvent) throw new BadRequestException('Event with the provided ID does not exist')
@@ -50,8 +50,8 @@ export class EventService {
     return findEvent
   }
 
-  async getEventByName(eventTitle: string): Promise<boolean> {
-    const findEventByName = await this.eventRepository.count({ where: { eventTitle } })
+  async getEventByName(title: string): Promise<boolean> {
+    const findEventByName = await this.eventRepository.count({ where: { title } })
     if (findEventByName > 0) return true
     return false
   }
@@ -64,9 +64,9 @@ export class EventService {
     return false
   }
 
-  async getEventTicketsById(idEventTicket: number, userId: string): Promise<EventTicketsEntity> {
+  async getEventTicketsById(id: string, userId: string): Promise<Tickets> {
     const findEventTicketsById = await this.eventTicketsRepository.findOne({
-      where: { idEventTicket, createdBy: userId }
+      where: { id, createdBy: userId }
     })
     if (!findEventTicketsById)
       throw new BadRequestException('Event Tickets with the provided ID does not exist')
@@ -92,13 +92,13 @@ export class EventService {
     createBasicEventInput: CreateBasicEventInput,
     userId: string
   ): Promise<SuccessResponse> {
-    const { eventTitle, refIdCategory, refIdSubCategory, type, location } = createBasicEventInput
+    const { title, categoryId, subCategoryId, type, location } = createBasicEventInput
 
     let category, subCategory
-    if (refIdCategory) category = await this.categoryService.getCategoryById(refIdCategory)
+    if (categoryId) category = await this.categoryService.getCategoryById(categoryId)
 
-    if (refIdSubCategory && refIdCategory)
-      subCategory = await this.categoryService.getSubCategoryById(refIdSubCategory, refIdCategory)
+    if (subCategoryId && categoryId)
+      subCategory = await this.categoryService.getSubCategoryById(subCategoryId, categoryId)
 
     const getlocation = await this.addLocation(location)
 
@@ -106,7 +106,7 @@ export class EventService {
 
     if (type) await this.checkValidTypeEvent(type)
 
-    const event = await this.getEventByName(eventTitle)
+    const event = await this.getEventByName(title)
     if (event) throw new BadRequestException('Event Name already exists')
 
     try {
@@ -128,14 +128,13 @@ export class EventService {
     updateBasicEventInput: UpdateBasicEventInput,
     userId: string
   ): Promise<SuccessResponse> {
-    const { idEvent, refIdCategory, refIdSubCategory, type, location, ...rest } =
-      updateBasicEventInput
-    const event = await this.getEventById(idEvent, userId)
+    const { eventId, categoryId, subCategoryId, type, location, ...rest } = updateBasicEventInput
+    const event = await this.getEventById(eventId, userId)
     let category, subCategory
-    if (refIdCategory) category = await this.categoryService.getCategoryById(refIdCategory)
+    if (categoryId) category = await this.categoryService.getCategoryById(categoryId)
 
-    if (refIdSubCategory && refIdCategory)
-      subCategory = await this.categoryService.getSubCategoryById(refIdSubCategory, refIdCategory)
+    if (subCategoryId && categoryId)
+      subCategory = await this.categoryService.getSubCategoryById(subCategoryId, categoryId)
 
     const getlocation = await this.addLocation(location)
 
@@ -143,11 +142,11 @@ export class EventService {
 
     if (type) await this.checkValidTypeEvent(type)
 
-    const checkEventTitle = await this.getEventByName(updateBasicEventInput.eventTitle)
+    const checkEventTitle = await this.getEventByName(updateBasicEventInput.title)
     if (checkEventTitle) throw new BadRequestException('Event Name already exists')
 
     try {
-      await this.eventRepository.update(event.idEvent, {
+      await this.eventRepository.update(event.id, {
         ...rest,
         type,
         category,
@@ -167,12 +166,12 @@ export class EventService {
     eventDetailsInput: EventDetailsInput,
     userId: string
   ): Promise<SuccessResponse> {
-    const { refIdEvent, ...rest } = eventDetailsInput
-    const event = await this.getEventById(refIdEvent, userId)
+    const { eventId, ...rest } = eventDetailsInput
+    const event = await this.getEventById(eventId, userId)
 
     try {
       if (event.eventDetails) {
-        await this.eventDetailsRepository.update(event.eventDetails?.idEventDetails, {
+        await this.eventDetailsRepository.update(event.eventDetails?.id, {
           ...rest,
           event,
           updatedBy: userId,
@@ -196,8 +195,8 @@ export class EventService {
     createEventTicketsInput: CreateEventTicketInput,
     userId: string
   ): Promise<SuccessResponse> {
-    const { refIdEvent, ...rest } = createEventTicketsInput
-    const event = await this.getEventById(refIdEvent, userId)
+    const { eventId, ...rest } = createEventTicketsInput
+    const event = await this.getEventById(eventId, userId)
     const ticketData = await this.getEventTicketsByName(createEventTicketsInput.ticketName, userId)
     if (ticketData)
       throw new BadRequestException('This Ticket name already exist. Enter a valid name')
@@ -218,12 +217,12 @@ export class EventService {
     updateEventTicketsInput: UpdateEventTicketInput,
     userId: string
   ): Promise<SuccessResponse> {
-    const { refIdEvent, idEventTicket, ...rest } = updateEventTicketsInput
-    const event = await this.getEventById(refIdEvent, userId)
-    const ticketData = await this.getEventTicketsById(idEventTicket, userId)
+    const { eventId, id, ...rest } = updateEventTicketsInput
+    const event = await this.getEventById(eventId, userId)
+    const ticketData = await this.getEventTicketsById(id, userId)
 
     try {
-      await this.eventTicketsRepository.update(ticketData.idEventTicket, {
+      await this.eventTicketsRepository.update(ticketData.id, {
         ...rest,
         event,
         updatedBy: userId,
@@ -265,12 +264,12 @@ export class EventService {
     offset,
     filter
   }: ListEventsInputs): Promise<[Event[], number]> {
-    const { eventTitle, search, categoryName, online } = filter || {}
+    const { title, search, categoryName, online } = filter || {}
 
     try {
       const queryBuilder = await this.eventRepository.createQueryBuilder('event')
 
-      eventTitle && queryBuilder.andWhere('event.eventTitle = :eventTitle', { eventTitle })
+      title && queryBuilder.andWhere('event.title = :title', { title })
       online && queryBuilder.andWhere('event.online = :online', { online })
 
       if (categoryName)
@@ -279,7 +278,7 @@ export class EventService {
       if (search) {
         queryBuilder.andWhere(
           new Brackets(qb => {
-            qb.where('LOWER(event.eventTitle) LIKE LOWER(:search)', { search: `${search}` })
+            qb.where('LOWER(event.title) LIKE LOWER(:search)', { search: `${search}` })
               .orWhere('LOWER(location.city) LIKE LOWER(:search)', { search: `${search}` })
               .orWhere('LOWER(location.country) LIKE LOWER(:search)', { search: `${search}` })
           })

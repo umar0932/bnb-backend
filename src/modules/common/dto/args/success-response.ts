@@ -2,9 +2,9 @@ import { Field, ObjectType } from '@nestjs/graphql'
 
 @ObjectType()
 export class SuccessResponse {
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   success: boolean
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   message?: string
 }

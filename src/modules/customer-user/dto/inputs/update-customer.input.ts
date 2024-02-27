@@ -26,7 +26,7 @@ export class UpdateCustomerInput {
   @IsOptional()
   @Field(() => String, { nullable: true })
   @MaxLength(250, { message: 'MediaUrl should not exceed 50 characters' })
-  mediaUrl?: string
+  profileImage?: string
 
   @IsString({ message: 'Job title should be a string' })
   @IsOptional()
@@ -81,6 +81,6 @@ export class UpdateCustomerInput {
 
   @IsBoolean({ message: 'isActive should be a boolean value' })
   @IsOptional()
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   isActive?: boolean
 }

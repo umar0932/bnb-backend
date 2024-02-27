@@ -5,45 +5,45 @@ export class CustomerFilterInput {
   @Field(() => ID, { nullable: true })
   id?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   email?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   firstName?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   lastName?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   homePhone?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   cellPhone?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   jobTitle?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   companyName?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   website?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   firstAddress?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   secondAddress?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   city?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   country?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   zipCode?: string
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   state?: string
 }

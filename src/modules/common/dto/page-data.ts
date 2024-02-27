@@ -2,7 +2,7 @@ import { Field, Int, ObjectType } from '@nestjs/graphql'
 
 @ObjectType()
 export default class PageData {
-  @Field()
+  @Field(() => Int)
   public count: number
 
   @Field(() => Int, { nullable: true })

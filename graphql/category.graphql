@@ -2,10 +2,10 @@
 
 query getAllCategories {
   getAllCategories {
-    idCategory
+    id
     categoryName
     subCategories {
-      idSubCategory
+      id
       subCategoryName
     }
   }
@@ -13,10 +13,10 @@ query getAllCategories {
 
 query getAllSubCategories {
   getAllSubCategories {
-    idSubCategory
+    id
     subCategoryName
     category {
-      idCategory
+      id
       categoryName
     }
   }
@@ -33,7 +33,7 @@ mutation createCategory($input: CreateCategoryInput!) {
 
 mutation updateCategory($input: UpdateCategoryInput!) {
   updateCategory(input: $input) {
-    idCategory,
+    id,
     categoryName
   }
 }
@@ -47,10 +47,10 @@ mutation createSubCategory($input: CreateSubCategoryInput!) {
 
 mutation updateSubCategories($input: UpdateSubCategoryInput!) {
   updateSubCategories(input: $input) {
-    idSubCategory
+    id
     subCategoryName
     category {
-      idCategory
+      id
       categoryName
     }
   }

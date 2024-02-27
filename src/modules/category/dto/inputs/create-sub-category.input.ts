@@ -1,13 +1,13 @@
 import { InputType, Field, ID } from '@nestjs/graphql'
 
-import { IsNotEmpty, IsNumber, IsString, MaxLength, MinLength } from 'class-validator'
+import { IsNotEmpty, IsString, IsUUID, MaxLength, MinLength } from 'class-validator'
 
 @InputType()
 export class CreateSubCategoryInput {
   @Field(() => ID)
-  @IsNotEmpty({ message: 'Category ID should not be empty' })
-  @IsNumber({}, { message: 'Category ID should be a number' })
-  idCategory!: number
+  @IsNotEmpty({ message: 'Category id cannot be empty' })
+  @IsUUID('4', { message: 'Invalid Category UUID format' })
+  categoryId!: string
 
   @Field(() => String)
   @IsString({ message: 'Subcategory name should be a string' })

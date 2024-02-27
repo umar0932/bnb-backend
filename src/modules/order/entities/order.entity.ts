@@ -14,31 +14,34 @@ registerEnumType(OrderStatus, {
 @Entity('orders')
 @ObjectType()
 export class OrderEntity extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
-  idOrder: string
+  id: string
+
+  // Complusory Variables
 
   @Column({ name: 'event_id' })
   @Field(() => Int)
-  idEvent: number
+  eventId!: number
 
   @Column({ name: 'payment_intent_id' })
   @Field(() => String)
-  paymentIntentId: string
+  paymentIntentId!: string
 
   @Column({ name: 'stripe_customer_id' })
   @Field(() => String)
-  stripeCustomerId: string
+  stripeCustomerId!: string
 
   @Column('numeric', { default: 0.0, name: 'total_price' })
-  @Field(() => Number)
-  totalPrice: number
+  @Field(() => Int)
+  totalPrice!: number
 
   @Column({ type: 'simple-json', name: 'tickets_json' })
   @Field(() => TicketType)
-  tickets: TicketType
+  tickets!: TicketType
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING, name: 'order_status' })
   @Field(() => OrderStatus)
-  orderStatus: OrderStatus
+  orderStatus!: OrderStatus
 }

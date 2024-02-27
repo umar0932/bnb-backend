@@ -7,7 +7,12 @@ import { AdminService } from '@app/admin'
 import { SuccessResponse } from '@app/common'
 
 import { Category, SubCategory } from './entities'
-import { CreateCategoryInput, CreateSubCategoryInput, UpdateSubCategoryInput } from './dto/inputs'
+import {
+  CreateCategoryInput,
+  CreateSubCategoryInput,
+  UpdateCategoryInput,
+  UpdateSubCategoryInput
+} from './dto/inputs'
 
 @Injectable()
 export class CategoryService {
@@ -19,8 +24,8 @@ export class CategoryService {
     private subCategoryRepository: Repository<SubCategory>
   ) {}
 
-  async getCategoryById(idCategory: number): Promise<Category> {
-    const findCategoryById = await this.categoryRepository.findOne({ where: { idCategory } })
+  async getCategoryById(id: string): Promise<Category> {
+    const findCategoryById = await this.categoryRepository.findOne({ where: { id } })
     if (!findCategoryById)
       throw new BadRequestException('Category with the provided ID does not exist')
 
@@ -36,10 +41,10 @@ export class CategoryService {
     return false
   }
 
-  async getSubCategoryById(idSubCategory: number, idCategory: number): Promise<SubCategory> {
+  async getSubCategoryById(id: string, categoryId: string): Promise<SubCategory> {
     try {
       const findSubCategory = await this.subCategoryRepository.findOne({
-        where: { idSubCategory, category: { idCategory } },
+        where: { id, category: { id: categoryId } },
         relations: ['category']
       })
       if (!findSubCategory)
@@ -64,104 +69,101 @@ export class CategoryService {
     return true
   }
 
-  async createCategory(
-    categoryInput: CreateCategoryInput,
-    idAdminUser: string
-  ): Promise<SuccessResponse> {
-    await this.adminService.getAdminById(idAdminUser)
+  async createCategory(categoryInput: CreateCategoryInput, id: string): Promise<SuccessResponse> {
+    await this.adminService.getAdminById(id)
 
     const category = await this.checkCategoryByName(categoryInput.categoryName)
     if (category) throw new BadRequestException('Category already exists')
 
     await this.categoryRepository.save({
       ...categoryInput,
-      createdBy: idAdminUser
+      createdBy: id
     })
 
     return { success: true, message: 'Category Created' }
   }
 
-  async getAllCategories(idAdminUser: string): Promise<Category[]> {
-    await this.adminService.getAdminById(idAdminUser)
+  async getAllCategories(id: string): Promise<Category[]> {
+    await this.adminService.getAdminById(id)
 
     return await this.categoryRepository.find({ relations: ['subCategories'] })
   }
 
   async updateCategories(
-    categoryInput: Partial<Category>,
-    idAdminUser: string
+    updateCategoryInput: UpdateCategoryInput,
+    userId: string
   ): Promise<Partial<Category>> {
-    const { idCategory } = categoryInput
+    const { id } = updateCategoryInput
 
-    await this.adminService.getAdminById(idAdminUser)
+    await this.adminService.getAdminById(userId)
 
-    if (!idCategory) throw new BadRequestException('category Id is invalid')
+    if (!id) throw new BadRequestException('category Id is invalid')
 
     try {
-      const categoryData = await this.getCategoryById(idCategory)
-      await this.categoryRepository.update(categoryData.idCategory, {
-        ...categoryInput,
-        updatedBy: idAdminUser,
+      const categoryData = await this.getCategoryById(id)
+      await this.categoryRepository.update(categoryData.id, {
+        ...updateCategoryInput,
+        updatedBy: id,
         updatedDate: new Date()
       })
     } catch (e) {
       throw new BadRequestException('Failed to update data')
     }
 
-    return await this.getCategoryById(idCategory)
+    return await this.getCategoryById(id)
   }
 
   async createSubCategory(
     createSubCategoryInput: CreateSubCategoryInput,
-    idAdminUser: string
+    userId: string
   ): Promise<SuccessResponse> {
-    await this.adminService.getAdminById(idAdminUser)
+    await this.adminService.getAdminById(userId)
 
-    const { idCategory, subCategoryName } = createSubCategoryInput
+    const { categoryId, subCategoryName } = createSubCategoryInput
 
-    const category = await this.getCategoryById(idCategory)
+    const category = await this.getCategoryById(categoryId)
 
     await this.getSubCategoryByName(subCategoryName)
 
     await this.subCategoryRepository.save({
       ...createSubCategoryInput,
       category,
-      createdBy: idAdminUser
+      createdBy: userId
     })
 
     return { success: true, message: 'Sub Category Created' }
   }
 
-  async getAllSubCategories(idAdminUser: string): Promise<SubCategory[]> {
-    await this.adminService.getAdminById(idAdminUser)
+  async getAllSubCategories(id: string): Promise<SubCategory[]> {
+    await this.adminService.getAdminById(id)
 
     return await this.subCategoryRepository.find({ relations: ['category'] })
   }
 
   async updateSubCategories(
     updateSubCategoryInput: UpdateSubCategoryInput,
-    idAdminUser: string
+    userId: string
   ): Promise<Partial<SubCategory>> {
-    const { idSubCategory, idCategory, subCategoryName } = updateSubCategoryInput
-    await this.adminService.getAdminById(idAdminUser)
+    const { id, categoryId, subCategoryName } = updateSubCategoryInput
+    await this.adminService.getAdminById(userId)
 
     let category
 
-    const subCategoryData = await this.getSubCategoryById(idSubCategory, idCategory)
-    if (idCategory) category = await this.getCategoryById(idCategory)
+    const subCategoryData = await this.getSubCategoryById(id, categoryId)
+    if (categoryId) category = await this.getCategoryById(categoryId)
 
     try {
-      await this.subCategoryRepository.update(subCategoryData.idSubCategory, {
-        idSubCategory,
+      await this.subCategoryRepository.update(subCategoryData.id, {
+        id,
         subCategoryName,
         category,
-        updatedBy: idAdminUser,
+        updatedBy: userId,
         updatedDate: new Date()
       })
     } catch (e) {
       throw new BadRequestException('Failed to update data')
     }
 
-    return await this.getSubCategoryById(idSubCategory, idCategory)
+    return await this.getSubCategoryById(id, id)
   }
 }

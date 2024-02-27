@@ -144,9 +144,9 @@ export class CustomerUserService {
     return findOrganizerByName
   }
 
-  async getOrganizerById(idOrganizerUser: string, customerId: string): Promise<Organizer> {
+  async getOrganizerById(id: string, customerId: string): Promise<Organizer> {
     const findOrganizerById = await this.organizerRepository.findOne({
-      where: { idOrganizerUser, isActive: true, createdBy: customerId }
+      where: { id, isActive: true, createdBy: customerId }
     })
     if (!findOrganizerById)
       throw new BadRequestException('Organizer with the provided ID does not exist')
@@ -422,11 +422,11 @@ export class CustomerUserService {
     customerId: string
   ): Promise<Partial<Organizer>> {
     await this.getCustomerById(customerId)
-    const organizerData = await this.getOrganizerById(organizerInput.idOrganizerUser, customerId)
+    const organizerData = await this.getOrganizerById(organizerInput.id, customerId)
     if (!organizerData)
       throw new BadRequestException('Organizer with the provided ID does not exist')
     try {
-      await this.organizerRepository.update(organizerData.idOrganizerUser, {
+      await this.organizerRepository.update(organizerData.id, {
         ...organizerInput,
         updatedBy: customerId,
         updatedDate: new Date()
@@ -435,10 +435,7 @@ export class CustomerUserService {
       throw new BadRequestException('Failed to update data')
     }
 
-    const updatedOrganizerData = await this.getOrganizerById(
-      organizerInput.idOrganizerUser,
-      customerId
-    )
+    const updatedOrganizerData = await this.getOrganizerById(organizerInput.id, customerId)
 
     return updatedOrganizerData
   }
@@ -476,7 +473,7 @@ export class CustomerUserService {
   async saveMediaUrl(userId: string, fileName: string): Promise<boolean> {
     const updateMediaUrl = await this.updateCustomerData(
       {
-        mediaUrl: fileName
+        profileImage: fileName
       },
       userId
     )

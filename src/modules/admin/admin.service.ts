@@ -57,7 +57,7 @@ export class AdminService {
   async login(loginAdminInput: LoginAdminInput, contextUser: Admin): Promise<AdminLoginResponse> {
     const payload = {
       email: loginAdminInput?.email,
-      sub: contextUser?.idAdminUser,
+      sub: contextUser?.id,
       type: JWT_STRATEGY_NAME.ADMIN
     }
     return {
@@ -66,8 +66,8 @@ export class AdminService {
     }
   }
 
-  async getAdminById(idAdminUser: string): Promise<Admin> {
-    const findAdminById = await this.adminRepository.findOne({ where: { idAdminUser } })
+  async getAdminById(id: string): Promise<Admin> {
+    const findAdminById = await this.adminRepository.findOne({ where: { id } })
     if (!findAdminById) throw new ForbiddenException('Invalid Admin user')
 
     return findAdminById
@@ -80,12 +80,12 @@ export class AdminService {
     return { success: false, message: 'Email is invalid' }
   }
 
-  async create(data: CreateAdminUserInput, idAdminUser: string): Promise<SuccessResponse> {
+  async create(data: CreateAdminUserInput, id: string): Promise<SuccessResponse> {
     const { email } = data
 
-    console.log(idAdminUser)
+    console.log(id)
 
-    // await this.getAdminById(idAdminUser)
+    // await this.getAdminById(id)
 
     const adminUser = await this.adminRepository.findOne({ where: { email } })
     if (adminUser) throw new BadRequestException('Email already exists')
@@ -107,17 +107,17 @@ export class AdminService {
     updateAdminUserInput: UpdateAdminUserInput,
     userId: string
   ): Promise<Partial<Admin>> {
-    const { mediaUrl } = updateAdminUserInput
+    const { profileImage } = updateAdminUserInput
     const adminData = await this.getAdminById(userId)
     let signedUrl
 
-    if (mediaUrl) {
-      signedUrl = await this.saveMediaUrl(mediaUrl)
+    if (profileImage) {
+      signedUrl = await this.saveMediaUrl(profileImage)
     }
     try {
-      await this.adminRepository.update(adminData.idAdminUser, {
+      await this.adminRepository.update(adminData.id, {
         ...updateAdminUserInput,
-        mediaUrl: signedUrl,
+        profileImage: signedUrl,
         updatedDate: new Date()
       })
     } catch (e) {
@@ -142,7 +142,7 @@ export class AdminService {
     try {
       const pwd = await encodePassword(password)
 
-      await this.adminRepository.update(adminData.idAdminUser, {
+      await this.adminRepository.update(adminData.id, {
         password: pwd,
         updatedDate: new Date()
       })
@@ -157,8 +157,8 @@ export class AdminService {
     if (emailExists) throw new BadRequestException('Email already exists')
     try {
       const adminData: Partial<Admin> = await this.getAdminById(userId)
-      if (adminData.idAdminUser) {
-        await this.adminRepository.update(adminData.idAdminUser, {
+      if (adminData.id) {
+        await this.adminRepository.update(adminData.id, {
           email,
           updatedDate: new Date()
         })
@@ -168,10 +168,10 @@ export class AdminService {
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...rest } = updatedAdminData
-      if (updatedAdminData.idAdminUser && updatedAdminData.email) {
+      if (updatedAdminData.id && updatedAdminData.email) {
         const payload: JwtDto = {
           email: updatedAdminData.email,
-          sub: updatedAdminData.idAdminUser,
+          sub: updatedAdminData.id,
           type: JWT_STRATEGY_NAME.ADMIN
         }
 

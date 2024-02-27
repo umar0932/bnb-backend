@@ -7,7 +7,7 @@ import { Type } from 'class-transformer'
 export class CreateOrderInput {
   @Field(() => Int)
   @IsNotEmpty({ message: 'Event ID cannot be empty' })
-  idEvent!: number
+  eventId!: string
 
   @Field(() => Int)
   @IsNumber({}, { message: 'Total price must be a number' })

@@ -1,26 +1,36 @@
-import { InputType, Field } from '@nestjs/graphql'
+import { InputType, Field, ID } from '@nestjs/graphql'
 
-import { IsNotEmpty, IsString, IsNumber, IsArray, ValidateNested, IsDate } from 'class-validator'
+import {
+  IsNotEmpty,
+  IsString,
+  IsArray,
+  ValidateNested,
+  IsDate,
+  IsUUID,
+  IsOptional
+} from 'class-validator'
 import { Type } from 'class-transformer'
 
 import { CreateLocationInput } from '@app/common'
 
 @InputType()
 export class CreateBasicEventInput {
-  @Field()
+  @Field(() => String)
   @IsNotEmpty({ message: 'Event title cannot be empty' })
   @IsString({ message: 'Event title must be a string' })
-  eventTitle!: string
+  title!: string
 
-  @Field(() => Number, { nullable: true })
-  @IsNumber({}, { message: 'RefIdCategory must be a number' })
-  refIdCategory?: number
+  @Field(() => ID, { nullable: true })
+  @IsUUID('4', { message: 'Invalid Category UUID format' })
+  categoryId?: string
 
-  @Field(() => Number, { nullable: true })
-  @IsNumber({}, { message: 'RefIdSubCategory must be a number' })
-  refIdSubCategory?: number
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsUUID('4', { message: 'Invalid subCategory UUID format' })
+  subCategoryId?: string
 
   @Field(() => [String], { nullable: true })
+  @IsOptional()
   @IsArray({ message: 'Tags must be an array' })
   tags?: string[]
 

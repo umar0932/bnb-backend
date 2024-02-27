@@ -7,13 +7,13 @@ import { CustomerUserModule } from '@app/customer-user'
 import { LocationsEntity } from '@app/common/entities'
 
 import { CategoryModule } from '@app/category'
-import { Event, EventDetailsEntity, EventTicketsEntity } from './entities'
+import { Event, EventDetailsEntity, Tickets } from './entities'
 import { EventResolver } from './event.resolver'
 import { EventService } from './event.service'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Event, EventDetailsEntity, EventTicketsEntity, LocationsEntity]),
+    TypeOrmModule.forFeature([Event, EventDetailsEntity, Tickets, LocationsEntity]),
     AdminModule,
     AwsS3ClientModule,
     CustomerUserModule,

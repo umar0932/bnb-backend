@@ -10,20 +10,24 @@ import { Event } from '@app/events/entities'
 @Entity({ name: 'category' })
 @ObjectType()
 export class Category extends CustomBaseEntity {
+  // Primary key
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
-  idCategory!: number
+  @PrimaryGeneratedColumn('uuid')
+  id: string
+
+  // Complusory Variables
 
   @Column({ length: 50, name: 'category_name', unique: true })
-  @Field()
+  @Field(() => String)
   categoryName!: string
 
+  // Relations
+
+  @Field(() => [SubCategory], { nullable: true })
   @OneToMany(() => SubCategory, subCategory => subCategory.category, {
     eager: true,
-    nullable: true,
-    cascade: true
+    nullable: true
   })
-  @Field(() => [SubCategory], { nullable: true })
   subCategories?: SubCategory[]
 
   @Field(() => Event, { nullable: true })

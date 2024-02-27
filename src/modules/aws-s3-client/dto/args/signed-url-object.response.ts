@@ -4,10 +4,10 @@ import { IsString } from 'class-validator'
 @ObjectType()
 export class S3SignedUrlResponse {
   @IsString()
-  @Field()
+  @Field(() => String)
   signedUrl!: string
 
   @IsString()
-  @Field()
+  @Field(() => String)
   fileName!: string
 }
