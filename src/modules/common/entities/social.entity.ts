@@ -36,7 +36,7 @@ export class SocialProvider {
 
   @Field(() => Customer)
   @OneToOne(() => Customer, customer => customer.socialProvider, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'ref_id_customer' })
+  @JoinColumn({ name: 'customer_id' })
   customer: Customer
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })

@@ -56,9 +56,9 @@ export class EventService {
     return false
   }
 
-  async getEventTicketsByName(ticketName: string, customerId: string): Promise<boolean> {
+  async getEventTicketsByName(title: string, customerId: string): Promise<boolean> {
     const findEventTickets = await this.eventTicketsRepository.count({
-      where: { ticketName, createdBy: customerId }
+      where: { title, createdBy: customerId }
     })
     if (findEventTickets > 0) return true
     return false
@@ -197,7 +197,7 @@ export class EventService {
   ): Promise<SuccessResponse> {
     const { eventId, ...rest } = createEventTicketsInput
     const event = await this.getEventById(eventId, userId)
-    const ticketData = await this.getEventTicketsByName(createEventTicketsInput.ticketName, userId)
+    const ticketData = await this.getEventTicketsByName(createEventTicketsInput.title, userId)
     if (ticketData)
       throw new BadRequestException('This Ticket name already exist. Enter a valid name')
     try {

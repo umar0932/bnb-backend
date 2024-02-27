@@ -73,16 +73,16 @@ input CreateCustomerInput {
 }
 
 input CreateEventTicketInput {
-  availableQuantity: Float!
+  availableQuantity: Int!
   endDate: DateTime!
   eventId: ID!
   isVisible: Boolean
-  maxQuantity: Float!
-  minQuantity: Float!
+  maxQuantity: Int!
+  minQuantity: Int!
+  price: Int!
   startDate: DateTime!
-  ticketDescription: String
-  ticketName: String!
-  ticketPrice: Float!
+  description: String
+  title: String!
 }
 
 input CreateLocationInput {
@@ -359,13 +359,13 @@ type Mutation {
 type OrderEntity {
   createdBy: String
   createdDate: DateTime
-  eventId: Int!
+  eventId: String!
   id: ID!
   orderStatus: OrderStatus!
   paymentIntentId: String!
   stripeCustomerId: String!
   tickets: TicketType!
-  totalPrice: Int!
+  totalPrice: Float!
   updatedBy: String
   updatedDate: DateTime
 }
@@ -467,30 +467,30 @@ type SuccessResponse {
 
 type TicketType {
   id: ID!
+  price: Int!
   quantity: Int!
-  ticketPrice: Int!
 }
 
 input TicketTypeInput {
   id: Int!
+  price: Int!
   quantity: Int!
-  ticketPrice: Int!
 }
 
 type Tickets {
-  availableQuantity: Float!
+  availableQuantity: Int!
   createdBy: String
   createdDate: DateTime
   endDate: DateTime!
-  event: Event
+  event: Event!
   id: ID!
   isVisible: Boolean
-  maxQuantity: Float!
-  minQuantity: Float!
+  maxQuantity: Int!
+  minQuantity: Int!
+  price: Float!
   startDate: DateTime!
-  ticketDescription: String
-  ticketName: String!
-  ticketPrice: Float!
+  description: String
+  title: String!
   updatedBy: String
   updatedDate: DateTime
 }
@@ -539,17 +539,17 @@ input UpdateCustomerInput {
 }
 
 input UpdateEventTicketInput {
-  availableQuantity: Float!
+  availableQuantity: Int!
   endDate: DateTime!
   eventId: ID!
   id: ID!
   isVisible: Boolean
-  maxQuantity: Float!
-  minQuantity: Float!
+  maxQuantity: Int!
+  minQuantity: Int!
+  price: Int!
   startDate: DateTime!
-  ticketDescription: String
-  ticketName: String!
-  ticketPrice: Float!
+  description: String
+  title: String!
 }
 
 input UpdateOrganizerInput {

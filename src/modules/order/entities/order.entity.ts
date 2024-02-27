@@ -1,4 +1,4 @@
-import { Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
@@ -22,8 +22,8 @@ export class OrderEntity extends CustomBaseEntity {
   // Complusory Variables
 
   @Column({ name: 'event_id' })
-  @Field(() => Int)
-  eventId!: number
+  @Field(() => String)
+  eventId!: string
 
   @Column({ name: 'payment_intent_id' })
   @Field(() => String)
@@ -33,8 +33,8 @@ export class OrderEntity extends CustomBaseEntity {
   @Field(() => String)
   stripeCustomerId!: string
 
-  @Column('numeric', { default: 0.0, name: 'total_price' })
-  @Field(() => Int)
+  @Column('float', { default: 0.0, name: 'total_price' })
+  @Field(() => Number)
   totalPrice!: number
 
   @Column({ type: 'simple-json', name: 'tickets_json' })

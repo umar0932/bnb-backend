@@ -1,4 +1,4 @@
-import { InputType, Field, ID } from '@nestjs/graphql'
+import { InputType, Field, ID, Int } from '@nestjs/graphql'
 import {
   IsNotEmpty,
   IsString,
@@ -19,21 +19,21 @@ export class CreateEventTicketInput {
   eventId!: string
 
   @Field(() => String)
-  @IsString({ message: 'Ticket name must be a string' })
-  @IsNotEmpty({ message: 'Ticket name cannot be empty' })
-  @MinLength(1, { message: 'Ticket name must be at least 1 character long' })
-  @MaxLength(50, { message: 'Ticket name cannot be longer than 50 characters' })
-  ticketName!: string
+  @IsString({ message: 'Ticket title must be a string' })
+  @IsNotEmpty({ message: 'Ticket title cannot be empty' })
+  @MinLength(1, { message: 'Ticket title must be at least 1 character long' })
+  @MaxLength(50, { message: 'Ticket title cannot be longer than 50 characters' })
+  title!: string
 
-  @Field(() => Number)
+  @Field(() => Int)
   @IsNotEmpty({ message: 'Available quantity cannot be empty' })
   @IsNumber({}, { message: 'Available quantity must be a number' })
   availableQuantity!: number
 
-  @Field(() => Number)
+  @Field(() => Int)
   @IsNotEmpty({ message: 'Ticket price cannot be empty' })
   @IsNumber({}, { message: 'Ticket price must be a number' })
-  ticketPrice!: number
+  price!: number
 
   @Field(() => Date)
   @IsNotEmpty({ message: 'Start date cannot be empty' })
@@ -49,19 +49,19 @@ export class CreateEventTicketInput {
   @IsString({ message: 'Ticket description must be a string' })
   @MinLength(0, { message: 'Ticket description must be at least 0 characters long' })
   @MaxLength(50, { message: 'Ticket description cannot be longer than 50 characters' })
-  ticketDescription?: string
+  description?: string
 
   @Field(() => Boolean, { nullable: true })
   @IsBoolean({ message: 'Is visible must be a boolean' })
   isVisible?: boolean
 
-  @Field(() => Number)
+  @Field(() => Int)
   @IsNotEmpty({ message: 'Minimum quantity cannot be empty' })
   @IsNumber({}, { message: 'Minimum quantity must be a number' })
   @Min(1, { message: 'Minimum quantity must be at least 1' })
   minQuantity!: number
 
-  @Field(() => Number)
+  @Field(() => Int)
   @IsNotEmpty({ message: 'Maximum quantity cannot be empty' })
   @IsNumber({}, { message: 'Maximum quantity must be a number' })
   @Min(1, { message: 'Maximum quantity must be at least 1' })
