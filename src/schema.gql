@@ -1,0 +1,567 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Admin {
+  createdBy: String
+  createdDate: DateTime
+  email: String!
+  firstName: String!
+  id: ID!
+  isActive: Boolean
+  lastName: String!
+  password: String!
+  profileImage: String
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+type AdminEmailUpdateResponse {
+  accessToken: String!
+  user: Admin!
+}
+
+type AdminLoginResponse {
+  accessToken: String!
+  user: Admin!
+}
+
+type Category {
+  categoryName: String!
+  createdBy: String
+  createdDate: DateTime
+  events: Event
+  id: ID!
+  subCategories: [SubCategory!]
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+input CreateAdminUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
+input CreateBasicEventInput {
+  categoryId: ID
+  endDate: DateTime!
+  location: CreateLocationInput!
+  startDate: DateTime!
+  subCategoryId: ID
+  tags: [String!]
+  title: String!
+  type: String
+}
+
+input CreateCategoryInput {
+  categoryName: String!
+}
+
+input CreateChargeInput {
+  amount: Int!
+  customerId: String!
+  paymentMethodId: String!
+}
+
+input CreateCustomerInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
+input CreateEventTicketInput {
+  availableQuantity: Int!
+  endDate: DateTime!
+  eventId: ID!
+  isVisible: Boolean
+  maxQuantity: Int!
+  minQuantity: Int!
+  price: Int!
+  startDate: DateTime!
+  description: String
+  title: String!
+}
+
+input CreateLocationInput {
+  city: String!
+  country: String!
+  lat: String!
+  locationType: LocationTypes!
+  long: String!
+  placeId: String
+  postalCode: String!
+  state: String
+  streetAddress: String!
+  venueName: String!
+}
+
+input CreateOrderInput {
+  eventId: Int!
+  tickets: [TicketTypeInput!]!
+  totalPrice: Int!
+}
+
+input CreateOrganizerInput {
+  description: String
+  name: String!
+  organizationBio: String
+  websiteLink: String
+}
+
+input CreateSubCategoryInput {
+  categoryId: ID!
+  subCategoryName: String!
+}
+
+type Customer {
+  cellPhone: String
+  city: String
+  companyName: String
+  country: String
+  createdBy: String
+  createdDate: DateTime
+  email: String!
+  firstAddress: String
+  firstName: String!
+  homePhone: String
+  id: ID!
+  isActive: Boolean
+  jobTitle: String
+  lastName: String!
+  password: String!
+  profileImage: String
+  secondAddress: String
+  socialProvider: SocialProvider
+  state: String
+  stripeCustomerId: String
+  updatedBy: String
+  updatedDate: DateTime
+  website: String
+  zipCode: String
+}
+
+type CustomerEmailUpdateResponse {
+  accessToken: String!
+  user: Customer!
+}
+
+input CustomerFilterInput {
+  cellPhone: String
+  city: String
+  companyName: String
+  country: String
+  email: String
+  firstAddress: String
+  firstName: String
+  homePhone: String
+  id: ID
+  jobTitle: String
+  lastName: String
+  secondAddress: String
+  state: String
+  website: String
+  zipCode: String
+}
+
+type CustomerLoginOrRegisterResponse {
+  accessToken: String!
+  user: Customer!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Event {
+  category: Category
+  createdBy: String
+  createdDate: DateTime
+  endDate: DateTime!
+  eventDetails: EventDetailsEntity
+  eventTickets: Tickets
+  id: ID!
+  location: LocationsEntity!
+  startDate: DateTime!
+  status: EventStatus!
+  subCategory: SubCategory
+  tags: [String!]
+  title: String!
+  type: String
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+type EventDetailsEntity {
+  createdBy: String
+  createdDate: DateTime
+  description: String!
+  event: Event!
+  eventImages: [String!]!
+  id: ID!
+  summary: String!
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+input EventDetailsInput {
+  description: String
+  eventId: String!
+  eventImages: [String!]!
+  summary: String
+}
+
+input EventFilterInput {
+  categoryName: String
+  eventToday: String
+  eventWeekend: String
+  online: Boolean
+  search: String
+  title: String
+}
+
+"""The status of event"""
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  SOLD
+}
+
+input ListCustomersInputs {
+  filter: CustomerFilterInput
+  limit: Float!
+  offset: Float = 0
+}
+
+type ListCustomersResponse {
+  results: [Customer!]!
+  totalRows: Float
+}
+
+input ListEventsInputs {
+  filter: EventFilterInput
+  limit: Float!
+  offset: Float = 0
+}
+
+type ListEventsResponse {
+  results: [Event!]!
+  totalRows: Float
+}
+
+"""The type of location for an event (ONLINE_EVENT or VENUE_EVENT)"""
+enum LocationTypes {
+  ONLINE_EVENT
+  VENUE_EVENT
+}
+
+type LocationsEntity {
+  city: String!
+  country: String!
+  id: ID!
+  lat: String!
+  locationType: LocationTypes!
+  long: String!
+  placeId: String
+  postalCode: String!
+  state: String
+  streetAddress: String!
+  venueName: String!
+}
+
+input LoginAdminInput {
+  email: String!
+  password: String!
+}
+
+input LoginCustomerInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  """Customer Social Registration"""
+  continueWithSocialSite(input: RegisterOrLoginSocialInput!): CustomerLoginOrRegisterResponse!
+
+  """Create new admin user"""
+  createAdminUser(input: CreateAdminUserInput!): SuccessResponse!
+
+  """This will create new Events"""
+  createBasicEvent(input: CreateBasicEventInput!): SuccessResponse!
+
+  """This will create new Categories"""
+  createCategory(input: CreateCategoryInput!): SuccessResponse!
+
+  """This will signup new Customers"""
+  createCustomer(input: CreateCustomerInput!): CustomerLoginOrRegisterResponse!
+
+  """This will create new Ticket for the Event"""
+  createEventTickets(input: CreateEventTicketInput!): SuccessResponse!
+
+  """This will create new Events"""
+  createOrUpdateEventDetails(input: EventDetailsInput!): SuccessResponse!
+
+  """This will signup new Organizers"""
+  createOrganizer(input: CreateOrganizerInput!): SuccessResponse!
+
+  """This will create new SubCategories"""
+  createSubCategory(input: CreateSubCategoryInput!): SuccessResponse!
+
+  """Admin Login"""
+  loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
+
+  """Customer Login"""
+  loginAsCustomer(input: LoginCustomerInput!): CustomerLoginOrRegisterResponse!
+
+  """This will save/update user profile image in DB"""
+  saveCustomerMediaUrl(fileName: String!): String!
+
+  """This will charge the Customer on test stripe"""
+  testCharge(chargeInput: CreateChargeInput!, orderInput: CreateOrderInput!): SuccessResponse!
+
+  """Update admin data"""
+  updateAdminData(input: UpdateAdminUserInput!): String!
+
+  """Update admin email"""
+  updateAdminEmail(input: String!): AdminEmailUpdateResponse!
+
+  """This will update Admin Password"""
+  updateAdminPassword(password: String!): SuccessResponse!
+
+  """This will update ticket for the Event"""
+  updateBasicEvent(input: UpdateBasicEventInput!): SuccessResponse!
+
+  """This will update Category"""
+  updateCategory(input: UpdateCategoryInput!): Category!
+
+  """This will update Customer"""
+  updateCustomer(input: UpdateCustomerInput!): Customer!
+
+  """Update customer email"""
+  updateCustomerEmail(input: String!): CustomerEmailUpdateResponse!
+
+  """This will update Customer Password"""
+  updateCustomerPassword(password: String!): SuccessResponse!
+
+  """This will update ticket for the Event"""
+  updateEventTicket(input: UpdateEventTicketInput!): SuccessResponse!
+
+  """This will signup update Organizers"""
+  updateOrganizer(input: UpdateOrganizerInput!): Organizer!
+
+  """This will update SubCategory"""
+  updateSubCategories(input: UpdateSubCategoryInput!): SubCategory!
+}
+
+type OrderEntity {
+  createdBy: String
+  createdDate: DateTime
+  eventId: String!
+  id: ID!
+  orderStatus: OrderStatus!
+  paymentIntentId: String!
+  stripeCustomerId: String!
+  tickets: TicketType!
+  totalPrice: Float!
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+"""The status of order"""
+enum OrderStatus {
+  FAILED
+  PENDING
+  SUCCEEDED
+}
+
+type Organizer {
+  createdBy: String
+  createdDate: DateTime
+  description: String
+  id: ID!
+  isActive: String
+  name: String!
+  organizationBio: String
+  updatedBy: String
+  updatedDate: DateTime
+  websiteLink: String
+}
+
+type PageData {
+  count: Int!
+  limit: Int
+  offset: Int
+}
+
+type Query {
+  """This will get all categories"""
+  getAllCategories: [Category!]!
+
+  """The List of Events with Pagination and filters"""
+  getAllEventsWithPagination(input: ListEventsInputs!): ListEventsResponse!
+
+  """This will get all categories"""
+  getAllSubCategories: [SubCategory!]!
+
+  """Get the Customer"""
+  getCustomerData: Customer!
+
+  """Get S3 bucket Signed Url"""
+  getCustomerUploadUrl: S3SignedUrlResponse!
+
+  """The List of Customers with Pagination and filters"""
+  getCustomersAdmin(input: ListCustomersInputs!): ListCustomersResponse!
+
+  """This will return signed Urls for Events"""
+  getEventUploadUrls(count: Float!): [S3SignedUrlResponse!]!
+
+  """This will get all Orders of Current Customer"""
+  getOrdersOfCustomer: [OrderEntity!]!
+
+  """check if email already exist"""
+  validEmailAdmin(input: String!): SuccessResponse!
+}
+
+input RegisterOrLoginSocialInput {
+  accessToken: String!
+  provider: SocialAuthProviders!
+}
+
+type S3SignedUrlResponse {
+  fileName: String!
+  signedUrl: String!
+}
+
+"""Social provider types"""
+enum SocialAuthProviders {
+  FACEBOOK
+  GOOGLE
+}
+
+type SocialProvider {
+  createdDate: DateTime!
+  customer: Customer!
+  id: ID!
+  provider: SocialAuthProviders!
+  socialId: String!
+}
+
+type SubCategory {
+  category: Category!
+  createdBy: String
+  createdDate: DateTime
+  events: [Event!]
+  id: ID!
+  subCategoryName: String!
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+type SuccessResponse {
+  message: String
+  success: Boolean
+}
+
+type TicketType {
+  id: ID!
+  price: Int!
+  quantity: Int!
+}
+
+input TicketTypeInput {
+  id: Int!
+  price: Int!
+  quantity: Int!
+}
+
+type Tickets {
+  availableQuantity: Int!
+  createdBy: String
+  createdDate: DateTime
+  endDate: DateTime!
+  event: Event!
+  id: ID!
+  isVisible: Boolean
+  maxQuantity: Int!
+  minQuantity: Int!
+  price: Float!
+  startDate: DateTime!
+  description: String
+  title: String!
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+input UpdateAdminUserInput {
+  email: String
+  firstName: String
+  lastName: String
+  profileImage: String
+}
+
+input UpdateBasicEventInput {
+  categoryId: ID
+  endDate: DateTime!
+  eventId: ID!
+  location: CreateLocationInput!
+  startDate: DateTime!
+  subCategoryId: ID
+  tags: [String!]
+  title: String!
+  type: String
+}
+
+input UpdateCategoryInput {
+  categoryName: String!
+  id: ID!
+}
+
+input UpdateCustomerInput {
+  cellPhone: String
+  city: String
+  companyName: String
+  country: String
+  firstAddress: String
+  firstName: String
+  homePhone: String
+  isActive: String
+  jobTitle: String
+  lastName: String
+  profileImage: String
+  secondAddress: String
+  state: String
+  stripeCustomerId: String
+  website: String
+  zipCode: String
+}
+
+input UpdateEventTicketInput {
+  availableQuantity: Int!
+  endDate: DateTime!
+  eventId: ID!
+  id: ID!
+  isVisible: Boolean
+  maxQuantity: Int!
+  minQuantity: Int!
+  price: Int!
+  startDate: DateTime!
+  description: String
+  title: String!
+}
+
+input UpdateOrganizerInput {
+  description: String
+  id: ID!
+  name: String!
+  organizationBio: String
+  websiteLink: String
+}
+
+input UpdateSubCategoryInput {
+  categoryId: ID!
+  id: ID!
+  subCategoryName: String!
+}

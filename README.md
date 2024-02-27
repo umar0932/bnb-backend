@@ -1,73 +1,109 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# BNB PROJECT
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**GraphQL** API with **user authentication** and **role based access control**.  
+Technologies used are:
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- GraphQL
+- TypeORM
+- Postgres
+- Apollo Server
+- Passport-JWT
 
-## Description
+## Setup
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Start by cloning the repository into your local workstation:
 
-## Installation
-
-```bash
-$ npm install
+```sh
+git clone https://github.com/{username}/bnb-backend.git
 ```
 
-## Running the app
+This project is made with npm. 
+Run `npm install`
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```sh
+cd ./my-project
+npm install
 ```
 
-## Test
+Create thre `.env` files in the root of the project:
 
-```bash
-# unit tests
-$ npm run test
+- `.env`
+- `.env.dev`
+- `.env.pro`
 
-# e2e tests
-$ npm run test:e2e
+In the `.env.dev` file, put the environment variables used in **development**.  
+The `.env.pro` file will contain all the environment variables for **production**.
+The `.env` file will contain all the environment variables for **Docker**.
 
-# test coverage
-$ npm run test:cov
+To make connection with the database install docker on your machine and then run the following commands
+
+```sh
+docker compose up 
 ```
 
-## Support
+To remove the Docker run
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```sh
+docker compose down 
+```
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
-## License
+## Usage
 
-Nest is [MIT licensed](LICENSE).
+When the database is connected, you can start up the server by running `npm run start:dev`.
+A GraphQL schema will be generated. This will contain a Users table and all the dto's for user authentication. If it is already present then the schema willupdate according to your typeORM Entity
+
+To register a user:
+
+- Go to the [GraphQL Playground](http://localhost:{APP_PORT}/graphql)
+- Run the signup mutation using `email`, `password` and `username` variables
+
+Running this mutation will create a new entry in the Users table **if the email is not already registered**.  
+
+
+To login a user:
+
+- Go to the [GraphQL Playground](http://localhost:{APP_PORT}/graphql)
+- Run the login mutation using `email` and `password` variables
+
+Running this mutation will check the credentials of the user, if the credentials are correct, the mutation will return a JWT.
+This token contains the user information, including the user role.
+
+## Jwt Guards
+
+To protect an API route, you can use a **JwtGuard**. This guard checks if the user has a valid JWT. You can apply this guard to the **UseGuard decorator** to queries and mutations inside a resolver.
+In this example the findAll users query inside the `users.resolver.ts` file is protected using this guard.
+
+```js
+  @Query(() => [User], { name: 'users' })
+  @UseGuards(JwtAuthGuard)
+  findAll(): Promise<User[]> {
+    return this.usersService.findAll();
+  }
+```
+
+To send an authenticated request in the GraphQL playground, you can use the JWT that was returned after loggin in.
+Add this to the HTTP Headers.  
+**Remove the "<>"**.
+
+```json
+{
+  "Authorization": "Bearer <your token>"
+}
+```
+
+## Role Guards
+
+The protect an API route from a specific user Role, you can use a **Roles** guard. This guard checks if the user has the correct roles to access the specified route.
+In this example the findAll users query inside the `users.resolver.ts` file is protected using this guard.  
+Only a user with the ADMIN role can access this endpoint.
+
+```js
+  @Query(() => [User], { name: 'users' })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  findAll(): Promise<User[]> {
+    return this.usersService.findAll();
+  }
+```
