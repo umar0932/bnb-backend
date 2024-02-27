@@ -56,7 +56,7 @@ A GraphQL schema will be generated. This will contain a Users table and all the 
 
 To register a user:
 
-- Go to the [GraphQL Playground](http://localhost:{APP_PORT}/graphql)
+- Go to the [GraphQL Playground](http://localhost:{PORT}/graphql)
 - Run the signup mutation using `email`, `password` and `username` variables
 
 Running this mutation will create a new entry in the Users table **if the email is not already registered**.  
@@ -64,7 +64,7 @@ Running this mutation will create a new entry in the Users table **if the email 
 
 To login a user:
 
-- Go to the [GraphQL Playground](http://localhost:{APP_PORT}/graphql)
+- Go to the [GraphQL Playground](http://localhost:{PORT}/graphql)
 - Run the login mutation using `email` and `password` variables
 
 Running this mutation will check the credentials of the user, if the credentials are correct, the mutation will return a JWT.
