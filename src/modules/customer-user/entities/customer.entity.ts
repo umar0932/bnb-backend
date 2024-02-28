@@ -1,8 +1,10 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql'
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql'
 
-import { Column, Entity, Index, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity, SocialProvider } from '@app/common/entities'
+
+import { CustomerFollower } from './customer-follower.entity'
 
 @Entity({ name: 'customer_user' })
 @Index(['email'])
@@ -36,6 +38,14 @@ export class Customer extends CustomBaseEntity {
   @Column({ length: 250, name: 'profile_image', nullable: true })
   @Field(() => String, { nullable: true })
   profileImage?: string
+
+  @Column({ type: 'numeric', name: 'following_count', default: 0 })
+  @Field(() => Int, { nullable: true })
+  totalFollowings?: number
+
+  @Column({ type: 'numeric', name: 'followers_count', default: 0 })
+  @Field(() => Int, { nullable: true })
+  totalFollowers?: number
 
   @Column({ length: 50, name: 'city', nullable: true })
   @Field(() => String, { nullable: true })
@@ -92,6 +102,20 @@ export class Customer extends CustomBaseEntity {
   // Enums
 
   // Relations
+
+  @Field(() => [CustomerFollower], { nullable: true })
+  @OneToMany(() => CustomerFollower, (uf: CustomerFollower) => uf.followers, {
+    eager: true,
+    nullable: true
+  })
+  followers?: CustomerFollower[]
+
+  @Field(() => [CustomerFollower], { nullable: true })
+  @OneToMany(() => CustomerFollower, (uf: CustomerFollower) => uf.following, {
+    eager: true,
+    nullable: true
+  })
+  following?: CustomerFollower[]
 
   @Field(() => SocialProvider, { nullable: true })
   @OneToOne(() => SocialProvider, socialProvider => socialProvider.customer, {

@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
@@ -26,9 +31,32 @@ export class AdminService {
     private jwtService: JwtService
   ) {}
 
-  getJwtToken = async ({ sub, email, type }: JwtDto) => {
-    const payload: JwtDto = { email, sub, type }
+  // Private Methods
+
+  // Public Methods
+
+  async adminOnlyAccess(userType: string): Promise<void> {
+    if (userType !== JWT_STRATEGY_NAME.ADMIN) throw new ForbiddenException('Only Admins Access')
+  }
+
+  async getAdminById(id: string): Promise<Admin> {
+    const findAdminById = await this.adminRepository.findOne({ where: { id } })
+    if (!findAdminById) throw new NotFoundException('Invalid Admin user')
+
+    return findAdminById
+  }
+
+  getJwtToken = async ({ sub, email, firstName, lastName, profileImage, type }: JwtDto) => {
+    const payload: JwtDto = { sub, email, firstName, lastName, profileImage, type }
     return await this.jwtService.sign(payload)
+  }
+
+  async isValidPwd(pwd: string): Promise<boolean> {
+    const checkPwd = isValidPassword(pwd)
+
+    if (!checkPwd) throw new BadRequestException('Invalid email or password')
+
+    return true
   }
 
   async validateAdmin(email: string, password: string): Promise<Admin> {
@@ -46,32 +74,7 @@ export class AdminService {
     return true
   }
 
-  async isValidPwd(pwd: string): Promise<boolean> {
-    const checkPwd = isValidPassword(pwd)
-
-    if (!checkPwd) throw new BadRequestException('Invalid email or password')
-
-    return true
-  }
-
-  async login(loginAdminInput: LoginAdminInput, contextUser: Admin): Promise<AdminLoginResponse> {
-    const payload = {
-      email: loginAdminInput?.email,
-      sub: contextUser?.id,
-      type: JWT_STRATEGY_NAME.ADMIN
-    }
-    return {
-      accessToken: await this.getJwtToken(payload),
-      user: contextUser
-    }
-  }
-
-  async getAdminById(id: string): Promise<Admin> {
-    const findAdminById = await this.adminRepository.findOne({ where: { id } })
-    if (!findAdminById) throw new ForbiddenException('Invalid Admin user')
-
-    return findAdminById
-  }
+  // Resolver Query Methods
 
   async isEmailExist(email: string): Promise<SuccessResponse> {
     const emailExists = await this.adminRepository.count({ where: { email } })
@@ -80,7 +83,9 @@ export class AdminService {
     return { success: false, message: 'Email is invalid' }
   }
 
-  async create(data: CreateAdminUserInput, id: string): Promise<SuccessResponse> {
+  // Resolver Mutation Methods
+
+  async createAdmin(data: CreateAdminUserInput, id: string): Promise<SuccessResponse> {
     const { email } = data
 
     console.log(id)
@@ -94,6 +99,7 @@ export class AdminService {
 
     await this.adminRepository.save({
       ...data,
+      isActive: true,
       password
     })
 
@@ -101,6 +107,27 @@ export class AdminService {
       success: true,
       message: 'Created a new admin'
     }
+  }
+
+  async loginAdmin(loginAdminInput: LoginAdminInput, admin: Admin): Promise<AdminLoginResponse> {
+    const payload = {
+      sub: admin?.id,
+      email: loginAdminInput?.email,
+      firstName: admin?.firstName,
+      lastName: admin?.lastName,
+      type: JWT_STRATEGY_NAME.ADMIN
+    }
+    return {
+      accessToken: await this.getJwtToken(payload),
+      user: admin
+    }
+  }
+
+  async saveMediaUrl(fileName: string): Promise<string> {
+    const bucketName = this.configService.get('ADMIN_UPLOADS_BUCKET')
+
+    const url = `${bucketName}/${fileName}`
+    return url
   }
 
   async updateAdminData(
@@ -132,6 +159,47 @@ export class AdminService {
     return rest
   }
 
+  async updateAdminEmail(userId: string, email: string): Promise<AdminEmailUpdateResponse> {
+    const emailExists = await this.isEmailExist(email)
+    if (emailExists) throw new BadRequestException('Email already exists')
+    try {
+      const adminData: Partial<Admin> = await this.getAdminById(userId)
+      if (adminData.id) {
+        await this.adminRepository.update(adminData.id, {
+          email,
+          updatedDate: new Date()
+        })
+      }
+
+      const updatedAdminData: Partial<Admin> = await this.getAdminById(userId)
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...rest } = updatedAdminData
+      if (
+        updatedAdminData.id &&
+        updatedAdminData.email &&
+        updatedAdminData.firstName &&
+        updatedAdminData.lastName
+      ) {
+        const payload: JwtDto = {
+          sub: updatedAdminData.id,
+          email: updatedAdminData.email,
+          firstName: updatedAdminData.firstName,
+          lastName: updatedAdminData.lastName,
+          profileImage: updatedAdminData.profileImage,
+          type: JWT_STRATEGY_NAME.ADMIN
+        }
+
+        return {
+          accessToken: await this.getJwtToken(payload),
+          user: rest
+        }
+      } else throw new BadRequestException("Couldn't update email")
+    } catch (err) {
+      throw new BadRequestException("Couldn't update email")
+    }
+  }
+
   async updatePassword(password: string, adminId: string): Promise<SuccessResponse> {
     const adminData = await this.getAdminById(adminId)
     // const checkPwd = await isValidPassword(password)
@@ -150,44 +218,5 @@ export class AdminService {
       throw new BadRequestException('Failed to update admin data')
     }
     return { success: true, message: 'Password of admin has been updated' }
-  }
-
-  async updateAdminEmail(userId: string, email: string): Promise<AdminEmailUpdateResponse> {
-    const emailExists = await this.isEmailExist(email)
-    if (emailExists) throw new BadRequestException('Email already exists')
-    try {
-      const adminData: Partial<Admin> = await this.getAdminById(userId)
-      if (adminData.id) {
-        await this.adminRepository.update(adminData.id, {
-          email,
-          updatedDate: new Date()
-        })
-      }
-
-      const updatedAdminData: Partial<Admin> = await this.getAdminById(userId)
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...rest } = updatedAdminData
-      if (updatedAdminData.id && updatedAdminData.email) {
-        const payload: JwtDto = {
-          email: updatedAdminData.email,
-          sub: updatedAdminData.id,
-          type: JWT_STRATEGY_NAME.ADMIN
-        }
-
-        return {
-          accessToken: await this.getJwtToken(payload),
-          user: rest
-        }
-      } else throw new BadRequestException("Couldn't update email")
-    } catch (err) {
-      throw new BadRequestException("Couldn't update email")
-    }
-  }
-
-  async saveMediaUrl(fileName: string): Promise<string> {
-    const bucketName = this.configService.get('ADMIN_UPLOADS_BUCKET')
-    const url = `${bucketName}/${fileName}`
-    return url
   }
 }

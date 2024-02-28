@@ -294,8 +294,6 @@ export class EventService {
         .skip(offset)
         .getManyAndCount()
 
-      console.log('events', events)
-
       return [events, total]
     } catch (error) {
       throw new BadRequestException('Failed to find Events')

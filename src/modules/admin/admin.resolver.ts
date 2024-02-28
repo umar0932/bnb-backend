@@ -13,10 +13,19 @@ import { GqlAuthGuard } from './guards'
 export class AdminResolver {
   constructor(private readonly adminService: AdminService) {}
 
+  // Queries
+
+  @Query(() => SuccessResponse, { description: 'check if email already exist' })
+  async validEmailAdmin(@Args('input') emailId: string): Promise<SuccessResponse> {
+    return await this.adminService.isEmailExist(emailId)
+  }
+
+  // Mutations
+
   @Mutation(() => AdminLoginResponse, { description: 'Admin Login' })
   @UseGuards(GqlAuthGuard)
   async loginAsAdmin(@Args('input') loginAdminInput: LoginAdminInput, @CurrentUser() user: any) {
-    return this.adminService.login(loginAdminInput, user)
+    return this.adminService.loginAdmin(loginAdminInput, user)
   }
 
   @Mutation(() => SuccessResponse, { description: 'Create new admin user' })
@@ -25,31 +34,7 @@ export class AdminResolver {
     @Args('input') createAdminUserData: CreateAdminUserInput,
     @CurrentUser() user: JwtUserPayload
   ): Promise<SuccessResponse> {
-    return this.adminService.create(createAdminUserData, user?.userId)
-  }
-
-  @Query(() => SuccessResponse, { description: 'check if email already exist' })
-  async validEmailAdmin(@Args('input') emailId: string): Promise<SuccessResponse> {
-    return await this.adminService.isEmailExist(emailId)
-  }
-
-  @Mutation(() => SuccessResponse, {
-    description: 'This will update Admin Password'
-  })
-  @Allow()
-  async updateAdminPassword(
-    @CurrentUser() user: JwtUserPayload,
-    @Args('password') password: string
-  ): Promise<SuccessResponse> {
-    return await this.adminService.updatePassword(password, user.userId)
-  }
-
-  @Mutation(() => AdminEmailUpdateResponse, {
-    description: 'Update admin email'
-  })
-  @Allow()
-  async updateAdminEmail(@CurrentUser() user: JwtUserPayload, @Args('input') email: string) {
-    return this.adminService.updateAdminEmail(user.userId, email)
+    return this.adminService.createAdmin(createAdminUserData, user?.userId)
   }
 
   @Mutation(() => String, {
@@ -61,5 +46,24 @@ export class AdminResolver {
     @CurrentUser() user: JwtUserPayload
   ) {
     return this.adminService.updateAdminData(updateAdminUserData, user.userId)
+  }
+
+  @Mutation(() => AdminEmailUpdateResponse, {
+    description: 'Update admin email'
+  })
+  @Allow()
+  async updateAdminEmail(@CurrentUser() user: JwtUserPayload, @Args('input') email: string) {
+    return this.adminService.updateAdminEmail(user.userId, email)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'This will update Admin Password'
+  })
+  @Allow()
+  async updateAdminPassword(
+    @CurrentUser() user: JwtUserPayload,
+    @Args('password') password: string
+  ): Promise<SuccessResponse> {
+    return await this.adminService.updatePassword(password, user.userId)
   }
 }
