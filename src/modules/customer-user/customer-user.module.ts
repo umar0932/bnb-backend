@@ -12,15 +12,14 @@ import { SocialProvider } from '@app/common/entities'
 import facebookConfig from '@config/facebook.config'
 import googleConfig from '@config/google.config'
 
-import { Customer } from './entities/customer.entity'
+import { Customer, CustomerFollower, Organizer } from './entities'
 import { CustomerUserResolver } from './customer-user.resolver'
 import { CustomerUserService } from './customer-user.service'
 import { FacebookStrategy, GoogleStrategy, JwtStrategy, LocalStrategy } from './strategy'
-import { Organizer } from './entities/organizer.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Customer, Organizer, SocialProvider]),
+    TypeOrmModule.forFeature([Customer, CustomerFollower, Organizer, SocialProvider]),
     ConfigModule.forFeature(facebookConfig),
     ConfigModule.forFeature(googleConfig),
     PassportModule.register({ defaultStrategy: 'jwt' }),

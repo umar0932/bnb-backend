@@ -46,4 +46,7 @@ export class CustomerFilterInput {
 
   @Field(() => String, { nullable: true })
   state?: string
+
+  @Field(() => String, { nullable: true })
+  search?: string
 }

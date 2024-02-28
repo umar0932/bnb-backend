@@ -13,4 +13,10 @@ export class ListCustomersResponse {
 
   @Field(() => Number, { nullable: true })
   totalRows?: number
+
+  @Field({ nullable: true, defaultValue: 0 })
+  offset?: number
+
+  @Field({ nullable: true })
+  limit?: number
 }

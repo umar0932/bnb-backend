@@ -126,6 +126,8 @@ type Customer {
   email: String!
   firstAddress: String
   firstName: String!
+  followers: [CustomerFollower!]
+  following: [CustomerFollower!]
   homePhone: String
   id: ID!
   isActive: Boolean
@@ -137,6 +139,8 @@ type Customer {
   socialProvider: SocialProvider
   state: String
   stripeCustomerId: String
+  totalFollowers: Int
+  totalFollowings: Int
   updatedBy: String
   updatedDate: DateTime
   website: String
@@ -160,10 +164,21 @@ input CustomerFilterInput {
   id: ID
   jobTitle: String
   lastName: String
+  search: String
   secondAddress: String
   state: String
   website: String
   zipCode: String
+}
+
+type CustomerFollower {
+  createdBy: String
+  createdDate: DateTime
+  followers: Customer
+  following: Customer
+  id: ID!
+  updatedBy: String
+  updatedDate: DateTime
 }
 
 type CustomerLoginOrRegisterResponse {
@@ -237,6 +252,8 @@ input ListCustomersInputs {
 }
 
 type ListCustomersResponse {
+  limit: Float
+  offset: Float
   results: [Customer!]!
   totalRows: Float
 }
@@ -310,6 +327,9 @@ type Mutation {
   """This will create new SubCategories"""
   createSubCategory(input: CreateSubCategoryInput!): SuccessResponse!
 
+  """This will follow a customer"""
+  followCustomer(customerId: String!): SuccessResponse!
+
   """Admin Login"""
   loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
 
@@ -321,6 +341,9 @@ type Mutation {
 
   """This will charge the Customer on test stripe"""
   testCharge(chargeInput: CreateChargeInput!, orderInput: CreateOrderInput!): SuccessResponse!
+
+  """This will unfollow a customer"""
+  unfollowCustomer(customerId: String!): SuccessResponse!
 
   """Update admin data"""
   updateAdminData(input: UpdateAdminUserInput!): String!
@@ -390,6 +413,11 @@ type Organizer {
   websiteLink: String
 }
 
+type OtherCustomerDataResponse {
+  isFollowing: Boolean!
+  user: Customer!
+}
+
 type PageData {
   count: Int!
   limit: Int
@@ -418,8 +446,20 @@ type Query {
   """This will return signed Urls for Events"""
   getEventUploadUrls(count: Float!): [S3SignedUrlResponse!]!
 
+  """Get the followers of the authenticated customer"""
+  getFollowers(customerId: String!): [Customer!]!
+
+  """Get the following of the authenticated customer"""
+  getFollowing(customerId: String!): [Customer!]!
+
   """This will get all Orders of Current Customer"""
   getOrdersOfCustomer: [OrderEntity!]!
+
+  """Get other Customer Data"""
+  getOtherCustomerData(customerId: String!): OtherCustomerDataResponse!
+
+  """The List of Customers with filters"""
+  searchCustomers(search: String!): SearchCustomersResponse!
 
   """check if email already exist"""
   validEmailAdmin(input: String!): SuccessResponse!
@@ -433,6 +473,12 @@ input RegisterOrLoginSocialInput {
 type S3SignedUrlResponse {
   fileName: String!
   signedUrl: String!
+}
+
+type SearchCustomersResponse {
+  message: String
+  results: [Customer!]
+  totalCount: Float
 }
 
 """Social provider types"""
