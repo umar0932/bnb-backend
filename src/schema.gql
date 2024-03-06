@@ -37,6 +37,10 @@ type Category {
   updatedDate: DateTime
 }
 
+input CategoryFilterInputs {
+  search: String
+}
+
 input CreateAdminUserInput {
   email: String!
   firstName: String!
@@ -245,6 +249,19 @@ enum EventStatus {
   SOLD
 }
 
+input ListCategoriesInput {
+  filter: CategoryFilterInputs
+  limit: Float
+  offset: Float
+}
+
+type ListCategoriesResponse {
+  limit: Int
+  offset: Int
+  results: [Category!]!
+  totalRows: Float
+}
+
 input ListCustomersInputs {
   filter: CustomerFilterInput
   limit: Float!
@@ -266,6 +283,19 @@ input ListEventsInputs {
 
 type ListEventsResponse {
   results: [Event!]!
+  totalRows: Float
+}
+
+input ListSubCategoriesInput {
+  filter: SubCategoryFilterInputs
+  limit: Float
+  offset: Float
+}
+
+type ListSubCategoriesResponse {
+  limit: Int
+  offset: Int
+  results: [SubCategory!]!
   totalRows: Float
 }
 
@@ -310,7 +340,7 @@ type Mutation {
   createBasicEvent(input: CreateBasicEventInput!): SuccessResponse!
 
   """This will create new Categories"""
-  createCategory(input: CreateCategoryInput!): SuccessResponse!
+  createCategory(input: CreateCategoryInput!): Category!
 
   """This will signup new Customers"""
   createCustomer(input: CreateCustomerInput!): CustomerLoginOrRegisterResponse!
@@ -325,7 +355,7 @@ type Mutation {
   createOrganizer(input: CreateOrganizerInput!): SuccessResponse!
 
   """This will create new SubCategories"""
-  createSubCategory(input: CreateSubCategoryInput!): SuccessResponse!
+  createSubCategory(input: CreateSubCategoryInput!): SubCategory!
 
   """This will follow a customer"""
   followCustomer(customerId: String!): SuccessResponse!
@@ -434,6 +464,9 @@ type Query {
   """This will get all categories"""
   getAllSubCategories: [SubCategory!]!
 
+  """The List of categories with Pagination and filters"""
+  getCategories(input: ListCategoriesInput!): ListCategoriesResponse!
+
   """Get the Customer"""
   getCustomerData: Customer!
 
@@ -457,6 +490,9 @@ type Query {
 
   """Get other Customer Data"""
   getOtherCustomerData(customerId: String!): OtherCustomerDataResponse!
+
+  """The List of sub categories with Pagination and filters"""
+  getSubCategories(input: ListSubCategoriesInput!): ListSubCategoriesResponse!
 
   """The List of Customers with filters"""
   searchCustomers(search: String!): SearchCustomersResponse!
@@ -504,6 +540,10 @@ type SubCategory {
   subCategoryName: String!
   updatedBy: String
   updatedDate: DateTime
+}
+
+input SubCategoryFilterInputs {
+  search: String
 }
 
 type SuccessResponse {

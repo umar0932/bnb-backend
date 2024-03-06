@@ -1,15 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
-import { Repository } from 'typeorm'
+import { Brackets, Repository } from 'typeorm'
 
 import { AdminService } from '@app/admin'
-import { SuccessResponse } from '@app/common'
 
 import { Category, SubCategory } from './entities'
 import {
   CreateCategoryInput,
   CreateSubCategoryInput,
+  ListCategoriesInput,
+  ListSubCategoriesInput,
   UpdateCategoryInput,
   UpdateSubCategoryInput
 } from './dto/inputs'
@@ -23,6 +24,10 @@ export class CategoryService {
     @InjectRepository(SubCategory)
     private subCategoryRepository: Repository<SubCategory>
   ) {}
+
+  // Private Methods
+
+  // Public Methods
 
   async getCategoryById(id: string): Promise<Category> {
     const findCategoryById = await this.categoryRepository.findOne({ where: { id } })
@@ -69,24 +74,86 @@ export class CategoryService {
     return true
   }
 
-  async createCategory(categoryInput: CreateCategoryInput, id: string): Promise<SuccessResponse> {
-    await this.adminService.getAdminById(id)
+  // Resolver Query Methods
 
-    const category = await this.checkCategoryByName(categoryInput.categoryName)
-    if (category) throw new BadRequestException('Category already exists')
+  async getCategoriesWithPagination(
+    listCategoriesInput: ListCategoriesInput
+  ): Promise<[Category[], number, number, number]> {
+    const { limit = 10, offset = 0, filter } = listCategoriesInput
+    const { search } = filter || {}
 
-    await this.categoryRepository.save({
-      ...categoryInput,
-      createdBy: id
-    })
+    try {
+      const queryBuilder = this.categoryRepository.createQueryBuilder('category')
 
-    return { success: true, message: 'Category Created' }
+      queryBuilder
+        .leftJoinAndSelect('category.subCategories', 'subCategories')
+        .orderBy('category.createdDate', 'DESC')
+        .take(limit)
+        .skip(offset)
+
+      if (search) {
+        queryBuilder.andWhere(
+          new Brackets(qb => {
+            qb.where('LOWER(posts.body) LIKE LOWER(:search)', { search: `%${search}%` })
+          })
+        )
+      }
+
+      const [categories, total] = await queryBuilder.getManyAndCount()
+
+      return [categories, total, limit, offset]
+    } catch (error) {
+      throw new BadRequestException('Failed to find category')
+    }
+  }
+
+  async getSubCategoriesWithPagination(
+    listSubCategoriesInput: ListSubCategoriesInput
+  ): Promise<[SubCategory[], number, number, number]> {
+    const { limit = 10, offset = 0, filter } = listSubCategoriesInput
+    const { search } = filter || {}
+
+    try {
+      const queryBuilder = this.subCategoryRepository.createQueryBuilder('subCategory')
+
+      queryBuilder.orderBy('subCategory.createdDate', 'DESC').take(limit).skip(offset)
+
+      if (search) {
+        queryBuilder.andWhere(
+          new Brackets(qb => {
+            qb.where('LOWER(posts.body) LIKE LOWER(:search)', { search: `%${search}%` })
+          })
+        )
+      }
+
+      const [subCategories, total] = await queryBuilder.getManyAndCount()
+
+      return [subCategories, total, limit, offset]
+    } catch (error) {
+      throw new BadRequestException('Failed to find subCategory')
+    }
   }
 
   async getAllCategories(id: string): Promise<Category[]> {
     await this.adminService.getAdminById(id)
 
     return await this.categoryRepository.find({ relations: ['subCategories'] })
+  }
+
+  // Resolver Mutation Methods
+
+  async createCategory(categoryInput: CreateCategoryInput, id: string): Promise<Category> {
+    await this.adminService.getAdminById(id)
+
+    const categoryName = await this.checkCategoryByName(categoryInput.categoryName)
+    if (categoryName) throw new BadRequestException('Category name already exists')
+
+    const category = await this.categoryRepository.save({
+      ...categoryInput,
+      createdBy: id
+    })
+
+    return category
   }
 
   async updateCategories(
@@ -116,7 +183,7 @@ export class CategoryService {
   async createSubCategory(
     createSubCategoryInput: CreateSubCategoryInput,
     userId: string
-  ): Promise<SuccessResponse> {
+  ): Promise<SubCategory> {
     await this.adminService.getAdminById(userId)
 
     const { categoryId, subCategoryName } = createSubCategoryInput
@@ -125,13 +192,13 @@ export class CategoryService {
 
     await this.getSubCategoryByName(subCategoryName)
 
-    await this.subCategoryRepository.save({
+    const subCategory = await this.subCategoryRepository.save({
       ...createSubCategoryInput,
       category,
       createdBy: userId
     })
 
-    return { success: true, message: 'Sub Category Created' }
+    return subCategory
   }
 
   async getAllSubCategories(id: string): Promise<SubCategory[]> {

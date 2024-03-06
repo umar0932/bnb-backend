@@ -19,8 +19,6 @@ import { StripeWebhooksService } from './stripe-webhook.service'
         const stripeConfig = configService.get<StripeModuleConfig>('stripeConfig')
         if (!stripeConfig) throw new Error('Stripe configuration is missing')
 
-        console.log('stripeConfig---->>>>', stripeConfig)
-
         return stripeConfig
       },
       inject: [ConfigService]
