@@ -1,7 +1,14 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 
-import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
+import {
+  Allow,
+  CurrentUser,
+  ForgotPasswordInput,
+  JwtUserPayload,
+  ResetForgotPasswordInput,
+  SuccessResponse
+} from '@app/common'
 
 import { Admin } from './entities'
 import { AdminEmailUpdateResponse, AdminLoginResponse } from './dto/args'
@@ -65,5 +72,19 @@ export class AdminResolver {
     @Args('password') password: string
   ): Promise<SuccessResponse> {
     return await this.adminService.updatePassword(password, user.userId)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'Send a password reset link for Admin'
+  })
+  async forgotPasswordAdmin(@Args('input') forgotPasswordInput: ForgotPasswordInput) {
+    return this.adminService.sendEmailForgotPassword(forgotPasswordInput)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'Reset Password for Admin'
+  })
+  async resetPasswordAdmin(@Args('input') resetForgotPasswordInput: ResetForgotPasswordInput) {
+    return this.adminService.resetPassword(resetForgotPasswordInput)
   }
 }

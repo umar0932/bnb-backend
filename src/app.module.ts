@@ -13,6 +13,7 @@ import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { CategoryModule } from '@app/category'
 import { CustomerUserModule } from '@app/customer-user'
 import { EventModule } from '@app/events'
+import { MailModule } from '@app/mail'
 import { OrderModule } from '@app/order'
 import { PaymentModule } from '@app/payment'
 
@@ -58,7 +59,8 @@ const env = `${process.env.NODE_ENV}`
     CategoryModule,
     EventModule,
     OrderModule,
-    PaymentModule
+    PaymentModule,
+    MailModule
   ]
 })
 export class AppModule {}

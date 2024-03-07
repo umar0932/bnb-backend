@@ -12,6 +12,7 @@ type Admin {
   lastName: String!
   password: String!
   profileImage: String
+  resetPaswordOTP: String
   updatedBy: String
   updatedDate: DateTime
 }
@@ -139,6 +140,7 @@ type Customer {
   lastName: String!
   password: String!
   profileImage: String
+  resetPaswordOTP: String
   secondAddress: String
   socialProvider: SocialProvider
   state: String
@@ -247,6 +249,10 @@ enum EventStatus {
   DRAFT
   PUBLISHED
   SOLD
+}
+
+input ForgotPasswordInput {
+  email: String!
 }
 
 input ListCategoriesInput {
@@ -360,11 +366,23 @@ type Mutation {
   """This will follow a customer"""
   followCustomer(customerId: String!): SuccessResponse!
 
+  """Send a password reset link for Admin"""
+  forgotPasswordAdmin(input: ForgotPasswordInput!): SuccessResponse!
+
+  """Send a password reset link"""
+  forgotPasswordCustomer(input: ForgotPasswordInput!): SuccessResponse!
+
   """Admin Login"""
   loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
 
   """Customer Login"""
   loginAsCustomer(input: LoginCustomerInput!): CustomerLoginOrRegisterResponse!
+
+  """Reset Password for Admin"""
+  resetPasswordAdmin(input: ResetForgotPasswordInput!): SuccessResponse!
+
+  """Reset Password for Customer"""
+  resetPasswordCustomer(input: ResetForgotPasswordInput!): SuccessResponse!
 
   """This will save/update user profile image in DB"""
   saveCustomerMediaUrl(fileName: String!): String!
@@ -504,6 +522,12 @@ type Query {
 input RegisterOrLoginSocialInput {
   accessToken: String!
   provider: SocialAuthProviders!
+}
+
+input ResetForgotPasswordInput {
+  code: String!
+  email: String!
+  password: String!
 }
 
 type S3SignedUrlResponse {

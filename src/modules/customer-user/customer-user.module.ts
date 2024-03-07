@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AdminModule } from '@app/admin'
 import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { JWTConfigTypes } from '@app/common'
+import { MailModule } from '@app/mail'
 import { PaymentModule } from '@app/payment'
 import { SocialProvider } from '@app/common/entities'
 import facebookConfig from '@config/facebook.config'
@@ -35,7 +36,8 @@ import { FacebookStrategy, GoogleStrategy, JwtStrategy, LocalStrategy } from './
     }),
     AdminModule,
     AwsS3ClientModule,
-    forwardRef(() => PaymentModule)
+    forwardRef(() => PaymentModule),
+    MailModule
   ],
   providers: [
     CustomerUserResolver,

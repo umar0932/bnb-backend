@@ -36,6 +36,10 @@ export class Admin extends CustomBaseEntity {
   @Field(() => String, { nullable: true })
   profileImage?: string
 
+  @Column({ length: 150, name: 'reset_password_otp', nullable: true })
+  @Field(() => String, { nullable: true })
+  resetPaswordOTP?: string
+
   @Column({ nullable: true, default: false, name: 'is_active' })
   @Field(() => Boolean, { nullable: true })
   isActive?: boolean

@@ -20,14 +20,18 @@ import { uuid } from 'uuidv4'
 import { AdminService } from '@app/admin'
 import { AwsS3ClientService } from '@app/aws-s3-client'
 import {
+  ForgotPasswordInput,
   JWT_STRATEGY_NAME,
   JwtDto,
+  ResetForgotPasswordInput,
   SocialProviderTypes,
   SuccessResponse,
   comparePassword,
   encodePassword,
+  generateOTP,
   isValidPassword
 } from '@app/common'
+import { MailService } from '@app/mail'
 import { PaymentService } from '@app/payment'
 import { SocialProvider } from '@app/common/entities'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
@@ -56,6 +60,7 @@ export class CustomerUserService {
     @InjectRepository(CustomerFollower)
     private customerFollowerRepository: Repository<CustomerFollower>,
     @InjectEntityManager() private readonly entityManager: EntityManager,
+    private mailService: MailService,
     @InjectRepository(Organizer)
     private organizerRepository: Repository<Organizer>,
     @Inject(forwardRef(() => PaymentService))
@@ -147,6 +152,14 @@ export class CustomerUserService {
       throw new BadRequestException('Social Provider with the provided ID does not exist')
 
     return findsocialProviderById
+  }
+
+  async forgotPassword(email: string): Promise<Customer> {
+    const customer = await this.getCustomerByEmail(email)
+
+    if (customer.socialProvider)
+      throw new BadRequestException('Social Provider with the provided ID does not exist')
+    return customer
   }
 
   async getAllCustomers(userId: string): Promise<Partial<CustomerWithoutPasswordResponse[]>> {
@@ -625,6 +638,53 @@ export class CustomerUserService {
       })
     } catch (e) {
       throw new BadRequestException('Failed to update customer data')
+    }
+    return { success: true, message: 'Password of customer has been updated' }
+  }
+
+  async sendEmailForgotPassword(
+    forgotPasswordInput: ForgotPasswordInput
+  ): Promise<SuccessResponse> {
+    const { email } = forgotPasswordInput || {}
+
+    const customer = await this.forgotPassword(email)
+    const code = generateOTP()
+    const encodedCode = await encodePassword(code)
+
+    try {
+      await this.mailService.sendForgotPasswordEmail(customer.email, customer.firstName, code)
+      await this.customerRepository.update(customer.id, {
+        resetPaswordOTP: encodedCode,
+        updatedBy: customer.id,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      console.log(e)
+      throw new BadRequestException('Failed to send forgot Email')
+    }
+    return { success: true, message: 'Forgot Email send' }
+  }
+
+  async resetPasswordCustomer(
+    resetForgotPasswordInput: ResetForgotPasswordInput
+  ): Promise<SuccessResponse> {
+    const { email, code, password } = resetForgotPasswordInput || {}
+    const customer = await this.forgotPassword(email)
+
+    if (customer?.resetPaswordOTP) {
+      const isValidCode = await this.validatePassword(code, customer.resetPaswordOTP)
+      if (!isValidCode) throw new BadRequestException('OTP Code is Invalid')
+    }
+
+    try {
+      await this.customerRepository.update(customer.id, {
+        password,
+        updatedBy: customer.id,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      console.log(e)
+      throw new BadRequestException('Failed to update customer password')
     }
     return { success: true, message: 'Password of customer has been updated' }
   }

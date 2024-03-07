@@ -3,7 +3,15 @@ import { UseGuards } from '@nestjs/common'
 
 import { Profile } from 'passport'
 
-import { Allow, CurrentUser, JwtUserPayload, SocialProfile, SuccessResponse } from '@app/common'
+import {
+  Allow,
+  CurrentUser,
+  ForgotPasswordInput,
+  JwtUserPayload,
+  ResetForgotPasswordInput,
+  SocialProfile,
+  SuccessResponse
+} from '@app/common'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
 import {
@@ -212,5 +220,19 @@ export class CustomerUserResolver {
     @Args('input') updateOrganizerInput: UpdateOrganizerInput
   ): Promise<Partial<Organizer>> {
     return await this.customerUserService.updateOrganizerData(updateOrganizerInput, user.userId)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'Send a password reset link'
+  })
+  async forgotPasswordCustomer(@Args('input') forgotPasswordInput: ForgotPasswordInput) {
+    return this.customerUserService.sendEmailForgotPassword(forgotPasswordInput)
+  }
+
+  @Mutation(() => SuccessResponse, {
+    description: 'Reset Password for Customer'
+  })
+  async resetPasswordCustomer(@Args('input') resetForgotPasswordInput: ResetForgotPasswordInput) {
+    return this.customerUserService.resetPasswordCustomer(resetForgotPasswordInput)
   }
 }

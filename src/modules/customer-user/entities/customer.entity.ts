@@ -39,6 +39,10 @@ export class Customer extends CustomBaseEntity {
   @Field(() => String, { nullable: true })
   profileImage?: string
 
+  @Column({ length: 150, name: 'reset_password_otp', nullable: true })
+  @Field(() => String, { nullable: true })
+  resetPaswordOTP?: string
+
   @Column({ type: 'numeric', name: 'following_count', default: 0 })
   @Field(() => Int, { nullable: true })
   totalFollowings?: number

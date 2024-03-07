@@ -11,13 +11,17 @@ import { JwtService } from '@nestjs/jwt'
 import { Repository } from 'typeorm'
 
 import {
+  ForgotPasswordInput,
   JWT_STRATEGY_NAME,
   JwtDto,
+  ResetForgotPasswordInput,
   SuccessResponse,
   comparePassword,
   encodePassword,
+  generateOTP,
   isValidPassword
 } from '@app/common'
+import { MailService } from '@app/mail'
 
 import { Admin } from './entities'
 import { AdminEmailUpdateResponse, AdminLoginResponse } from './dto/args'
@@ -28,6 +32,7 @@ export class AdminService {
   constructor(
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     private configService: ConfigService,
+    private mailService: MailService,
     private jwtService: JwtService
   ) {}
 
@@ -39,11 +44,28 @@ export class AdminService {
     if (userType !== JWT_STRATEGY_NAME.ADMIN) throw new ForbiddenException('Only Admins Access')
   }
 
+  async forgotPassword(email: string): Promise<Admin> {
+    const admin = await this.getAdminByEmail(email)
+
+    return admin
+  }
+
   async getAdminById(id: string): Promise<Admin> {
     const findAdminById = await this.adminRepository.findOne({ where: { id } })
     if (!findAdminById) throw new NotFoundException('Invalid Admin user')
 
     return findAdminById
+  }
+
+  async getAdminByEmail(email: string): Promise<Admin> {
+    if (!email) throw new BadRequestException('Admin Email is invalid')
+    const findAdminByEmail = await this.adminRepository.findOne({
+      where: { email, isActive: true }
+    })
+    if (!findAdminByEmail)
+      throw new NotFoundException('Admin with the provided email does not exist')
+
+    return findAdminByEmail
   }
 
   getJwtToken = async ({ sub, email, firstName, lastName, profileImage, type }: JwtDto) => {
@@ -216,6 +238,51 @@ export class AdminService {
       })
     } catch (e) {
       throw new BadRequestException('Failed to update admin data')
+    }
+    return { success: true, message: 'Password of admin has been updated' }
+  }
+
+  async sendEmailForgotPassword(
+    forgotPasswordInput: ForgotPasswordInput
+  ): Promise<SuccessResponse> {
+    const { email } = forgotPasswordInput || {}
+
+    const admin = await this.forgotPassword(email)
+    const code = generateOTP()
+
+    try {
+      const encodedCode = await encodePassword(code)
+      await this.mailService.sendForgotPasswordEmail(admin.email, admin.firstName, code)
+      await this.adminRepository.update(admin.id, {
+        resetPaswordOTP: encodedCode,
+        updatedBy: admin.id,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      throw new BadRequestException('Failed to send forgot Email')
+    }
+    return { success: true, message: 'Forgot Email send' }
+  }
+
+  async resetPassword(
+    resetForgotPasswordInput: ResetForgotPasswordInput
+  ): Promise<SuccessResponse> {
+    const { email, code, password } = resetForgotPasswordInput || {}
+    const admin = await this.forgotPassword(email)
+
+    if (admin?.resetPaswordOTP) {
+      const isValidCode = await this.validatePassword(code, admin.resetPaswordOTP)
+      if (!isValidCode) throw new BadRequestException('OTP Code is Invalid')
+    }
+
+    try {
+      await this.adminRepository.update(admin.id, {
+        password,
+        updatedBy: admin.id,
+        updatedDate: new Date()
+      })
+    } catch (e) {
+      throw new BadRequestException('Failed to update admin password')
     }
     return { success: true, message: 'Password of admin has been updated' }
   }

@@ -1,3 +1,8 @@
+const int = (val: string | undefined, num: number): number =>
+  val ? (isNaN(parseInt(val)) ? num : parseInt(val)) : num
+const bool = (val: string | undefined, bool: boolean): boolean =>
+  val == null ? bool : val == 'true'
+
 export default () => ({
   port: parseInt(process.env.PORT || '4000', 10),
   database: {
@@ -29,5 +34,19 @@ export default () => ({
   stripe: {
     publish: process.env.STRIPE_PUBLISH_KEY,
     currency: process.env.STRIPE_CURRENCY
+  },
+  email: {
+    name: process.env.EMAIL_NAME ?? 'bnb',
+    from: process.env.EMAIL_FROM ?? '',
+    retries: int(process.env.EMAIL_FAIL_RETRIES, 3),
+    transport: {
+      host: process.env.EMAIL_HOST ?? '',
+      port: int(process.env.EMAIL_PORT, 587),
+      secure: bool(process.env.EMAIL_SECURE, false),
+      auth: {
+        user: process.env.EMAIL_USER ?? process.env.EMAIL_FROM ?? '',
+        pass: process.env.EMAIL_PASSWORD ?? ''
+      }
+    }
   }
 })
