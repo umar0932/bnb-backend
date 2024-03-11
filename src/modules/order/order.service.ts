@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { DeepPartial, Repository } from 'typeorm'
 
 import { CustomerUserService } from '@app/customer-user'
+import { EventService } from '@app/events'
 import { SuccessResponse } from '@app/common'
 
 import { CreateOrderInput } from './dto/inputs'
@@ -15,6 +16,8 @@ export class OrderService {
   constructor(
     @Inject(forwardRef(() => CustomerUserService))
     private customerService: CustomerUserService,
+    @Inject(forwardRef(() => EventService))
+    private eventService: EventService,
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>
   ) {}
@@ -25,10 +28,15 @@ export class OrderService {
     paymentIntentId: string
   ): Promise<SuccessResponse> {
     const customer = await this.customerService.getCustomerById(userId)
+    const { eventId } = orderInput
+
+    await this.eventService.checkEventExistById(eventId)
 
     try {
-      const order = await this.orderRepository.create({
+      const order = this.orderRepository.create({
         ...orderInput,
+        event: { id: eventId },
+        customer: { id: customer.id },
         orderStatus: paymentIntentId ? OrderStatus.SUCCEEDED : OrderStatus.FAILED,
         paymentIntentId,
         stripeCustomerId: customer.stripeCustomerId,

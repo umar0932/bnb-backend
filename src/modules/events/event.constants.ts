@@ -29,3 +29,8 @@ export enum EventStatus {
 export enum TicketsSalesChannel {
   ONLINE = 'ONLINE'
 }
+
+export enum EventLocationType {
+  ONLINE = 'online',
+  ONSITE = 'onsite'
+}

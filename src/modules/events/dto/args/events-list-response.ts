@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql'
+import { Field, Int, ObjectType } from '@nestjs/graphql'
 
 import { Event } from '@app/events/entities'
 import { RelayTypes } from '@app/common'
@@ -13,4 +13,10 @@ export class ListEventsResponse {
 
   @Field(() => Number, { nullable: true })
   totalRows?: number
+
+  @Field(() => Int, { nullable: true, defaultValue: 0 })
+  offset?: number
+
+  @Field(() => Int, { nullable: true })
+  limit?: number
 }

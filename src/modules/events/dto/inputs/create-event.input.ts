@@ -12,6 +12,7 @@ import {
 import { Type } from 'class-transformer'
 
 import { CreateLocationInput } from '@app/common'
+import { EventLocationType } from '@app/events/event.constants'
 
 @InputType()
 export class CreateBasicEventInput {
@@ -59,4 +60,12 @@ export class CreateBasicEventInput {
   @IsString({ message: 'Type must be a string' })
   @IsOptional()
   type?: string
+
+  @Field(() => String, { nullable: true })
+  @IsString({ message: 'MeetingUrl must be a string' })
+  @IsOptional()
+  meetingUrl?: string
+
+  @Field(() => EventLocationType, { nullable: true })
+  eventLocationType?: EventLocationType
 }

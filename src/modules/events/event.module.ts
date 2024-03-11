@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { AdminModule } from '@app/admin'
@@ -16,7 +16,7 @@ import { EventService } from './event.service'
     TypeOrmModule.forFeature([Event, EventDetailsEntity, Tickets, LocationsEntity]),
     AdminModule,
     AwsS3ClientModule,
-    CustomerUserModule,
+    forwardRef(() => CustomerUserModule),
     CategoryModule
   ],
   providers: [EventResolver, EventService],

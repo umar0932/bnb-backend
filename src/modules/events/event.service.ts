@@ -22,7 +22,7 @@ import {
   UpdateBasicEventInput,
   UpdateEventTicketInput
 } from './dto/inputs'
-import { Type } from './event.constants'
+import { EventLocationType, Type } from './event.constants'
 
 @Injectable()
 export class EventService {
@@ -40,20 +40,21 @@ export class EventService {
     private s3Service: AwsS3ClientService
   ) {}
 
-  async getEventById(id: string, userId: string): Promise<Event> {
-    const findEvent = await this.eventRepository.findOne({
-      where: { id, createdBy: userId }
-    })
+  // Private Methods
 
-    if (!findEvent) throw new BadRequestException('Event with the provided ID does not exist')
-
-    return findEvent
-  }
+  // Public Methods
 
   async getEventByName(title: string): Promise<boolean> {
     const findEventByName = await this.eventRepository.count({ where: { title } })
     if (findEventByName > 0) return true
     return false
+  }
+
+  async checkEventExistById(id: string): Promise<boolean> {
+    const findEventExistById = await this.eventRepository.count({ where: { id } })
+    if (!findEventExistById)
+      throw new BadRequestException('Event with the provided ID does not exist')
+    return true
   }
 
   async getEventTicketsByName(title: string, customerId: string): Promise<boolean> {
@@ -88,11 +89,93 @@ export class EventService {
     }
   }
 
+  // Resolver Query Methods
+
+  async getEventById(id: string, userId: string): Promise<Event> {
+    const findEvent = await this.eventRepository.findOne({
+      where: { id, createdBy: userId }
+    })
+
+    if (!findEvent) throw new BadRequestException('Event with the provided ID does not exist')
+
+    return findEvent
+  }
+
+  async getEventUploadUrls(count: number): Promise<S3SignedUrlResponse[]> {
+    if (!count) throw new BadRequestException('Count cannot be less than 1')
+    const urls: S3SignedUrlResponse[] = []
+
+    for (let i = 0; i < count; i++) {
+      const key = `user_event_image_uploads/${uuid()}-event-upload`
+      const bucketName = this.configService.get('USER_UPLOADS_BUCKET')
+
+      const command = new PutObjectCommand({
+        Bucket: bucketName,
+        Key: key
+      })
+      const url = await getSignedUrl(this.s3Service.getClient(), command, {
+        expiresIn: 3600
+      })
+      urls.push({
+        signedUrl: url,
+        fileName: key
+      })
+    }
+
+    return urls
+  }
+
+  async getEventsWithPagination(
+    listEventsInputs: ListEventsInputs
+  ): Promise<[Event[], number, number, number]> {
+    const { limit = 10, offset = 0, filter } = listEventsInputs
+    const { title, search, categoryName, online } = filter || {}
+
+    try {
+      const queryBuilder = this.eventRepository.createQueryBuilder('event')
+
+      title && queryBuilder.andWhere('event.title = :title', { title })
+      online && queryBuilder.andWhere('event.online = :online', { online })
+
+      if (categoryName)
+        queryBuilder.andWhere('category.categoryName = :categoryName', { categoryName })
+
+      if (search) {
+        queryBuilder.andWhere(
+          new Brackets(qb => {
+            qb.where('LOWER(event.title) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(location.city) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(location.country) LIKE LOWER(:search)', { search: `${search}` })
+          })
+        )
+      }
+
+      const [events, total] = await queryBuilder
+        .leftJoinAndSelect('event.category', 'category')
+        .leftJoinAndSelect('event.subCategory', 'subCategory')
+        .leftJoinAndSelect('event.location', 'location')
+        .leftJoinAndSelect('event.eventDetails', 'eventDetails')
+        .leftJoinAndSelect('event.eventTickets', 'eventTickets')
+        .leftJoinAndSelect('event.orders', 'eventorders')
+        .leftJoinAndSelect('eventorders.customer', 'customerorder')
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount()
+
+      return [events, total, limit, offset]
+    } catch (error) {
+      throw new BadRequestException('Failed to find Events')
+    }
+  }
+
+  // Resolver Mutation Methods
+
   async createBasicEvent(
     createBasicEventInput: CreateBasicEventInput,
     userId: string
   ): Promise<SuccessResponse> {
-    const { title, categoryId, subCategoryId, type, location } = createBasicEventInput
+    const { title, categoryId, subCategoryId, type, location, eventLocationType, meetingUrl } =
+      createBasicEventInput
 
     let category, subCategory
     if (categoryId) category = await this.categoryService.getCategoryById(categoryId)
@@ -109,10 +192,15 @@ export class EventService {
     const event = await this.getEventByName(title)
     if (event) throw new BadRequestException('Event Name already exists')
 
+    if (eventLocationType === EventLocationType.ONLINE && !meetingUrl)
+      throw new BadRequestException('Meeting URL is required for online events')
+
     try {
       await this.eventRepository.save({
         ...createBasicEventInput,
         title,
+        eventLocationType,
+        meetingUrl,
         category,
         subCategory,
         location: getlocation,
@@ -197,109 +285,44 @@ export class EventService {
   async createEventTicket(
     createEventTicketsInput: CreateEventTicketInput,
     userId: string
-  ): Promise<SuccessResponse> {
+  ): Promise<Tickets> {
     const { eventId, ...rest } = createEventTicketsInput
-    const event = await this.getEventById(eventId, userId)
+    await this.getEventById(eventId, userId)
     const ticketData = await this.getEventTicketsByName(createEventTicketsInput.title, userId)
     if (ticketData)
       throw new BadRequestException('This Ticket name already exist. Enter a valid name')
     try {
-      await this.eventTicketsRepository.save({
+      const ticket = await this.eventTicketsRepository.save({
         ...rest,
-        event,
+        event: { id: eventId },
         createdBy: userId
       })
+
+      return ticket
     } catch (error) {
       throw new BadRequestException('Failed to create Ticketss')
     }
-
-    return { success: true, message: 'Event Tickets created' }
   }
 
   async updateEventTicket(
     updateEventTicketsInput: UpdateEventTicketInput,
     userId: string
-  ): Promise<SuccessResponse> {
+  ): Promise<Tickets> {
     const { eventId, id, ...rest } = updateEventTicketsInput
-    const event = await this.getEventById(eventId, userId)
+    await this.getEventById(eventId, userId)
     const ticketData = await this.getEventTicketsById(id, userId)
 
     try {
       await this.eventTicketsRepository.update(ticketData.id, {
         ...rest,
-        event,
+        event: { id: eventId },
         updatedBy: userId,
         updatedDate: new Date()
       })
+
+      return await this.getEventTicketsById(id, userId)
     } catch (error) {
       throw new BadRequestException('Failed to update Tickets')
-    }
-
-    return { success: true, message: 'Event Tickets updated' }
-  }
-
-  async getEventUploadUrls(count: number): Promise<S3SignedUrlResponse[]> {
-    if (!count) throw new BadRequestException('Count cannot be less than 1')
-    const urls: S3SignedUrlResponse[] = []
-
-    for (let i = 0; i < count; i++) {
-      const key = `user_event_image_uploads/${uuid()}-event-upload`
-      const bucketName = this.configService.get('USER_UPLOADS_BUCKET')
-
-      const command = new PutObjectCommand({
-        Bucket: bucketName,
-        Key: key
-      })
-      const url = await getSignedUrl(this.s3Service.getClient(), command, {
-        expiresIn: 3600
-      })
-      urls.push({
-        signedUrl: url,
-        fileName: key
-      })
-    }
-
-    return urls
-  }
-
-  async getEventsWithPagination({
-    limit,
-    offset,
-    filter
-  }: ListEventsInputs): Promise<[Event[], number]> {
-    const { title, search, categoryName, online } = filter || {}
-
-    try {
-      const queryBuilder = await this.eventRepository.createQueryBuilder('event')
-
-      title && queryBuilder.andWhere('event.title = :title', { title })
-      online && queryBuilder.andWhere('event.online = :online', { online })
-
-      if (categoryName)
-        queryBuilder.andWhere('category.categoryName = :categoryName', { categoryName })
-
-      if (search) {
-        queryBuilder.andWhere(
-          new Brackets(qb => {
-            qb.where('LOWER(event.title) LIKE LOWER(:search)', { search: `${search}` })
-              .orWhere('LOWER(location.city) LIKE LOWER(:search)', { search: `${search}` })
-              .orWhere('LOWER(location.country) LIKE LOWER(:search)', { search: `${search}` })
-          })
-        )
-      }
-
-      const [events, total] = await queryBuilder
-        .leftJoinAndSelect('event.category', 'category')
-        .leftJoinAndSelect('event.subCategory', 'subCategory')
-        .leftJoinAndSelect('event.location', 'location')
-        .leftJoinAndSelect('event.eventDetails', 'eventDetails')
-        .take(limit)
-        .skip(offset)
-        .getManyAndCount()
-
-      return [events, total]
-    } catch (error) {
-      throw new BadRequestException('Failed to find Events')
     }
   }
 }

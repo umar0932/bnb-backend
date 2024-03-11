@@ -1,22 +1,22 @@
 import { Field, InputType, Int } from '@nestjs/graphql'
 
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator'
+import { IsString, IsNotEmpty, IsNumber, IsUUID } from 'class-validator'
 
 @InputType()
 export class CreateChargeInput {
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'Payment Method must be a string' })
+  @IsNotEmpty({ message: 'Payment Method id cannot be empty' })
   @Field(() => String)
   paymentMethodId: string
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Amount must be a number' })
   @Field(() => Int)
   amount: number
 
-  @IsString()
-  @IsNotEmpty()
   @Field(() => String)
-  customerId: string
+  @IsNotEmpty({ message: 'Customer id cannot be empty' })
+  @IsUUID('4', { message: 'Invalid Customer UUID format' })
+  customerId!: string
 }
 
 export default CreateChargeInput

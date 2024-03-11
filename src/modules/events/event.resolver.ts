@@ -3,7 +3,7 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql'
 import { Allow, CurrentUser, JwtUserPayload, SuccessResponse } from '@app/common'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 
-import { Event } from './entities'
+import { Event, Tickets } from './entities'
 import {
   CreateBasicEventInput,
   CreateEventTicketInput,
@@ -21,6 +21,15 @@ export class EventResolver {
 
   // Queries
 
+  @Query(() => Event, { description: 'Get the Event' })
+  @Allow()
+  async getEventById(
+    @Args('input') eventId: string,
+    @CurrentUser() user: JwtUserPayload
+  ): Promise<Event> {
+    return await this.eventService.getEventById(eventId, user.userId)
+  }
+
   @Query(() => [S3SignedUrlResponse], {
     description: 'This will return signed Urls for Events'
   })
@@ -35,14 +44,10 @@ export class EventResolver {
     description: 'The List of Events with Pagination and filters'
   })
   @Allow()
-  async getEvents(@Args('input') args: ListEventsInputs): Promise<ListEventsResponse> {
-    const { limit, offset, filter } = args
-    const [events, count] = await this.eventService.getEventsWithPagination({
-      limit,
-      offset,
-      filter
-    })
-    return { results: events, totalRows: count }
+  async getEvents(@Args('input') listEventsInputs: ListEventsInputs): Promise<ListEventsResponse> {
+    const [events, count, limit, offset] =
+      await this.eventService.getEventsWithPagination(listEventsInputs)
+    return { results: events, totalRows: count, limit, offset }
   }
 
   // Mutations
@@ -80,25 +85,25 @@ export class EventResolver {
     return await this.eventService.createOrUpdateEventDetails(eventDetailsInput, user.userId)
   }
 
-  @Mutation(() => SuccessResponse, {
+  @Mutation(() => Tickets, {
     description: 'This will create new Ticket for the Event'
   })
   @Allow()
   async createEventTickets(
     @Args('input') createEventTicketsInput: CreateEventTicketInput,
     @CurrentUser() user: JwtUserPayload
-  ): Promise<SuccessResponse> {
+  ): Promise<Tickets> {
     return await this.eventService.createEventTicket(createEventTicketsInput, user.userId)
   }
 
-  @Mutation(() => SuccessResponse, {
+  @Mutation(() => Tickets, {
     description: 'This will update ticket for the Event'
   })
   @Allow()
   async updateEventTicket(
     @Args('input') updateEventTicketsInput: UpdateEventTicketInput,
     @CurrentUser() user: JwtUserPayload
-  ): Promise<SuccessResponse> {
+  ): Promise<Tickets> {
     return await this.eventService.updateEventTicket(updateEventTicketsInput, user.userId)
   }
 }

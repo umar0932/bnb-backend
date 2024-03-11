@@ -52,7 +52,9 @@ input CreateAdminUserInput {
 input CreateBasicEventInput {
   categoryId: ID
   endDate: DateTime!
+  eventLocationType: EventLocationType
   location: CreateLocationInput!
+  meetingUrl: String
   startDate: DateTime!
   subCategoryId: ID
   tags: [String!]
@@ -85,7 +87,7 @@ input CreateEventTicketInput {
   isVisible: Boolean
   maxQuantity: Int!
   minQuantity: Int!
-  price: Int!
+  price: Float!
   startDate: DateTime!
   title: String!
 }
@@ -104,7 +106,7 @@ input CreateLocationInput {
 }
 
 input CreateOrderInput {
-  eventId: Int!
+  eventId: String!
   tickets: [TicketTypeInput!]!
   totalPrice: Int!
 }
@@ -145,6 +147,7 @@ type Customer {
   isActive: Boolean
   jobTitle: String
   lastName: String!
+  orders: [OrderEntity!]
   password: String!
   profileImage: String
   ratings: [Rating!]
@@ -211,9 +214,12 @@ type Event {
   createdDate: DateTime
   endDate: DateTime!
   eventDetails: EventDetailsEntity
-  eventTickets: Tickets
+  eventLocationType: EventLocationType!
+  eventTickets: [Tickets!]
   id: ID!
   location: LocationsEntity!
+  meetingUrl: String
+  orders: [OrderEntity!]
   ratings: [Rating!]
   startDate: DateTime!
   status: EventStatus!
@@ -251,6 +257,12 @@ input EventFilterInput {
   online: Boolean
   search: String
   title: String
+}
+
+"""The status of event"""
+enum EventLocationType {
+  ONLINE
+  ONSITE
 }
 
 """The status of event"""
@@ -292,11 +304,13 @@ type ListCustomersResponse {
 
 input ListEventsInputs {
   filter: EventFilterInput
-  limit: Float!
-  offset: Float = 0
+  limit: Float
+  offset: Float
 }
 
 type ListEventsResponse {
+  limit: Int
+  offset: Int
   results: [Event!]!
   totalRows: Float
 }
@@ -375,7 +389,7 @@ type Mutation {
   createCustomer(input: CreateCustomerInput!): CustomerLoginOrRegisterResponse!
 
   """This will create new Ticket for the Event"""
-  createEventTickets(input: CreateEventTicketInput!): SuccessResponse!
+  createEventTickets(input: CreateEventTicketInput!): Tickets!
 
   """This will create new Events"""
   createOrUpdateEventDetails(input: EventDetailsInput!): SuccessResponse!
@@ -444,7 +458,7 @@ type Mutation {
   updateCustomerPassword(password: String!): SuccessResponse!
 
   """This will update ticket for the Event"""
-  updateEventTicket(input: UpdateEventTicketInput!): SuccessResponse!
+  updateEventTicket(input: UpdateEventTicketInput!): Tickets!
 
   """This will signup update Organizers"""
   updateOrganizer(input: UpdateOrganizerInput!): Organizer!
@@ -456,7 +470,8 @@ type Mutation {
 type OrderEntity {
   createdBy: String
   createdDate: DateTime
-  eventId: String!
+  customer: Customer!
+  event: Event!
   id: ID!
   orderStatus: OrderStatus!
   paymentIntentId: String!
@@ -516,6 +531,9 @@ type Query {
 
   """The List of Customers with Pagination and filters"""
   getCustomersAdmin(input: ListCustomersInputs!): ListCustomersResponse!
+
+  """Get the Event"""
+  getEventById(input: String!): Event!
 
   """This will return signed Urls for Events"""
   getEventUploadUrls(count: Float!): [S3SignedUrlResponse!]!
@@ -626,8 +644,8 @@ type TicketType {
 }
 
 input TicketTypeInput {
-  id: Int!
-  price: Int!
+  id: String!
+  price: Float!
   quantity: Int!
 }
 
@@ -693,7 +711,7 @@ input UpdateCustomerInput {
 }
 
 input UpdateEventTicketInput {
-  availableQuantity: Int!
+  availableQuantity: Int
   description: String
   endDate: DateTime!
   eventId: ID!
@@ -701,9 +719,9 @@ input UpdateEventTicketInput {
   isVisible: Boolean
   maxQuantity: Int!
   minQuantity: Int!
-  price: Int!
+  price: Float
   startDate: DateTime!
-  title: String!
+  title: String
 }
 
 input UpdateOrganizerInput {

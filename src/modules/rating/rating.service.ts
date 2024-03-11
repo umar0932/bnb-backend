@@ -38,13 +38,10 @@ export class RatingService {
       const scaledOrganizerRating = (Number(organizerRating) / 5) * 5
 
       if (averageRating === null || averageRating === undefined) {
-        console.log('averageRating1---->>>', averageRating)
         await transactionalManager.update(Customer, customer.id, {
           averageRating: scaledOrganizerRating
         })
       } else {
-        console.log('averageRating2---->>>', averageRating)
-
         const updatedAverageRating = (Number(averageRating) + scaledOrganizerRating) / 2
 
         const finalAverageRating = Math.min(Math.max(updatedAverageRating, 0), 5)

@@ -30,7 +30,7 @@ export class CreateEventTicketInput {
   @IsNumber({}, { message: 'Available quantity must be a number' })
   availableQuantity!: number
 
-  @Field(() => Int)
+  @Field(() => Number)
   @IsNotEmpty({ message: 'Ticket price cannot be empty' })
   @IsNumber({}, { message: 'Ticket price must be a number' })
   price!: number
@@ -45,16 +45,6 @@ export class CreateEventTicketInput {
   @IsDate({ message: 'Invalid end date format' })
   endDate!: Date
 
-  @Field(() => String, { nullable: true })
-  @IsString({ message: 'Ticket description must be a string' })
-  @MinLength(0, { message: 'Ticket description must be at least 0 characters long' })
-  @MaxLength(50, { message: 'Ticket description cannot be longer than 50 characters' })
-  description?: string
-
-  @Field(() => Boolean, { nullable: true })
-  @IsBoolean({ message: 'Is visible must be a boolean' })
-  isVisible?: boolean
-
   @Field(() => Int)
   @IsNotEmpty({ message: 'Minimum quantity cannot be empty' })
   @IsNumber({}, { message: 'Minimum quantity must be a number' })
@@ -66,4 +56,14 @@ export class CreateEventTicketInput {
   @IsNumber({}, { message: 'Maximum quantity must be a number' })
   @Min(1, { message: 'Maximum quantity must be at least 1' })
   maxQuantity!: number
+
+  @Field(() => String, { nullable: true })
+  @IsString({ message: 'Ticket description must be a string' })
+  @MinLength(0, { message: 'Ticket description must be at least 0 characters long' })
+  @MaxLength(50, { message: 'Ticket description cannot be longer than 50 characters' })
+  description?: string
+
+  @Field(() => Boolean, { nullable: true })
+  @IsBoolean({ message: 'Is visible must be a boolean' })
+  isVisible?: boolean
 }

@@ -1,8 +1,10 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities'
+import { Customer } from '@app/customer-user/entities'
+import { Event } from '@app/events/entities'
 
 import { OrderStatus, TicketType } from '../types'
 
@@ -20,10 +22,6 @@ export class OrderEntity extends CustomBaseEntity {
   id: string
 
   // Complusory Variables
-
-  @Column({ name: 'event_id' })
-  @Field(() => String)
-  eventId!: string
 
   @Column({ name: 'payment_intent_id' })
   @Field(() => String)
@@ -44,4 +42,21 @@ export class OrderEntity extends CustomBaseEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING, name: 'order_status' })
   @Field(() => OrderStatus)
   orderStatus!: OrderStatus
+
+  // Relations
+
+  @Field(() => Event)
+  @ManyToOne(() => Event, event => event.orders, {
+    onUpdate: 'CASCADE'
+  })
+  @JoinColumn({ name: 'event_id' })
+  event: Event
+
+  @Field(() => Customer)
+  @ManyToOne(() => Customer, customer => customer.orders, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn({ name: 'customer_id' })
+  customer: Customer
 }

@@ -1,12 +1,13 @@
 import { InputType, Field, Int } from '@nestjs/graphql'
 
-import { IsNotEmpty, IsNumber, ValidateNested, ArrayMinSize } from 'class-validator'
+import { IsNotEmpty, IsNumber, ValidateNested, ArrayMinSize, IsUUID } from 'class-validator'
 import { Type } from 'class-transformer'
 
 @InputType()
 export class CreateOrderInput {
-  @Field(() => Int)
-  @IsNotEmpty({ message: 'Event ID cannot be empty' })
+  @Field(() => String)
+  @IsNotEmpty({ message: 'Event id cannot be empty' })
+  @IsUUID('4', { message: 'Invalid Event UUID format' })
   eventId!: string
 
   @Field(() => Int)
@@ -22,15 +23,16 @@ export class CreateOrderInput {
 
 @InputType()
 class TicketTypeInput {
-  @Field(() => Int)
+  @Field(() => String)
   @IsNotEmpty({ message: 'Ticket ID cannot be empty' })
-  id!: number
+  @IsUUID('4', { message: 'Invalid Ticket UUID format' })
+  id!: string
 
   @Field(() => Int)
   @IsNumber({}, { message: 'Quantity must be a number' })
   quantity!: number
 
-  @Field(() => Int)
+  @Field(() => Number)
   @IsNumber({}, { message: 'Ticket price must be a number' })
   price!: number
 }

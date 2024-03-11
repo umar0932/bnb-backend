@@ -12,14 +12,20 @@ import {
 
 import { Category, SubCategory } from '@app/category/entities'
 import { CustomBaseEntity, LocationsEntity } from '@app/common/entities'
+import { OrderEntity } from '@app/order/entities'
 import { Rating } from '@app/rating/entities'
 
 import { EventDetailsEntity } from './event-details.entity'
-import { EventStatus } from '../event.constants'
+import { EventLocationType, EventStatus } from '../event.constants'
 import { Tickets } from './tickets.entity'
 
 registerEnumType(EventStatus, {
   name: 'EventStatus',
+  description: 'The status of event'
+})
+
+registerEnumType(EventLocationType, {
+  name: 'EventLocationType',
   description: 'The status of event'
 })
 
@@ -55,11 +61,24 @@ export class Event extends CustomBaseEntity {
   @Field(() => String, { nullable: true })
   type?: string
 
+  @Column({ length: 255, nullable: true, name: 'meeting_url' })
+  @Field(() => String, { nullable: true })
+  meetingUrl?: string
+
   // Enums
 
   @Field(() => EventStatus)
   @Column({ type: 'enum', enum: EventStatus, default: EventStatus.DRAFT, name: 'event_status' })
   status!: EventStatus
+
+  @Field(() => EventLocationType)
+  @Column({
+    type: 'enum',
+    enum: EventLocationType,
+    default: EventLocationType.ONSITE,
+    name: 'event_location_type'
+  })
+  eventLocationType!: EventLocationType
 
   // Relations
 
@@ -91,12 +110,11 @@ export class Event extends CustomBaseEntity {
   })
   eventDetails?: EventDetailsEntity
 
-  @Field(() => Tickets, { nullable: true })
-  @OneToMany(() => Tickets, eventTicketsEntity => eventTicketsEntity.event, {
+  @Field(() => [Tickets], { nullable: true })
+  @OneToMany(() => Tickets, eventTickets => eventTickets.event, {
     eager: true,
     nullable: true
   })
-  @JoinColumn({ name: 'tickets_id' })
   eventTickets?: Tickets[]
 
   @Field(() => [Rating], { nullable: true })
@@ -104,5 +122,12 @@ export class Event extends CustomBaseEntity {
     eager: true,
     nullable: true
   })
-  ratings: Rating[]
+  ratings?: Rating[]
+
+  @Field(() => [OrderEntity], { nullable: true })
+  @OneToMany(() => OrderEntity, orderEntity => orderEntity.event, {
+    eager: true,
+    nullable: true
+  })
+  orders?: OrderEntity[]
 }
