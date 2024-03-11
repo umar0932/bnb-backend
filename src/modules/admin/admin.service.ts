@@ -276,8 +276,9 @@ export class AdminService {
     }
 
     try {
+      const pwd = await encodePassword(password)
       await this.adminRepository.update(admin.id, {
-        password,
+        password: pwd,
         updatedBy: admin.id,
         updatedDate: new Date()
       })

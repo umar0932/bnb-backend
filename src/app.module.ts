@@ -18,6 +18,7 @@ import { OrderModule } from '@app/order'
 import { PaymentModule } from '@app/payment'
 
 import { dataSourceOptions } from 'db/data-source'
+import { RatingModule } from './modules/rating/rating.module'
 import EnvConfig from './config/config'
 
 dotenv.config()
@@ -60,7 +61,8 @@ const env = `${process.env.NODE_ENV}`
     EventModule,
     OrderModule,
     PaymentModule,
-    MailModule
+    MailModule,
+    RatingModule
   ]
 })
 export class AppModule {}

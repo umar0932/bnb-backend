@@ -19,6 +19,34 @@ import { ListEventsResponse } from './dto/args'
 export class EventResolver {
   constructor(private readonly eventService: EventService) {}
 
+  // Queries
+
+  @Query(() => [S3SignedUrlResponse], {
+    description: 'This will return signed Urls for Events'
+  })
+  @Allow()
+  async getEventUploadUrls(
+    @Args({ name: 'count', type: () => Number }) count: number
+  ): Promise<S3SignedUrlResponse[]> {
+    return this.eventService.getEventUploadUrls(count)
+  }
+
+  @Query(() => ListEventsResponse, {
+    description: 'The List of Events with Pagination and filters'
+  })
+  @Allow()
+  async getEvents(@Args('input') args: ListEventsInputs): Promise<ListEventsResponse> {
+    const { limit, offset, filter } = args
+    const [events, count] = await this.eventService.getEventsWithPagination({
+      limit,
+      offset,
+      filter
+    })
+    return { results: events, totalRows: count }
+  }
+
+  // Mutations
+
   @Mutation(() => SuccessResponse, {
     description: 'This will create new Events'
   })
@@ -72,31 +100,5 @@ export class EventResolver {
     @CurrentUser() user: JwtUserPayload
   ): Promise<SuccessResponse> {
     return await this.eventService.updateEventTicket(updateEventTicketsInput, user.userId)
-  }
-
-  @Query(() => [S3SignedUrlResponse], {
-    description: 'This will return signed Urls for Events'
-  })
-  @Allow()
-  async getEventUploadUrls(
-    @Args({ name: 'count', type: () => Number }) count: number
-  ): Promise<S3SignedUrlResponse[]> {
-    return this.eventService.getEventUploadUrls(count)
-  }
-
-  @Query(() => ListEventsResponse, {
-    description: 'The List of Events with Pagination and filters'
-  })
-  @Allow()
-  async getAllEventsWithPagination(
-    @Args('input') args: ListEventsInputs
-  ): Promise<ListEventsResponse> {
-    const { limit, offset, filter } = args
-    const [events, count] = await this.eventService.findAllEventsWithPagination({
-      limit,
-      offset,
-      filter
-    })
-    return { results: events, totalRows: count }
   }
 }

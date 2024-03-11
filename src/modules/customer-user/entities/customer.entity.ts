@@ -5,6 +5,7 @@ import { Column, Entity, Index, OneToMany, OneToOne, PrimaryGeneratedColumn } fr
 import { CustomBaseEntity, SocialProvider } from '@app/common/entities'
 
 import { CustomerFollower } from './customer-follower.entity'
+import { Rating } from '@app/rating/entities'
 
 @Entity({ name: 'customer_user' })
 @Index(['email'])
@@ -13,7 +14,7 @@ export class Customer extends CustomBaseEntity {
   // Primary key
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id!: string
 
   // Complusory Variables
 
@@ -34,6 +35,10 @@ export class Customer extends CustomBaseEntity {
   password!: string
 
   // Non Complusory Variables
+
+  @Column({ type: 'numeric', name: 'average_rating', nullable: true })
+  @Field(() => Number, { nullable: true })
+  averageRating?: number
 
   @Column({ length: 250, name: 'profile_image', nullable: true })
   @Field(() => String, { nullable: true })
@@ -120,6 +125,13 @@ export class Customer extends CustomBaseEntity {
     nullable: true
   })
   following?: CustomerFollower[]
+
+  @Field(() => [Rating], { nullable: true })
+  @OneToMany(() => Rating, rating => rating.customer, {
+    eager: true,
+    nullable: true
+  })
+  ratings: Rating[]
 
   @Field(() => SocialProvider, { nullable: true })
   @OneToOne(() => SocialProvider, socialProvider => socialProvider.customer, {

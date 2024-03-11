@@ -12,6 +12,7 @@ import {
 
 import { Category, SubCategory } from '@app/category/entities'
 import { CustomBaseEntity, LocationsEntity } from '@app/common/entities'
+import { Rating } from '@app/rating/entities'
 
 import { EventDetailsEntity } from './event-details.entity'
 import { EventStatus } from '../event.constants'
@@ -97,4 +98,11 @@ export class Event extends CustomBaseEntity {
   })
   @JoinColumn({ name: 'tickets_id' })
   eventTickets?: Tickets[]
+
+  @Field(() => [Rating], { nullable: true })
+  @OneToMany(() => Rating, rating => rating.event, {
+    eager: true,
+    nullable: true
+  })
+  ratings: Rating[]
 }

@@ -15,28 +15,11 @@ import { CreateLocationInput } from '@app/common'
 
 @InputType()
 export class CreateBasicEventInput {
+  // Complusory Variables
   @Field(() => String)
   @IsNotEmpty({ message: 'Event title cannot be empty' })
   @IsString({ message: 'Event title must be a string' })
   title!: string
-
-  @Field(() => ID, { nullable: true })
-  @IsUUID('4', { message: 'Invalid Category UUID format' })
-  categoryId?: string
-
-  @Field(() => ID, { nullable: true })
-  @IsOptional()
-  @IsUUID('4', { message: 'Invalid subCategory UUID format' })
-  subCategoryId?: string
-
-  @Field(() => [String], { nullable: true })
-  @IsOptional()
-  @IsArray({ message: 'Tags must be an array' })
-  tags?: string[]
-
-  @Field(() => String, { nullable: true })
-  @IsString({ message: 'Type must be a string' })
-  type?: string
 
   @Field(() => CreateLocationInput)
   @ValidateNested()
@@ -52,4 +35,28 @@ export class CreateBasicEventInput {
   @IsNotEmpty({ message: 'End date cannot be empty' })
   @IsDate({ message: 'Invalid end date format' })
   endDate!: Date
+
+  // Relations
+
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsUUID('4', { message: 'Invalid Category UUID format' })
+  categoryId?: string
+
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsUUID('4', { message: 'Invalid subCategory UUID format' })
+  subCategoryId?: string
+
+  // Non Complusory Variables
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray({ message: 'Tags must be an array' })
+  tags?: string[]
+
+  @Field(() => String, { nullable: true })
+  @IsString({ message: 'Type must be a string' })
+  @IsOptional()
+  type?: string
 }

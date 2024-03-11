@@ -112,6 +112,7 @@ export class EventService {
     try {
       await this.eventRepository.save({
         ...createBasicEventInput,
+        title,
         category,
         subCategory,
         location: getlocation,
@@ -128,30 +129,32 @@ export class EventService {
     updateBasicEventInput: UpdateBasicEventInput,
     userId: string
   ): Promise<SuccessResponse> {
-    const { eventId, categoryId, subCategoryId, type, location, ...rest } = updateBasicEventInput
-    const event = await this.getEventById(eventId, userId)
+    const { id, categoryId, subCategoryId, title, type, location, ...rest } = updateBasicEventInput
+    const event = await this.getEventById(id, userId)
     let category, subCategory
     if (categoryId) category = await this.categoryService.getCategoryById(categoryId)
 
     if (subCategoryId && categoryId)
       subCategory = await this.categoryService.getSubCategoryById(subCategoryId, categoryId)
 
-    const getlocation = await this.addLocation(location)
-
-    if (!getlocation) throw new BadRequestException('Location has invalid inputs')
-
+    if (location) {
+      const getlocation = await this.addLocation(location)
+      if (!getlocation) throw new BadRequestException('Location has invalid inputs')
+    }
     if (type) await this.checkValidTypeEvent(type)
 
-    const checkEventTitle = await this.getEventByName(updateBasicEventInput.title)
-    if (checkEventTitle) throw new BadRequestException('Event Name already exists')
-
+    if (title) {
+      const checkEventTitle = await this.getEventByName(title)
+      if (checkEventTitle) throw new BadRequestException('Event Name already exists')
+    }
     try {
       await this.eventRepository.update(event.id, {
         ...rest,
+        title,
         type,
         category,
         subCategory,
-        location: getlocation,
+        location,
         updatedBy: userId,
         updatedDate: new Date()
       })
@@ -259,7 +262,7 @@ export class EventService {
     return urls
   }
 
-  async findAllEventsWithPagination({
+  async getEventsWithPagination({
     limit,
     offset,
     filter

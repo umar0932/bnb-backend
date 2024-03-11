@@ -116,12 +116,19 @@ input CreateOrganizerInput {
   websiteLink: String
 }
 
+input CreateRatingInput {
+  customerId: String!
+  eventId: String!
+  organizerRating: Float!
+}
+
 input CreateSubCategoryInput {
   categoryId: ID!
   subCategoryName: String!
 }
 
 type Customer {
+  averageRating: Float
   cellPhone: String
   city: String
   companyName: String
@@ -140,6 +147,7 @@ type Customer {
   lastName: String!
   password: String!
   profileImage: String
+  ratings: [Rating!]
   resetPaswordOTP: String
   secondAddress: String
   socialProvider: SocialProvider
@@ -206,6 +214,7 @@ type Event {
   eventTickets: Tickets
   id: ID!
   location: LocationsEntity!
+  ratings: [Rating!]
   startDate: DateTime!
   status: EventStatus!
   subCategory: SubCategory
@@ -292,6 +301,20 @@ type ListEventsResponse {
   totalRows: Float
 }
 
+input ListRatingsInput {
+  eventId: String
+  filter: RatingFilterInputs
+  limit: Float
+  offset: Float
+}
+
+type ListRatingsResponse {
+  limit: Int
+  offset: Int
+  results: [Rating!]!
+  totalRows: Float
+}
+
 input ListSubCategoriesInput {
   filter: SubCategoryFilterInputs
   limit: Float
@@ -371,6 +394,9 @@ type Mutation {
 
   """Send a password reset link"""
   forgotPasswordCustomer(input: ForgotPasswordInput!): SuccessResponse!
+
+  """This will give new rating to the customer"""
+  giveRatingToOrganizer(input: CreateRatingInput!): Rating!
 
   """Admin Login"""
   loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
@@ -476,9 +502,6 @@ type Query {
   """This will get all categories"""
   getAllCategories: [Category!]!
 
-  """The List of Events with Pagination and filters"""
-  getAllEventsWithPagination(input: ListEventsInputs!): ListEventsResponse!
-
   """This will get all categories"""
   getAllSubCategories: [SubCategory!]!
 
@@ -497,6 +520,9 @@ type Query {
   """This will return signed Urls for Events"""
   getEventUploadUrls(count: Float!): [S3SignedUrlResponse!]!
 
+  """The List of Events with Pagination and filters"""
+  getEvents(input: ListEventsInputs!): ListEventsResponse!
+
   """Get the followers of the authenticated customer"""
   getFollowers(customerId: String!): [Customer!]!
 
@@ -509,6 +535,9 @@ type Query {
   """Get other Customer Data"""
   getOtherCustomerData(customerId: String!): OtherCustomerDataResponse!
 
+  """The List of ratings with Pagination and filters"""
+  getRatings(input: ListRatingsInput!): ListRatingsResponse!
+
   """The List of sub categories with Pagination and filters"""
   getSubCategories(input: ListSubCategoriesInput!): ListSubCategoriesResponse!
 
@@ -517,6 +546,21 @@ type Query {
 
   """check if email already exist"""
   validEmailAdmin(input: String!): SuccessResponse!
+}
+
+type Rating {
+  createdBy: String
+  createdDate: DateTime
+  customer: Customer!
+  event: Event!
+  id: ID!
+  organizerRating: Float!
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+input RatingFilterInputs {
+  search: String
 }
 
 input RegisterOrLoginSocialInput {
@@ -614,13 +658,13 @@ input UpdateAdminUserInput {
 
 input UpdateBasicEventInput {
   categoryId: ID
-  endDate: DateTime!
-  eventId: ID!
-  location: CreateLocationInput!
-  startDate: DateTime!
+  endDate: DateTime
+  id: ID!
+  location: CreateLocationInput
+  startDate: DateTime
   subCategoryId: ID
   tags: [String!]
-  title: String!
+  title: String
   type: String
 }
 
