@@ -7,7 +7,7 @@ import { CustomerUserService } from '@app/customer-user'
 import { EventService } from '@app/events'
 import { SuccessResponse } from '@app/common'
 
-import { CreateOrderInput } from './dto/inputs'
+import { CreateOrderInput, ListOrdersInputs } from './dto/inputs'
 import { OrderEntity } from './entities'
 import { OrderStatus } from './types'
 
@@ -21,6 +21,38 @@ export class OrderService {
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>
   ) {}
+
+  async getOrdersWithPagination(
+    listOrdersInputs: ListOrdersInputs
+  ): Promise<[OrderEntity[], number, number, number]> {
+    const { limit = 10, offset = 0, filter } = listOrdersInputs
+    const { search } = filter || {}
+
+    try {
+      const queryBuilder = this.orderRepository.createQueryBuilder('orders')
+
+      console.log('searchOrder', search)
+
+      // if (search) {
+      //   queryBuilder.andWhere(
+      //     new Brackets(qb => {
+      //       qb.where('LOWER(orders.title) LIKE LOWER(:search)', { search: `${search}` })
+      //     })
+      //   )
+      // }
+
+      const [orders, total] = await queryBuilder
+        .leftJoinAndSelect('orders.event', 'eventOrders')
+        .leftJoinAndSelect('orders.customer', 'customerOrders')
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount()
+
+      return [orders, total, limit, offset]
+    } catch (error) {
+      throw new BadRequestException('Failed to find Events')
+    }
+  }
 
   async createOrder(
     orderInput: CreateOrderInput,

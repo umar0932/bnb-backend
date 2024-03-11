@@ -8,12 +8,13 @@ import {
   CreateBasicEventInput,
   CreateEventTicketInput,
   EventDetailsInput,
+  ListEventTicketsInputs,
   ListEventsInputs,
   UpdateBasicEventInput,
   UpdateEventTicketInput
 } from './dto/inputs'
 import { EventService } from './event.service'
-import { ListEventsResponse } from './dto/args'
+import { ListEventTicketsResponse, ListEventsResponse } from './dto/args'
 
 @Resolver(() => Event)
 export class EventResolver {
@@ -48,6 +49,18 @@ export class EventResolver {
     const [events, count, limit, offset] =
       await this.eventService.getEventsWithPagination(listEventsInputs)
     return { results: events, totalRows: count, limit, offset }
+  }
+
+  @Query(() => ListEventTicketsResponse, {
+    description: 'The List of Event Tickets with Pagination and filters'
+  })
+  @Allow()
+  async getEventsTickets(
+    @Args('input') listEventTicketsInputs: ListEventTicketsInputs
+  ): Promise<ListEventTicketsResponse> {
+    const [eventTickets, count, limit, offset] =
+      await this.eventService.getEventTicketsWithPagination(listEventTicketsInputs)
+    return { results: eventTickets, totalRows: count, limit, offset }
   }
 
   // Mutations

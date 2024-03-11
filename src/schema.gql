@@ -272,6 +272,11 @@ enum EventStatus {
   SOLD
 }
 
+input EventTicketsFilterInput {
+  search: String
+  title: String
+}
+
 input ForgotPasswordInput {
   email: String!
 }
@@ -302,6 +307,19 @@ type ListCustomersResponse {
   totalRows: Float
 }
 
+input ListEventTicketsInputs {
+  filter: EventTicketsFilterInput
+  limit: Float
+  offset: Float
+}
+
+type ListEventTicketsResponse {
+  limit: Int
+  offset: Int
+  results: [Tickets!]!
+  totalRows: Float
+}
+
 input ListEventsInputs {
   filter: EventFilterInput
   limit: Float
@@ -312,6 +330,19 @@ type ListEventsResponse {
   limit: Int
   offset: Int
   results: [Event!]!
+  totalRows: Float
+}
+
+input ListOrdersInputs {
+  filter: OrderFilterInput
+  limit: Float
+  offset: Float
+}
+
+type ListOrdersResponse {
+  limit: Int
+  offset: Int
+  results: [OrderEntity!]!
   totalRows: Float
 }
 
@@ -482,6 +513,10 @@ type OrderEntity {
   updatedDate: DateTime
 }
 
+input OrderFilterInput {
+  search: String
+}
+
 """The status of order"""
 enum OrderStatus {
   FAILED
@@ -541,11 +576,17 @@ type Query {
   """The List of Events with Pagination and filters"""
   getEvents(input: ListEventsInputs!): ListEventsResponse!
 
+  """The List of Event Tickets with Pagination and filters"""
+  getEventsTickets(input: ListEventTicketsInputs!): ListEventTicketsResponse!
+
   """Get the followers of the authenticated customer"""
   getFollowers(customerId: String!): [Customer!]!
 
   """Get the following of the authenticated customer"""
   getFollowing(customerId: String!): [Customer!]!
+
+  """The List of Event Tickets with Pagination and filters"""
+  getOrders(input: ListOrdersInputs!): ListOrdersResponse!
 
   """This will get all Orders of Current Customer"""
   getOrdersOfCustomer: [OrderEntity!]!

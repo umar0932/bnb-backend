@@ -18,6 +18,7 @@ import {
   CreateBasicEventInput,
   CreateEventTicketInput,
   EventDetailsInput,
+  ListEventTicketsInputs,
   ListEventsInputs,
   UpdateBasicEventInput,
   UpdateEventTicketInput
@@ -163,6 +164,37 @@ export class EventService {
         .getManyAndCount()
 
       return [events, total, limit, offset]
+    } catch (error) {
+      throw new BadRequestException('Failed to find Events')
+    }
+  }
+
+  async getEventTicketsWithPagination(
+    listEventTicketsInputs: ListEventTicketsInputs
+  ): Promise<[Tickets[], number, number, number]> {
+    const { limit = 10, offset = 0, filter } = listEventTicketsInputs
+    const { title, search } = filter || {}
+
+    try {
+      const queryBuilder = this.eventTicketsRepository.createQueryBuilder('eventTickets')
+
+      title && queryBuilder.andWhere('eventTickets.title = :title', { title })
+
+      if (search) {
+        queryBuilder.andWhere(
+          new Brackets(qb => {
+            qb.where('LOWER(eventTickets.title) LIKE LOWER(:search)', { search: `${search}` })
+          })
+        )
+      }
+
+      const [eventTickets, total] = await queryBuilder
+        .leftJoinAndSelect('eventTickets.event.category', 'category')
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount()
+
+      return [eventTickets, total, limit, offset]
     } catch (error) {
       throw new BadRequestException('Failed to find Events')
     }
