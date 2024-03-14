@@ -62,7 +62,7 @@ export class OrderService {
     const customer = await this.customerService.getCustomerById(userId)
     const { eventId } = orderInput
 
-    await this.eventService.checkEventExistById(eventId)
+    await this.eventService.findFromAllEvents(eventId)
 
     try {
       const order = this.orderRepository.create({

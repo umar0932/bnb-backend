@@ -92,6 +92,10 @@ input CreateEventTicketInput {
   title: String!
 }
 
+input CreateLikeInput {
+  eventId: String!
+}
+
 input CreateLocationInput {
   city: String!
   country: String!
@@ -147,6 +151,7 @@ type Customer {
   isActive: Boolean
   jobTitle: String
   lastName: String!
+  likes: [Likes!]
   orders: [OrderEntity!]
   password: String!
   profileImage: String
@@ -217,6 +222,8 @@ type Event {
   eventLocationType: EventLocationType!
   eventTickets: [Tickets!]
   id: ID!
+  likeCount: Int
+  likes: [Likes!]
   location: LocationsEntity!
   meetingUrl: String
   orders: [OrderEntity!]
@@ -252,8 +259,10 @@ input EventDetailsInput {
 
 input EventFilterInput {
   categoryName: String
-  eventToday: String
-  eventWeekend: String
+  eventToday: Boolean
+  eventTomorrow: Boolean
+  eventWeekend: Boolean
+  onSite: Boolean
   online: Boolean
   search: String
   title: String
@@ -279,6 +288,20 @@ input EventTicketsFilterInput {
 
 input ForgotPasswordInput {
   email: String!
+}
+
+input LikeFilterInputs {
+  search: String
+}
+
+type Likes {
+  createdBy: String
+  createdDate: DateTime
+  event: Event
+  id: ID!
+  updatedBy: String
+  updatedDate: DateTime
+  user: Customer
 }
 
 input ListCategoriesInput {
@@ -330,6 +353,21 @@ type ListEventsResponse {
   limit: Int
   offset: Int
   results: [Event!]!
+  totalRows: Float
+}
+
+input ListLikesInput {
+  customerId: String
+  eventId: String
+  filter: LikeFilterInputs
+  limit: Float
+  offset: Float
+}
+
+type ListLikesResponse {
+  limit: Int
+  offset: Int
+  results: [Likes!]!
   totalRows: Float
 }
 
@@ -443,6 +481,9 @@ type Mutation {
   """This will give new rating to the customer"""
   giveRatingToOrganizer(input: CreateRatingInput!): Rating!
 
+  """This will create new Like on Event"""
+  likeEvent(input: CreateLikeInput!): Likes!
+
   """Admin Login"""
   loginAsAdmin(input: LoginAdminInput!): AdminLoginResponse!
 
@@ -463,6 +504,9 @@ type Mutation {
 
   """This will unfollow a customer"""
   unfollowCustomer(customerId: String!): SuccessResponse!
+
+  """This will unlike Event"""
+  unlikeEvent(input: UpdateLikeInput!): Likes!
 
   """Update admin data"""
   updateAdminData(input: UpdateAdminUserInput!): String!
@@ -584,6 +628,9 @@ type Query {
 
   """Get the following of the authenticated customer"""
   getFollowing(customerId: String!): [Customer!]!
+
+  """The List of likes with Pagination and filters"""
+  getLikes(input: ListLikesInput!): ListLikesResponse!
 
   """The List of Event Tickets with Pagination and filters"""
   getOrders(input: ListOrdersInputs!): ListOrdersResponse!
@@ -763,6 +810,10 @@ input UpdateEventTicketInput {
   price: Float
   startDate: DateTime!
   title: String
+}
+
+input UpdateLikeInput {
+  eventId: String!
 }
 
 input UpdateOrganizerInput {

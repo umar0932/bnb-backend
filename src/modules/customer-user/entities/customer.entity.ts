@@ -3,6 +3,7 @@ import { ObjectType, Field, ID, Int } from '@nestjs/graphql'
 import { Column, Entity, Index, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity, SocialProvider } from '@app/common/entities'
+import { Likes } from '@app/like/entities'
 import { OrderEntity } from '@app/order/entities'
 
 import { CustomerFollower } from './customer-follower.entity'
@@ -126,6 +127,12 @@ export class Customer extends CustomBaseEntity {
     nullable: true
   })
   following?: CustomerFollower[]
+
+  @Field(() => [Likes], { nullable: true })
+  @OneToMany(() => Likes, (like: Likes) => like.user, {
+    nullable: true
+  })
+  likes?: Likes[]
 
   @Field(() => [Rating], { nullable: true })
   @OneToMany(() => Rating, rating => rating.customer, {

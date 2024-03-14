@@ -51,11 +51,13 @@ export class EventService {
     return false
   }
 
-  async checkEventExistById(id: string): Promise<boolean> {
-    const findEventExistById = await this.eventRepository.count({ where: { id } })
-    if (!findEventExistById)
-      throw new BadRequestException('Event with the provided ID does not exist')
-    return true
+  async findFromAllEvents(id: string): Promise<Event> {
+    const findEvent = await this.eventRepository.findOne({
+      where: { id }
+    })
+    if (!findEvent) throw new BadRequestException('Event with the provided ID does not exist')
+
+    return findEvent
   }
 
   async getEventTicketsByName(title: string, customerId: string): Promise<boolean> {
@@ -130,16 +132,35 @@ export class EventService {
     listEventsInputs: ListEventsInputs
   ): Promise<[Event[], number, number, number]> {
     const { limit = 10, offset = 0, filter } = listEventsInputs
-    const { title, search, categoryName, online } = filter || {}
+    const { title, search, categoryName, online, eventToday, eventTomorrow, eventWeekend, onSite } =
+      filter || {}
 
     try {
       const queryBuilder = this.eventRepository.createQueryBuilder('event')
 
+      queryBuilder
+        .leftJoinAndSelect('event.category', 'category')
+        .leftJoinAndSelect('event.subCategory', 'subCategory')
+        .leftJoinAndSelect('event.location', 'location')
+        .leftJoinAndSelect('event.eventDetails', 'eventDetails')
+        .leftJoinAndSelect('event.eventTickets', 'eventTickets')
+        .leftJoinAndSelect('event.orders', 'eventorders')
+        .leftJoinAndSelect('eventorders.customer', 'customerorder')
+        .take(limit)
+        .skip(offset)
+
       title && queryBuilder.andWhere('event.title = :title', { title })
-      online && queryBuilder.andWhere('event.online = :online', { online })
+      online &&
+        queryBuilder.andWhere('event.eventLocationType = :online', {
+          online: EventLocationType.ONLINE
+        })
+      onSite &&
+        queryBuilder.andWhere('event.eventLocationType = :onSite', {
+          onSite: EventLocationType.ONSITE
+        })
 
       if (categoryName)
-        queryBuilder.andWhere('category.categoryName = :categoryName', { categoryName })
+        queryBuilder.andWhere('event.category.categoryName = :categoryName', { categoryName })
 
       if (search) {
         queryBuilder.andWhere(
@@ -151,17 +172,35 @@ export class EventService {
         )
       }
 
-      const [events, total] = await queryBuilder
-        .leftJoinAndSelect('event.category', 'category')
-        .leftJoinAndSelect('event.subCategory', 'subCategory')
-        .leftJoinAndSelect('event.location', 'location')
-        .leftJoinAndSelect('event.eventDetails', 'eventDetails')
-        .leftJoinAndSelect('event.eventTickets', 'eventTickets')
-        .leftJoinAndSelect('event.orders', 'eventorders')
-        .leftJoinAndSelect('eventorders.customer', 'customerorder')
-        .take(limit)
-        .skip(offset)
-        .getManyAndCount()
+      if (eventToday) {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        queryBuilder.andWhere('DATE(event.startDate) = :today', { today })
+      }
+
+      if (eventTomorrow) {
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setHours(0, 0, 0, 0)
+        queryBuilder.andWhere('DATE(event.startDate) = :tomorrow', { tomorrow })
+      }
+
+      if (eventWeekend) {
+        const today = new Date()
+        const startOfWeekend = new Date(today)
+        startOfWeekend.setDate(startOfWeekend.getDate() + (5 - today.getDay()))
+        const endOfWeekend = new Date(today)
+        endOfWeekend.setDate(endOfWeekend.getDate() + (7 - today.getDay()))
+        queryBuilder.andWhere(
+          'DATE(event.startDate) >= :startOfWeekend AND DATE(event.startDate) <= :endOfWeekend',
+          {
+            startOfWeekend,
+            endOfWeekend
+          }
+        )
+      }
+
+      const [events, total] = await queryBuilder.getManyAndCount()
 
       return [events, total, limit, offset]
     } catch (error) {

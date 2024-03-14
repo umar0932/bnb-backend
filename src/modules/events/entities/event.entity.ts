@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql'
+import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql'
 
 import {
   Column,
@@ -12,6 +12,7 @@ import {
 
 import { Category, SubCategory } from '@app/category/entities'
 import { CustomBaseEntity, LocationsEntity } from '@app/common/entities'
+import { Likes } from '@app/like/entities'
 import { OrderEntity } from '@app/order/entities'
 import { Rating } from '@app/rating/entities'
 
@@ -52,6 +53,10 @@ export class Event extends CustomBaseEntity {
   endDate!: Date
 
   // Non Complusory Variables
+
+  @Column({ type: 'bigint', name: 'like_count', default: 0 })
+  @Field(() => Int, { nullable: true })
+  likeCount?: number
 
   @Column('simple-array', { name: 'tags', nullable: true })
   @Field(() => [String], { nullable: true })
@@ -116,6 +121,13 @@ export class Event extends CustomBaseEntity {
     nullable: true
   })
   eventTickets?: Tickets[]
+
+  @Field(() => [Likes], { nullable: true })
+  @OneToMany(() => Likes, (like: Likes) => like.event, {
+    eager: true,
+    nullable: true
+  })
+  likes?: Likes[]
 
   @Field(() => [Rating], { nullable: true })
   @OneToMany(() => Rating, rating => rating.event, {

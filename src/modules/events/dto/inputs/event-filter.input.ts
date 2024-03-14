@@ -14,9 +14,15 @@ export class EventFilterInput {
   @Field(() => Boolean, { nullable: true })
   online?: boolean
 
-  @Field(() => String, { nullable: true })
-  eventToday?: string
+  @Field(() => Boolean, { nullable: true })
+  onSite?: boolean
 
-  @Field(() => String, { nullable: true })
-  eventWeekend?: string
+  @Field(() => Boolean, { nullable: true })
+  eventToday?: boolean
+
+  @Field(() => Boolean, { nullable: true })
+  eventTomorrow?: boolean
+
+  @Field(() => Boolean, { nullable: true })
+  eventWeekend?: boolean
 }

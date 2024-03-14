@@ -659,7 +659,6 @@ export class CustomerUserService {
         updatedDate: new Date()
       })
     } catch (e) {
-      console.log(e)
       throw new BadRequestException('Failed to send forgot Email')
     }
     return { success: true, message: 'Forgot Email send' }
@@ -684,7 +683,6 @@ export class CustomerUserService {
         updatedDate: new Date()
       })
     } catch (e) {
-      console.log(e)
       throw new BadRequestException('Failed to update customer password')
     }
     return { success: true, message: 'Password of customer has been updated' }
