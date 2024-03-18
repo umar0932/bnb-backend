@@ -27,6 +27,7 @@ import {
   EventDetailsInput,
   ListEventTicketsInputs,
   ListEventsInputs,
+  ListOrganizerEventsInputs,
   UpdateBasicEventInput,
   UpdateEventTicketInput
 } from './dto/inputs'
@@ -254,6 +255,55 @@ export class EventService {
             endOfWeekend
           }
         )
+      }
+
+      if (search) {
+        queryBuilder.andWhere(
+          new Brackets(qb => {
+            qb.where('LOWER(event.title) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(location.city) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(location.country) LIKE LOWER(:search)', { search: `${search}` })
+          })
+        )
+      }
+
+      const [events, total] = await queryBuilder.getManyAndCount()
+
+      return [events, total, limit, offset]
+    } catch (error) {
+      throw new BadRequestException('Failed to find Events')
+    }
+  }
+
+  async getEventsWithPaginationOrganizer(
+    listOrganizerEventsInputs: ListOrganizerEventsInputs
+  ): Promise<[Event[], number, number, number]> {
+    const { limit = 10, offset = 0, filter } = listOrganizerEventsInputs
+    const { title, search, upcomingEvents, pastEvents } = filter || {}
+
+    try {
+      const queryBuilder = this.eventRepository.createQueryBuilder('event')
+
+      queryBuilder
+        .leftJoinAndSelect('event.category', 'category')
+        .leftJoinAndSelect('event.subCategory', 'subCategory')
+        .leftJoinAndSelect('event.location', 'location')
+        .leftJoinAndSelect('event.eventDetails', 'eventDetails')
+        .leftJoinAndSelect('event.eventTickets', 'eventTickets')
+        .leftJoinAndSelect('event.orders', 'eventorders')
+        .leftJoinAndSelect('eventorders.customer', 'customerorder')
+        .take(limit)
+        .skip(offset)
+
+      title && queryBuilder.andWhere('event.title = :title', { title })
+
+      if (upcomingEvents) {
+        const currentDate = new Date()
+        queryBuilder.andWhere('event.startDate >= :currentDate', { currentDate })
+      }
+      if (pastEvents) {
+        const currentDate = new Date()
+        queryBuilder.andWhere('event.startDate <= :currentDate', { currentDate })
       }
 
       if (search) {

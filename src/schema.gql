@@ -387,6 +387,12 @@ type ListOrdersResponse {
   totalRows: Float
 }
 
+input ListOrganizerEventsInputs {
+  filter: OrganizerEventFilterInput
+  limit: Float
+  offset: Float
+}
+
 input ListRatingsInput {
   eventId: String
   filter: RatingFilterInputs
@@ -584,6 +590,13 @@ type Organizer {
   websiteLink: String
 }
 
+input OrganizerEventFilterInput {
+  pastEvents: Boolean
+  search: String
+  title: String
+  upcomingEvents: Boolean
+}
+
 type OtherCustomerDataResponse {
   isFollowing: Boolean!
   user: Customer!
@@ -622,6 +635,9 @@ type Query {
 
   """The List of Events with Pagination and filters"""
   getEvents(input: ListEventsInputs!): ListEventsResponse!
+
+  """The List of Events in Organizer side with Pagination and filters"""
+  getEventsOrganizer(input: ListOrganizerEventsInputs!): ListEventsResponse!
 
   """The List of Event Tickets with Pagination and filters"""
   getEventsTickets(input: ListEventTicketsInputs!): ListEventTicketsResponse!

@@ -10,6 +10,7 @@ import {
   EventDetailsInput,
   ListEventTicketsInputs,
   ListEventsInputs,
+  ListOrganizerEventsInputs,
   UpdateBasicEventInput,
   UpdateEventTicketInput
 } from './dto/inputs'
@@ -48,6 +49,18 @@ export class EventResolver {
   async getEvents(@Args('input') listEventsInputs: ListEventsInputs): Promise<ListEventsResponse> {
     const [events, count, limit, offset] =
       await this.eventService.getEventsWithPagination(listEventsInputs)
+    return { results: events, totalRows: count, limit, offset }
+  }
+
+  @Query(() => ListEventsResponse, {
+    description: 'The List of Events in Organizer side with Pagination and filters'
+  })
+  @Allow()
+  async getEventsOrganizer(
+    @Args('input') listOrganizerEventsInputs: ListOrganizerEventsInputs
+  ): Promise<ListEventsResponse> {
+    const [events, count, limit, offset] =
+      await this.eventService.getEventsWithPaginationOrganizer(listOrganizerEventsInputs)
     return { results: events, totalRows: count, limit, offset }
   }
 
