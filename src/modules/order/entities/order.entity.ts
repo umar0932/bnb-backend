@@ -36,8 +36,8 @@ export class OrderEntity extends CustomBaseEntity {
   totalPrice!: number
 
   @Column({ type: 'simple-json', name: 'tickets_json' })
-  @Field(() => TicketType)
-  tickets!: TicketType
+  @Field(() => [TicketType])
+  tickets!: TicketType[]
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING, name: 'order_status' })
   @Field(() => OrderStatus)

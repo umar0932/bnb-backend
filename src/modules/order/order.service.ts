@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 
-import { DeepPartial, Repository } from 'typeorm'
+import { EntityManager, Repository } from 'typeorm'
 
 import { CustomerUserService } from '@app/customer-user'
 import { EventService } from '@app/events'
@@ -16,11 +16,18 @@ export class OrderService {
   constructor(
     @Inject(forwardRef(() => CustomerUserService))
     private customerService: CustomerUserService,
+    @InjectEntityManager() private readonly entityManager: EntityManager,
     @Inject(forwardRef(() => EventService))
     private eventService: EventService,
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>
   ) {}
+
+  // Private Methods
+
+  // Public Methods
+
+  // Resolver Query Methods
 
   async getOrdersWithPagination(
     listOrdersInputs: ListOrdersInputs
@@ -54,38 +61,42 @@ export class OrderService {
     }
   }
 
+  async getOrdersOfCustomer(userId: string): Promise<OrderEntity[]> {
+    await this.customerService.getCustomerById(userId)
+
+    return await this.orderRepository.find({ where: { createdBy: userId } })
+  }
+
+  // Resolver Mutations Methods
+
   async createOrder(
     orderInput: CreateOrderInput,
     userId: string,
     paymentIntentId: string
   ): Promise<SuccessResponse> {
-    const customer = await this.customerService.getCustomerById(userId)
-    const { eventId } = orderInput
+    return this.entityManager.transaction(async transactionalManager => {
+      const customer = await this.customerService.getCustomerById(userId)
+      const { eventId } = orderInput
 
-    await this.eventService.findFromAllEvents(eventId)
+      const event = await this.eventService.findFromAllEvents(eventId)
 
-    try {
-      const order = this.orderRepository.create({
-        ...orderInput,
-        event: { id: eventId },
-        customer: { id: customer.id },
-        orderStatus: paymentIntentId ? OrderStatus.SUCCEEDED : OrderStatus.FAILED,
-        paymentIntentId,
-        stripeCustomerId: customer.stripeCustomerId,
-        createdBy: userId
-      } as unknown as DeepPartial<OrderEntity>)
+      try {
+        const order = await transactionalManager.save(OrderEntity, {
+          ...orderInput,
+          event: { id: eventId },
+          customer: { id: customer.id },
+          orderStatus: paymentIntentId ? OrderStatus.SUCCEEDED : OrderStatus.FAILED,
+          paymentIntentId,
+          stripeCustomerId: customer.stripeCustomerId,
+          createdBy: userId
+        })
 
-      await this.orderRepository.save(order)
+        await this.eventService.setTicketsSoldByEvent(event, userId, order.tickets)
 
-      return { success: true, message: 'Order Created' }
-    } catch (error) {
-      throw new BadRequestException('Order does not Created')
-    }
-  }
-
-  async getOrdersOfCustomer(userId: string): Promise<OrderEntity[]> {
-    await this.customerService.getCustomerById(userId)
-
-    return await this.orderRepository.find({ where: { createdBy: userId } })
+        return { success: true, message: 'Order Created' }
+      } catch (error) {
+        throw new BadRequestException(error.message ? error.message : 'Order does not created')
+      }
+    })
   }
 }

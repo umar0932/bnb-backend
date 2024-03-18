@@ -8,6 +8,6 @@ export class TicketType {
   @Field(() => Int)
   quantity: number
 
-  @Field(() => Int)
+  @Field(() => Number)
   price: number
 }

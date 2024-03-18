@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  forwardRef
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 
@@ -9,6 +15,7 @@ import { uuid } from 'uuidv4'
 
 import { LocationsEntity } from '@app/common/entities'
 import { CreateLocationInput, SuccessResponse } from '@app/common'
+import { CustomerUserService } from '@app/customer-user'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
 import { AwsS3ClientService } from '@app/aws-s3-client'
 
@@ -24,12 +31,15 @@ import {
   UpdateEventTicketInput
 } from './dto/inputs'
 import { EventLocationType, Type } from './event.constants'
+import { TicketType } from '@app/order/types'
 
 @Injectable()
 export class EventService {
   constructor(
     private categoryService: CategoryService,
     private configService: ConfigService,
+    @Inject(forwardRef(() => CustomerUserService))
+    private customerService: CustomerUserService,
     @InjectRepository(Event)
     private eventRepository: Repository<Event>,
     @InjectRepository(EventDetailsEntity)
@@ -76,6 +86,62 @@ export class EventService {
       throw new BadRequestException('Event Tickets with the provided ID does not exist')
 
     return findEventTicketsById
+  }
+
+  async getEventTickets(id: string, eventId: string): Promise<Tickets> {
+    const findEventTickets = await this.eventTicketsRepository.findOne({
+      where: { id, event: { id: eventId } }
+    })
+    if (!findEventTickets) throw new NotFoundException('Ticket with ID not found.')
+
+    return findEventTickets
+  }
+
+  async setTicketsSoldByEvent(event: Event, userId: string, tickets: TicketType[]): Promise<void> {
+    let totalTicketsSold = 0
+    let ticketsGrossTotal = 0
+
+    for (const ticket of tickets) {
+      const dbTicket = await this.getEventTickets(ticket.id, event.id)
+
+      if (ticket.quantity > dbTicket.maxQuantity)
+        throw new BadRequestException(
+          'Quantity to buy tickets cannot be more then the maximum quantity.'
+        )
+
+      if (ticket.quantity > dbTicket.availableQuantity)
+        throw new BadRequestException('Not enough available tickets for ticket with ID.')
+
+      const grossTotal = ticket.quantity * ticket.price
+      totalTicketsSold += ticket.quantity
+      ticketsGrossTotal += grossTotal
+
+      await this.eventTicketsRepository.update(
+        { id: ticket.id },
+        {
+          availableQuantity: dbTicket.availableQuantity - ticket.quantity,
+          ticketsSold: dbTicket.ticketsSold
+            ? Number(dbTicket.ticketsSold || 0) + ticket.quantity
+            : ticket.quantity,
+          grossTotal: dbTicket.grossTotal
+            ? Number(dbTicket.grossTotal || 0) + grossTotal
+            : dbTicket.grossTotal,
+          customer: { id: userId }
+        }
+      )
+    }
+
+    await this.eventRepository.update(
+      { id: event.id },
+      {
+        totalTicketsSold: event.totalTicketsSold
+          ? Number(event.totalTicketsSold || 0) + totalTicketsSold
+          : totalTicketsSold,
+        ticketsGrossTotal: event.ticketsGrossTotal
+          ? Number(event.ticketsGrossTotal || 0) + ticketsGrossTotal
+          : ticketsGrossTotal
+      }
+    )
   }
 
   async checkValidTypeEvent(type: string): Promise<boolean> {
@@ -162,16 +228,6 @@ export class EventService {
       if (categoryName)
         queryBuilder.andWhere('event.category.categoryName = :categoryName', { categoryName })
 
-      if (search) {
-        queryBuilder.andWhere(
-          new Brackets(qb => {
-            qb.where('LOWER(event.title) LIKE LOWER(:search)', { search: `${search}` })
-              .orWhere('LOWER(location.city) LIKE LOWER(:search)', { search: `${search}` })
-              .orWhere('LOWER(location.country) LIKE LOWER(:search)', { search: `${search}` })
-          })
-        )
-      }
-
       if (eventToday) {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
@@ -197,6 +253,16 @@ export class EventService {
             startOfWeekend,
             endOfWeekend
           }
+        )
+      }
+
+      if (search) {
+        queryBuilder.andWhere(
+          new Brackets(qb => {
+            qb.where('LOWER(event.title) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(location.city) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(location.country) LIKE LOWER(:search)', { search: `${search}` })
+          })
         )
       }
 
@@ -228,7 +294,8 @@ export class EventService {
       }
 
       const [eventTickets, total] = await queryBuilder
-        .leftJoinAndSelect('eventTickets.event.category', 'category')
+        .leftJoinAndSelect('eventTickets.event', 'event')
+        .leftJoinAndSelect('eventTickets.customer', 'customer')
         .take(limit)
         .skip(offset)
         .getManyAndCount()
@@ -362,6 +429,12 @@ export class EventService {
     const ticketData = await this.getEventTicketsByName(createEventTicketsInput.title, userId)
     if (ticketData)
       throw new BadRequestException('This Ticket name already exist. Enter a valid name')
+
+    if (createEventTicketsInput.maxQuantity > createEventTicketsInput.availableQuantity)
+      throw new BadRequestException(
+        'Maximum quantity cannot be greater than the available quantity'
+      )
+
     try {
       const ticket = await this.eventTicketsRepository.save({
         ...rest,
@@ -382,6 +455,13 @@ export class EventService {
     const { eventId, id, ...rest } = updateEventTicketsInput
     await this.getEventById(eventId, userId)
     const ticketData = await this.getEventTicketsById(id, userId)
+
+    if (updateEventTicketsInput.availableQuantity && updateEventTicketsInput.maxQuantity) {
+      if (updateEventTicketsInput.maxQuantity > updateEventTicketsInput.availableQuantity)
+        throw new BadRequestException(
+          'Maximum quantity cannot be greater than the available quantity'
+        )
+    }
 
     try {
       await this.eventTicketsRepository.update(ticketData.id, {

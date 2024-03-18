@@ -24,6 +24,10 @@ export class PaymentService {
     @InjectStripeClient() private stripe: Stripe
   ) {}
 
+  // Private Methods
+
+  // Public Methods
+
   async createStripeCustomer(name: string, email: string) {
     try {
       return await this.stripe.customers.create({
@@ -61,8 +65,11 @@ export class PaymentService {
 
       return { success: true, message: 'Charge and Order Created' }
     } catch (err) {
-      this.logger.error(err?.message, err, 'PaymentService')
-      throw new BadRequestException("Something went wrong while charging the customer's card.")
+      if (err instanceof BadRequestException) return { success: false, message: err.message }
+      else {
+        this.logger.error(err?.message, err, 'PaymentService')
+        throw new BadRequestException("Something went wrong while charging the customer's card.")
+      }
     }
   }
 

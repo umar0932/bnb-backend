@@ -6,6 +6,7 @@ import { CustomBaseEntity } from '@app/common/entities'
 
 import { Event } from './event.entity'
 import { TicketsSalesChannel } from '../event.constants'
+import { Customer } from '@app/customer-user/entities'
 
 registerEnumType(TicketsSalesChannel, {
   name: 'TicketsSalesChannel',
@@ -60,6 +61,14 @@ export class Tickets extends CustomBaseEntity {
   @Field(() => Boolean, { nullable: true })
   isVisible?: boolean
 
+  @Column({ type: 'bigint', name: 'tickets_sold', default: 0 })
+  @Field(() => Int, { nullable: true })
+  ticketsSold?: number
+
+  @Column({ type: 'bigint', name: 'gross_total', default: 0 })
+  @Field(() => Int, { nullable: true })
+  grossTotal?: number
+
   // Relations
 
   @Field(() => Event)
@@ -69,4 +78,13 @@ export class Tickets extends CustomBaseEntity {
   })
   @JoinColumn({ name: 'event_id' })
   event: Event
+
+  @Field(() => Customer, { nullable: true })
+  @ManyToOne(() => Customer, customer => customer.orders, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+    nullable: true
+  })
+  @JoinColumn({ name: 'customer_id' })
+  customer?: Customer
 }

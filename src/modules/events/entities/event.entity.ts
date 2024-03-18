@@ -70,6 +70,14 @@ export class Event extends CustomBaseEntity {
   @Field(() => String, { nullable: true })
   meetingUrl?: string
 
+  @Column({ type: 'bigint', name: 'tickets_sold', default: 0 })
+  @Field(() => Int, { nullable: true })
+  totalTicketsSold?: number
+
+  @Column({ type: 'bigint', name: 'gross_total', default: 0 })
+  @Field(() => Int, { nullable: true })
+  ticketsGrossTotal?: number
+
   // Enums
 
   @Field(() => EventStatus)

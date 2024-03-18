@@ -161,6 +161,7 @@ type Customer {
   socialProvider: SocialProvider
   state: String
   stripeCustomerId: String
+  tickets: [Tickets!]
   totalFollowers: Int
   totalFollowings: Int
   updatedBy: String
@@ -232,7 +233,9 @@ type Event {
   status: EventStatus!
   subCategory: SubCategory
   tags: [String!]
+  ticketsGrossTotal: Int
   title: String!
+  totalTicketsSold: Int
   type: String
   updatedBy: String
   updatedDate: DateTime
@@ -551,7 +554,7 @@ type OrderEntity {
   orderStatus: OrderStatus!
   paymentIntentId: String!
   stripeCustomerId: String!
-  tickets: TicketType!
+  tickets: [TicketType!]!
   totalPrice: Float!
   updatedBy: String
   updatedDate: DateTime
@@ -727,7 +730,7 @@ type SuccessResponse {
 
 type TicketType {
   id: ID!
-  price: Int!
+  price: Float!
   quantity: Int!
 }
 
@@ -741,15 +744,18 @@ type Tickets {
   availableQuantity: Int!
   createdBy: String
   createdDate: DateTime
+  customer: Customer
   description: String
   endDate: DateTime!
   event: Event!
+  grossTotal: Int
   id: ID!
   isVisible: Boolean
   maxQuantity: Int!
   minQuantity: Int!
   price: Float!
   startDate: DateTime!
+  ticketsSold: Int
   title: String!
   updatedBy: String
   updatedDate: DateTime

@@ -8,6 +8,7 @@ import { OrderEntity } from '@app/order/entities'
 
 import { CustomerFollower } from './customer-follower.entity'
 import { Rating } from '@app/rating/entities'
+import { Tickets } from '@app/events/entities'
 
 @Entity({ name: 'customer_user' })
 @Index(['email'])
@@ -146,6 +147,13 @@ export class Customer extends CustomBaseEntity {
     nullable: true
   })
   socialProvider?: SocialProvider
+
+  @Field(() => [Tickets], { nullable: true })
+  @OneToMany(() => Tickets, tickets => tickets.customer, {
+    eager: true,
+    nullable: true
+  })
+  tickets?: Tickets[]
 
   @Field(() => [OrderEntity], { nullable: true })
   @OneToMany(() => OrderEntity, orderEntity => orderEntity.event, {
