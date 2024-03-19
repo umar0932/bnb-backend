@@ -11,6 +11,7 @@ import {
   ListEventTicketsInputs,
   ListEventsInputs,
   ListOrganizerEventsInputs,
+  PublishOrUnPublishEventInput,
   UpdateBasicEventInput,
   UpdateEventTicketInput
 } from './dto/inputs'
@@ -78,30 +79,30 @@ export class EventResolver {
 
   // Mutations
 
-  @Mutation(() => SuccessResponse, {
+  @Mutation(() => Event, {
     description: 'This will create new Events'
   })
   @Allow()
   async createBasicEvent(
     @Args('input') createBasicEventInput: CreateBasicEventInput,
     @CurrentUser() user: JwtUserPayload
-  ): Promise<SuccessResponse> {
+  ): Promise<Event> {
     return await this.eventService.createBasicEvent(createBasicEventInput, user.userId)
   }
 
-  @Mutation(() => SuccessResponse, {
-    description: 'This will update ticket for the Event'
+  @Mutation(() => Event, {
+    description: 'This will update basic Event'
   })
   @Allow()
   async updateBasicEvent(
     @Args('input') updateBasicEventInput: UpdateBasicEventInput,
     @CurrentUser() user: JwtUserPayload
-  ): Promise<SuccessResponse> {
+  ): Promise<Event> {
     return await this.eventService.updateBasicEvent(updateBasicEventInput, user.userId)
   }
 
   @Mutation(() => SuccessResponse, {
-    description: 'This will create new Events'
+    description: 'This will create or update new Event Details'
   })
   @Allow()
   async createOrUpdateEventDetails(
@@ -131,5 +132,19 @@ export class EventResolver {
     @CurrentUser() user: JwtUserPayload
   ): Promise<Tickets> {
     return await this.eventService.updateEventTicket(updateEventTicketsInput, user.userId)
+  }
+
+  @Mutation(() => Event, {
+    description: 'This will Publish Event'
+  })
+  @Allow()
+  async publishOrUnPublishEvent(
+    @Args('input') publishOrUnPublishEventInput: PublishOrUnPublishEventInput,
+    @CurrentUser() user: JwtUserPayload
+  ): Promise<Event> {
+    return await this.eventService.publishOrUnPublishEvent(
+      publishOrUnPublishEventInput,
+      user.userId
+    )
   }
 }

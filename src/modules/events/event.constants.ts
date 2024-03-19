@@ -22,8 +22,7 @@ export const Type = {
 
 export enum EventStatus {
   DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  SOLD = 'SOLD'
+  PUBLISHED = 'PUBLISHED'
 }
 
 export enum TicketsSalesChannel {

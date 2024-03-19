@@ -13,11 +13,12 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { Brackets, Repository } from 'typeorm'
 import { uuid } from 'uuidv4'
 
+import { AwsS3ClientService } from '@app/aws-s3-client'
 import { LocationsEntity } from '@app/common/entities'
 import { CreateLocationInput, SuccessResponse } from '@app/common'
 import { CustomerUserService } from '@app/customer-user'
 import { S3SignedUrlResponse } from '@app/aws-s3-client/dto/args'
-import { AwsS3ClientService } from '@app/aws-s3-client'
+import { TicketType } from '@app/order/types'
 
 import { Event, EventDetailsEntity, Tickets } from './entities'
 import { CategoryService } from '@app/category'
@@ -28,11 +29,11 @@ import {
   ListEventTicketsInputs,
   ListEventsInputs,
   ListOrganizerEventsInputs,
+  PublishOrUnPublishEventInput,
   UpdateBasicEventInput,
   UpdateEventTicketInput
 } from './dto/inputs'
-import { EventLocationType, Type } from './event.constants'
-import { TicketType } from '@app/order/types'
+import { EventLocationType, EventStatus, Type } from './event.constants'
 
 @Injectable()
 export class EventService {
@@ -216,6 +217,9 @@ export class EventService {
         .take(limit)
         .skip(offset)
 
+      queryBuilder.andWhere('event.status = :published', {
+        published: EventStatus.PUBLISHED
+      })
       title && queryBuilder.andWhere('event.title = :title', { title })
       online &&
         queryBuilder.andWhere('event.eventLocationType = :online', {
@@ -279,7 +283,7 @@ export class EventService {
     listOrganizerEventsInputs: ListOrganizerEventsInputs
   ): Promise<[Event[], number, number, number]> {
     const { limit = 10, offset = 0, filter } = listOrganizerEventsInputs
-    const { title, search, upcomingEvents, pastEvents } = filter || {}
+    const { title, search, upcomingEvents, pastEvents, draft, published } = filter || {}
 
     try {
       const queryBuilder = this.eventRepository.createQueryBuilder('event')
@@ -297,6 +301,14 @@ export class EventService {
 
       title && queryBuilder.andWhere('event.title = :title', { title })
 
+      draft &&
+        queryBuilder.andWhere('event.status = :draft', {
+          draft: EventStatus.DRAFT
+        })
+      published &&
+        queryBuilder.andWhere('event.status = :published', {
+          published: EventStatus.PUBLISHED
+        })
       if (upcomingEvents) {
         const currentDate = new Date()
         queryBuilder.andWhere('event.startDate >= :currentDate', { currentDate })
@@ -361,7 +373,7 @@ export class EventService {
   async createBasicEvent(
     createBasicEventInput: CreateBasicEventInput,
     userId: string
-  ): Promise<SuccessResponse> {
+  ): Promise<Event> {
     const { title, categoryId, subCategoryId, type, location, eventLocationType, meetingUrl } =
       createBasicEventInput
 
@@ -384,7 +396,7 @@ export class EventService {
       throw new BadRequestException('Meeting URL is required for online events')
 
     try {
-      await this.eventRepository.save({
+      const event = await this.eventRepository.save({
         ...createBasicEventInput,
         title,
         eventLocationType,
@@ -394,17 +406,16 @@ export class EventService {
         location: getlocation,
         createdBy: userId
       })
+      return event
     } catch (error) {
       throw new BadRequestException('Failed to create event')
     }
-
-    return { success: true, message: 'Event Created' }
   }
 
   async updateBasicEvent(
     updateBasicEventInput: UpdateBasicEventInput,
     userId: string
-  ): Promise<SuccessResponse> {
+  ): Promise<Event> {
     const { id, categoryId, subCategoryId, title, type, location, ...rest } = updateBasicEventInput
     const event = await this.getEventById(id, userId)
     let category, subCategory
@@ -438,7 +449,7 @@ export class EventService {
       throw new BadRequestException('Failed to update Event')
     }
 
-    return { success: true, message: 'Event updated' }
+    return await this.getEventById(id, userId)
   }
 
   async createOrUpdateEventDetails(
@@ -494,7 +505,7 @@ export class EventService {
 
       return ticket
     } catch (error) {
-      throw new BadRequestException('Failed to create Ticketss')
+      throw new BadRequestException('Failed to create Tickets')
     }
   }
 
@@ -524,6 +535,29 @@ export class EventService {
       return await this.getEventTicketsById(id, userId)
     } catch (error) {
       throw new BadRequestException('Failed to update Tickets')
+    }
+  }
+
+  async publishOrUnPublishEvent(
+    publishOrUnPublishEventInput: PublishOrUnPublishEventInput,
+    userId: string
+  ): Promise<Event> {
+    const { eventId, publish } = publishOrUnPublishEventInput
+    const event = await this.getEventById(eventId, userId)
+
+    if (!event.eventDetails) throw new BadRequestException('Event Details cannot be empty')
+    if (!event.eventTickets) throw new BadRequestException('Event Tickets cannot be empty')
+
+    try {
+      await this.eventRepository.update(event.id, {
+        status: publish ? EventStatus.PUBLISHED : EventStatus.DRAFT,
+        updatedBy: userId,
+        updatedDate: new Date()
+      })
+
+      return await this.getEventById(eventId, userId)
+    } catch (error) {
+      throw new BadRequestException('Failed to update Event')
     }
   }
 }

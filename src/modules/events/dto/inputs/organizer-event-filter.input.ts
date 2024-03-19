@@ -13,4 +13,10 @@ export class OrganizerEventFilterInput {
 
   @Field(() => Boolean, { nullable: true })
   upcomingEvents?: boolean
+
+  @Field(() => Boolean, { nullable: true })
+  draft?: boolean
+
+  @Field(() => Boolean, { nullable: true })
+  published?: boolean
 }
