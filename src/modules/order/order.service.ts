@@ -1,13 +1,13 @@
 import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 
-import { EntityManager, Repository } from 'typeorm'
+import { Brackets, EntityManager, Repository } from 'typeorm'
 
 import { CustomerUserService } from '@app/customer-user'
 import { EventService } from '@app/events'
 import { SuccessResponse } from '@app/common'
 
-import { CreateOrderInput, ListOrdersInputs } from './dto/inputs'
+import { CreateOrderInput, ListOrdersInputs, ListOrganizerOrdersInputs } from './dto/inputs'
 import { OrderEntity } from './entities'
 import { OrderStatus } from './types'
 
@@ -47,6 +47,58 @@ export class OrderService {
       //     })
       //   )
       // }
+
+      const [orders, total] = await queryBuilder
+        .leftJoinAndSelect('orders.event', 'eventOrders')
+        .leftJoinAndSelect('orders.customer', 'customerOrders')
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount()
+
+      return [orders, total, limit, offset]
+    } catch (error) {
+      throw new BadRequestException('Failed to find Events')
+    }
+  }
+
+  async getOrganizerOrdersWithPagination(
+    listOrganizerOrdersInputs: ListOrganizerOrdersInputs
+  ): Promise<[OrderEntity[], number, number, number]> {
+    const { limit = 10, offset = 0, filter } = listOrganizerOrdersInputs
+    const { search, pastOneMonth, pastTwoMonths, pastThreeMonths } = filter || {}
+
+    try {
+      const queryBuilder = this.orderRepository.createQueryBuilder('orders')
+
+      if (pastOneMonth) {
+        const oneMonthAgo = new Date()
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+        queryBuilder.andWhere('event.startDate >= :oneMonthAgo', { oneMonthAgo })
+      }
+      if (pastTwoMonths) {
+        const twoMonthsAgo = new Date()
+        twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2)
+        queryBuilder.andWhere('event.startDate >= :twoMonthsAgo', { twoMonthsAgo })
+      }
+      if (pastThreeMonths) {
+        const threeMonthsAgo = new Date()
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+        queryBuilder.andWhere('event.startDate >= :threeMonthsAgo', { threeMonthsAgo })
+      }
+
+      if (search) {
+        queryBuilder.andWhere(
+          new Brackets(qb => {
+            qb.where('LOWER(orders.event.title) LIKE LOWER(:search)', { search: `${search}` })
+              .orWhere('LOWER(orders.customer.firstName) LIKE LOWER(:search)', {
+                search: `${search}`
+              })
+              .orWhere('LOWER(orders.customer.lastName) LIKE LOWER(:search)', {
+                search: `${search}`
+              })
+          })
+        )
+      }
 
       const [orders, total] = await queryBuilder
         .leftJoinAndSelect('orders.event', 'eventOrders')

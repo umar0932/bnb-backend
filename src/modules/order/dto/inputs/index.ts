@@ -1,3 +1,5 @@
 export * from './create-order.input'
 export * from './list-orders.input'
+export * from './list-organizer-orders.input'
 export * from './order-filter.input'
+export * from './organizer-order-filter.input'

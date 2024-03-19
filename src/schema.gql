@@ -393,6 +393,12 @@ input ListOrganizerEventsInputs {
   offset: Float
 }
 
+input ListOrganizerOrdersInputs {
+  filter: OrganizerOrderFilterInput
+  limit: Float
+  offset: Float
+}
+
 input ListRatingsInput {
   eventId: String
   filter: RatingFilterInputs
@@ -597,6 +603,14 @@ input OrganizerEventFilterInput {
   upcomingEvents: Boolean
 }
 
+input OrganizerOrderFilterInput {
+  pastOneMonth: Boolean
+  pastThreeMonths: Boolean
+  pastTwoMonths: Boolean
+  search: String
+  title: String
+}
+
 type OtherCustomerDataResponse {
   isFollowing: Boolean!
   user: Customer!
@@ -656,6 +670,9 @@ type Query {
 
   """This will get all Orders of Current Customer"""
   getOrdersOfCustomer: [OrderEntity!]!
+
+  """The List of Event Tickets with Pagination and filters"""
+  getOrdersOrganizer(input: ListOrganizerOrdersInputs!): ListOrdersResponse!
 
   """Get other Customer Data"""
   getOtherCustomerData(customerId: String!): OtherCustomerDataResponse!

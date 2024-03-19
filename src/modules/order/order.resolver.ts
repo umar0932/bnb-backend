@@ -4,7 +4,7 @@ import { Allow, CurrentUser, JwtUserPayload } from '@app/common'
 
 import { OrderEntity } from './entities'
 
-import { ListOrdersInputs } from './dto/inputs'
+import { ListOrdersInputs, ListOrganizerOrdersInputs } from './dto/inputs'
 import { ListOrdersResponse } from './dto/args'
 import { OrderService } from './order.service'
 
@@ -25,6 +25,18 @@ export class OrderResolver {
   async getOrders(@Args('input') listOrdersInputs: ListOrdersInputs): Promise<ListOrdersResponse> {
     const [orders, count, limit, offset] =
       await this.orderService.getOrdersWithPagination(listOrdersInputs)
+    return { results: orders, totalRows: count, limit, offset }
+  }
+
+  @Query(() => ListOrdersResponse, {
+    description: 'The List of Event Tickets with Pagination and filters'
+  })
+  @Allow()
+  async getOrdersOrganizer(
+    @Args('input') listOrganizerOrdersInputs: ListOrganizerOrdersInputs
+  ): Promise<ListOrdersResponse> {
+    const [orders, count, limit, offset] =
+      await this.orderService.getOrganizerOrdersWithPagination(listOrganizerOrdersInputs)
     return { results: orders, totalRows: count, limit, offset }
   }
 }
