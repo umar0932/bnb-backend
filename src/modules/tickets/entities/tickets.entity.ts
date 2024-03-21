@@ -3,9 +3,9 @@ import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql'
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities'
+import { Event } from '@app/events/entities'
 
-import { Event } from './event.entity'
-import { TicketsSalesChannel } from '../event.constants'
+import { TicketsSalesChannel } from '../ticket.constants'
 import { Customer } from '@app/customer-user/entities'
 
 registerEnumType(TicketsSalesChannel, {

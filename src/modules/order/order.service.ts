@@ -6,6 +6,7 @@ import { Brackets, EntityManager, Repository } from 'typeorm'
 import { CustomerUserService } from '@app/customer-user'
 import { EventService } from '@app/events'
 import { SuccessResponse } from '@app/common'
+import { TicketService } from '@app/tickets'
 
 import { CreateOrderInput, ListOrdersInputs, ListOrganizerOrdersInputs } from './dto/inputs'
 import { OrderEntity } from './entities'
@@ -20,7 +21,8 @@ export class OrderService {
     @Inject(forwardRef(() => EventService))
     private eventService: EventService,
     @InjectRepository(OrderEntity)
-    private orderRepository: Repository<OrderEntity>
+    private orderRepository: Repository<OrderEntity>,
+    private ticketService: TicketService
   ) {}
 
   // Private Methods
@@ -143,7 +145,7 @@ export class OrderService {
           createdBy: userId
         })
 
-        await this.eventService.setTicketsSoldByEvent(event, userId, order.tickets)
+        await this.ticketService.setTicketsSoldByEvent(event, userId, order.tickets)
 
         return { success: true, message: 'Order Created' }
       } catch (error) {

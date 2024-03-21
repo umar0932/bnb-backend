@@ -15,10 +15,10 @@ import { CustomBaseEntity, LocationsEntity } from '@app/common/entities'
 import { Likes } from '@app/like/entities'
 import { OrderEntity } from '@app/order/entities'
 import { Rating } from '@app/rating/entities'
+import { Tickets } from '@app/tickets/entities'
 
 import { EventDetailsEntity } from './event-details.entity'
 import { EventLocationType, EventStatus } from '../event.constants'
-import { Tickets } from './tickets.entity'
 
 registerEnumType(EventStatus, {
   name: 'EventStatus',

@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
 import { RelayTypes } from '@app/common'
-import { Tickets } from '@app/events/entities'
+import { Tickets } from '@app/tickets/entities'
 
 @ObjectType()
 export class EventTicketsResponse extends RelayTypes<Tickets>(Tickets) {}

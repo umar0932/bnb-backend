@@ -13,14 +13,15 @@ import { AwsS3ClientModule } from '@app/aws-s3-client'
 import { CategoryModule } from '@app/category'
 import { CustomerUserModule } from '@app/customer-user'
 import { EventModule } from '@app/events'
+import { LikeModule } from '@app/like'
 import { MailModule } from '@app/mail'
 import { OrderModule } from '@app/order'
 import { PaymentModule } from '@app/payment'
+import { TicketModule } from '@app/tickets'
 
 import { dataSourceOptions } from 'db/data-source'
 import { RatingModule } from './modules/rating/rating.module'
 import EnvConfig from './config/config'
-import { LikeModule } from '@app/like'
 
 dotenv.config()
 
@@ -64,7 +65,8 @@ const env = `${process.env.NODE_ENV}`
     PaymentModule,
     MailModule,
     RatingModule,
-    LikeModule
+    LikeModule,
+    TicketModule
   ]
 })
 export class AppModule {}

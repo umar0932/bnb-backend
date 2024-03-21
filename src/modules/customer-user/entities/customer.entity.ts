@@ -5,10 +5,10 @@ import { Column, Entity, Index, OneToMany, OneToOne, PrimaryGeneratedColumn } fr
 import { CustomBaseEntity, SocialProvider } from '@app/common/entities'
 import { Likes } from '@app/like/entities'
 import { OrderEntity } from '@app/order/entities'
+import { Rating } from '@app/rating/entities'
+import { Tickets } from '@app/tickets/entities'
 
 import { CustomerFollower } from './customer-follower.entity'
-import { Rating } from '@app/rating/entities'
-import { Tickets } from '@app/events/entities'
 
 @Entity({ name: 'customer_user' })
 @Index(['email'])

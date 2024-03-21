@@ -1,2 +1,1 @@
-export * from './event-tickets-list-response'
-export * from './events-list-response'
+export * from './list-events-response'
