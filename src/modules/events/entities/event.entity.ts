@@ -12,10 +12,10 @@ import {
 
 import { Category, SubCategory } from '@app/category/entities'
 import { CustomBaseEntity, LocationsEntity } from '@app/common/entities'
+import { CustomerEventTickets, Tickets } from '@app/tickets/entities'
 import { Likes } from '@app/like/entities'
 import { OrderEntity } from '@app/order/entities'
 import { Rating } from '@app/rating/entities'
-import { Tickets } from '@app/tickets/entities'
 
 import { EventDetailsEntity } from './event-details.entity'
 import { EventLocationType, EventStatus } from '../event.constants'
@@ -129,6 +129,13 @@ export class Event extends CustomBaseEntity {
     nullable: true
   })
   eventTickets?: Tickets[]
+
+  @Field(() => [CustomerEventTickets], { nullable: true })
+  @OneToMany(() => CustomerEventTickets, customerEventTickets => customerEventTickets.event, {
+    eager: true,
+    nullable: true
+  })
+  customerEventTickets?: CustomerEventTickets[]
 
   @Field(() => [Likes], { nullable: true })
   @OneToMany(() => Likes, (like: Likes) => like.event, {

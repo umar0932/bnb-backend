@@ -14,18 +14,21 @@ import { Event } from '@app/events/entities'
 import { EventService } from '@app/events'
 import { TicketType } from '@app/order/types'
 
-import { Tickets } from './entities'
 import {
   CreateEventTicketInput,
+  ListCustomerEventTicketsInputs,
   ListEventTicketsInputs,
   UpdateEventTicketInput
 } from './dto/inputs'
+import { CustomerEventTickets, Tickets } from './entities'
 
 @Injectable()
 export class TicketService {
   constructor(
     @Inject(forwardRef(() => CustomerUserService))
     private customerService: CustomerUserService,
+    @InjectRepository(CustomerEventTickets)
+    private customerEventTicketsRepository: Repository<CustomerEventTickets>,
     private eventService: EventService,
     @InjectRepository(Tickets)
     private eventTicketsRepository: Repository<Tickets>
@@ -75,7 +78,7 @@ export class TicketService {
         )
 
       if (ticket.quantity > dbTicket.availableQuantity)
-        throw new BadRequestException('Not enough available tickets for ticket with I.')
+        throw new BadRequestException('Not enough available tickets for ticket with ID.')
 
       const grossTotal = ticket.quantity * ticket.price
       totalTicketsSold += ticket.quantity
@@ -90,13 +93,24 @@ export class TicketService {
             : ticket.quantity,
           grossTotal: dbTicket.grossTotal
             ? Number(dbTicket.grossTotal || 0) + grossTotal
-            : dbTicket.grossTotal,
-          customer: { id: userId }
+            : dbTicket.grossTotal
         }
       )
-
-      await this.eventService.updateEventTotalTickets(event, totalTicketsSold, ticketsGrossTotal)
+      for (let i = 0; i < ticket.quantity; i++) {
+        await this.createCustomerEventTicket(event, userId, dbTicket)
+      }
     }
+    await this.eventService.updateEventTotalTickets(event, totalTicketsSold, ticketsGrossTotal)
+  }
+
+  async createCustomerEventTicket(event: Event, userId: string, ticket: Tickets): Promise<void> {
+    await this.customerEventTicketsRepository.save({
+      event,
+      ticket,
+      customer: { id: userId },
+      price: ticket.price,
+      createdBy: userId
+    })
   }
 
   // Resolver Query Methods
@@ -129,7 +143,30 @@ export class TicketService {
 
       return [eventTickets, total, limit, offset]
     } catch (error) {
-      throw new BadRequestException('Failed to find Events')
+      throw new BadRequestException('Failed to find Event Tickets')
+    }
+  }
+
+  async getCustomerEventTickets(
+    listCustomerEventTicketsInputs: ListCustomerEventTicketsInputs
+  ): Promise<[CustomerEventTickets[], number, number, number]> {
+    const { limit = 10, offset = 0 } = listCustomerEventTicketsInputs
+
+    try {
+      const queryBuilder =
+        this.customerEventTicketsRepository.createQueryBuilder('customerEventTickets')
+
+      const [customerEventTickets, total] = await queryBuilder
+        .leftJoinAndSelect('customerEventTickets.event', 'event')
+        .leftJoinAndSelect('customerEventTickets.customer', 'customer')
+        .leftJoinAndSelect('customerEventTickets.ticket', 'ticket')
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount()
+
+      return [customerEventTickets, total, limit, offset]
+    } catch (error) {
+      throw new BadRequestException('Failed to find Customer Event Tickets')
     }
   }
 

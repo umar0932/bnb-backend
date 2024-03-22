@@ -1,12 +1,12 @@
 import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql'
 
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 import { CustomBaseEntity } from '@app/common/entities'
 import { Event } from '@app/events/entities'
 
 import { TicketsSalesChannel } from '../ticket.constants'
-import { Customer } from '@app/customer-user/entities'
+import { CustomerEventTickets } from './customer-event-tickets.entity'
 
 registerEnumType(TicketsSalesChannel, {
   name: 'TicketsSalesChannel',
@@ -79,12 +79,10 @@ export class Tickets extends CustomBaseEntity {
   @JoinColumn({ name: 'event_id' })
   event: Event
 
-  @Field(() => Customer, { nullable: true })
-  @ManyToOne(() => Customer, customer => customer.orders, {
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
+  @Field(() => [CustomerEventTickets], { nullable: true })
+  @OneToMany(() => CustomerEventTickets, customerEventTickets => customerEventTickets.ticket, {
+    eager: true,
     nullable: true
   })
-  @JoinColumn({ name: 'customer_id' })
-  customer?: Customer
+  customerEventTickets?: CustomerEventTickets[]
 }

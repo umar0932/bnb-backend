@@ -2,14 +2,15 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql'
 
 import { Allow, CurrentUser, JwtUserPayload } from '@app/common'
 
-import { Tickets } from './entities'
 import {
   CreateEventTicketInput,
+  ListCustomerEventTicketsInputs,
   ListEventTicketsInputs,
   UpdateEventTicketInput
 } from './dto/inputs'
+import { ListCustomerEventTicketsResponse, ListEventTicketsResponse } from './dto/args'
+import { Tickets } from './entities'
 import { TicketService } from './ticket.service'
-import { ListEventTicketsResponse } from './dto/args'
 
 @Resolver(() => Tickets)
 export class TicketResolver {
@@ -26,6 +27,19 @@ export class TicketResolver {
   ): Promise<ListEventTicketsResponse> {
     const [eventTickets, count, limit, offset] =
       await this.ticketService.getEventTicketsWithPagination(listEventTicketsInputs)
+    return { results: eventTickets, totalRows: count, limit, offset }
+  }
+
+  @Query(() => ListCustomerEventTicketsResponse, {
+    description: 'The List of Event Tickets with Pagination and filters'
+  })
+  @Allow()
+  async getCustomerEventTickets(
+    @Args('input') listCustomerEventTicketsInputs: ListCustomerEventTicketsInputs
+  ): Promise<ListCustomerEventTicketsResponse> {
+    const [eventTickets, count, limit, offset] = await this.ticketService.getCustomerEventTickets(
+      listCustomerEventTicketsInputs
+    )
     return { results: eventTickets, totalRows: count, limit, offset }
   }
 

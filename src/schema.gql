@@ -141,6 +141,7 @@ type Customer {
   country: String
   createdBy: String
   createdDate: DateTime
+  customerEventTickets: [CustomerEventTickets!]
   email: String!
   firstAddress: String
   firstName: String!
@@ -161,7 +162,6 @@ type Customer {
   socialProvider: SocialProvider
   state: String
   stripeCustomerId: String
-  tickets: [Tickets!]
   totalFollowers: Int
   totalFollowings: Int
   updatedBy: String
@@ -173,6 +173,25 @@ type Customer {
 type CustomerEmailUpdateResponse {
   accessToken: String!
   user: Customer!
+}
+
+type CustomerEventTickets {
+  checkInTime: DateTime
+  createdBy: String
+  createdDate: DateTime
+  customer: Customer!
+  event: Event!
+  id: ID!
+  isCheckedIn: Boolean
+  paymentType: PaymentType!
+  price: Float!
+  ticket: Tickets!
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+input CustomerEventTicketsFilterInput {
+  search: String
 }
 
 input CustomerFilterInput {
@@ -218,6 +237,7 @@ type Event {
   category: Category
   createdBy: String
   createdDate: DateTime
+  customerEventTickets: [CustomerEventTickets!]
   endDate: DateTime!
   eventDetails: EventDetailsEntity
   eventLocationType: EventLocationType!
@@ -316,6 +336,19 @@ type ListCategoriesResponse {
   limit: Int
   offset: Int
   results: [Category!]!
+  totalRows: Float
+}
+
+input ListCustomerEventTicketsInputs {
+  filter: CustomerEventTicketsFilterInput
+  limit: Float
+  offset: Float
+}
+
+type ListCustomerEventTicketsResponse {
+  limit: Int
+  offset: Int
+  results: [CustomerEventTickets!]!
   totalRows: Float
 }
 
@@ -626,6 +659,12 @@ type PageData {
   offset: Int
 }
 
+"""The Payment Type"""
+enum PaymentType {
+  CASH
+  ONLINE
+}
+
 input PublishOrUnPublishEventInput {
   eventId: ID!
   publish: Boolean
@@ -643,6 +682,9 @@ type Query {
 
   """Get the Customer"""
   getCustomerData: Customer!
+
+  """The List of Event Tickets with Pagination and filters"""
+  getCustomerEventTickets(input: ListCustomerEventTicketsInputs!): ListCustomerEventTicketsResponse!
 
   """Get S3 bucket Signed Url"""
   getCustomerUploadUrl: S3SignedUrlResponse!
@@ -786,7 +828,7 @@ type Tickets {
   availableQuantity: Int!
   createdBy: String
   createdDate: DateTime
-  customer: Customer
+  customerEventTickets: [CustomerEventTickets!]
   description: String
   endDate: DateTime!
   event: Event!
