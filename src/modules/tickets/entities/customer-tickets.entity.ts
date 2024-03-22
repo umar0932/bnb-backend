@@ -16,7 +16,7 @@ registerEnumType(PaymentType, {
 
 @Entity({ name: 'customer_event_tickets' })
 @ObjectType()
-export class CustomerEventTickets extends CustomBaseEntity {
+export class CustomerTickets extends CustomBaseEntity {
   // Primary key
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
@@ -51,7 +51,7 @@ export class CustomerEventTickets extends CustomBaseEntity {
 
   // Relations
   @Field(() => Tickets)
-  @ManyToOne(() => Tickets, ticket => ticket.customerEventTickets, {
+  @ManyToOne(() => Tickets, ticket => ticket.customerTickets, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
   })
@@ -59,7 +59,7 @@ export class CustomerEventTickets extends CustomBaseEntity {
   ticket!: Tickets
 
   @Field(() => Event)
-  @ManyToOne(() => Event, event => event.customerEventTickets, {
+  @ManyToOne(() => Event, event => event.customerTickets, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
   })
@@ -67,7 +67,7 @@ export class CustomerEventTickets extends CustomBaseEntity {
   event!: Event
 
   @Field(() => Customer)
-  @ManyToOne(() => Customer, customer => customer.customerEventTickets, {
+  @ManyToOne(() => Customer, customer => customer.customerTickets, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
   })

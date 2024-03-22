@@ -12,23 +12,24 @@ import { Brackets, Repository } from 'typeorm'
 import { CustomerUserService } from '@app/customer-user'
 import { Event } from '@app/events/entities'
 import { EventService } from '@app/events'
+import { JWT_STRATEGY_NAME, JwtUserPayload } from '@app/common'
 import { TicketType } from '@app/order/types'
 
 import {
   CreateEventTicketInput,
-  ListCustomerEventTicketsInputs,
+  ListCustomerTicketsInputs,
   ListEventTicketsInputs,
   UpdateEventTicketInput
 } from './dto/inputs'
-import { CustomerEventTickets, Tickets } from './entities'
+import { CustomerTickets, Tickets } from './entities'
 
 @Injectable()
 export class TicketService {
   constructor(
     @Inject(forwardRef(() => CustomerUserService))
     private customerService: CustomerUserService,
-    @InjectRepository(CustomerEventTickets)
-    private customerEventTicketsRepository: Repository<CustomerEventTickets>,
+    @InjectRepository(CustomerTickets)
+    private customerTicketsRepository: Repository<CustomerTickets>,
     private eventService: EventService,
     @InjectRepository(Tickets)
     private eventTicketsRepository: Repository<Tickets>
@@ -60,9 +61,18 @@ export class TicketService {
     const findEventTickets = await this.eventTicketsRepository.findOne({
       where: { id, event: { id: eventId } }
     })
-    if (!findEventTickets) throw new NotFoundException('Ticket with ID not found.')
+    if (!findEventTickets) throw new NotFoundException('Event Ticket with ID not found.')
 
     return findEventTickets
+  }
+
+  async getCustomerTicketsById(id: string): Promise<CustomerTickets> {
+    const findCustomerTickets = await this.customerTicketsRepository.findOne({
+      where: { id }
+    })
+    if (!findCustomerTickets) throw new NotFoundException('Customer Ticket with ID not found.')
+
+    return findCustomerTickets
   }
 
   async setTicketsSoldByEvent(event: Event, userId: string, tickets: TicketType[]): Promise<void> {
@@ -104,7 +114,7 @@ export class TicketService {
   }
 
   async createCustomerEventTicket(event: Event, userId: string, ticket: Tickets): Promise<void> {
-    await this.customerEventTicketsRepository.save({
+    await this.customerTicketsRepository.save({
       event,
       ticket,
       customer: { id: userId },
@@ -147,26 +157,33 @@ export class TicketService {
     }
   }
 
-  async getCustomerEventTickets(
-    listCustomerEventTicketsInputs: ListCustomerEventTicketsInputs
-  ): Promise<[CustomerEventTickets[], number, number, number]> {
-    const { limit = 10, offset = 0 } = listCustomerEventTicketsInputs
+  async getCustomerTickets(
+    listCustomerTicketsInputs: ListCustomerTicketsInputs,
+    user: JwtUserPayload
+  ): Promise<[CustomerTickets[], number, number, number]> {
+    const { limit = 10, offset = 0, eventId, customerId } = listCustomerTicketsInputs
+    const { userId, type } = user || {}
 
     try {
-      const queryBuilder =
-        this.customerEventTicketsRepository.createQueryBuilder('customerEventTickets')
+      const queryBuilder = this.customerTicketsRepository.createQueryBuilder('customerTickets')
 
-      const [customerEventTickets, total] = await queryBuilder
-        .leftJoinAndSelect('customerEventTickets.event', 'event')
-        .leftJoinAndSelect('customerEventTickets.customer', 'customer')
-        .leftJoinAndSelect('customerEventTickets.ticket', 'ticket')
+      queryBuilder
+        .leftJoinAndSelect('customerTickets.event', 'event')
+        .leftJoinAndSelect('customerTickets.customer', 'customer')
+        .leftJoinAndSelect('customerTickets.ticket', 'ticket')
         .take(limit)
         .skip(offset)
-        .getManyAndCount()
 
-      return [customerEventTickets, total, limit, offset]
+      if (type === JWT_STRATEGY_NAME.ADMIN) {
+        if (eventId) queryBuilder.andWhere('event.id = :eventId', { eventId })
+        else if (customerId) queryBuilder.where('customer.id = :customerId', { customerId })
+      } else queryBuilder.where('customer.id = :userId', { userId })
+
+      const [customerTickets, total] = await queryBuilder.getManyAndCount()
+
+      return [customerTickets, total, limit, offset]
     } catch (error) {
-      throw new BadRequestException('Failed to find Customer Event Tickets')
+      throw new BadRequestException('Failed to find Customer Tickets')
     }
   }
 
@@ -226,6 +243,25 @@ export class TicketService {
       return await this.getEventTicketsById(id, userId)
     } catch (error) {
       throw new BadRequestException('Failed to update Tickets')
+    }
+  }
+
+  async scanTicket(ticketId: string): Promise<CustomerTickets> {
+    const customerEventTicketData = await this.getCustomerTicketsById(ticketId)
+
+    if (customerEventTicketData.isCheckedIn)
+      throw new BadRequestException('Customer is already checked in')
+
+    try {
+      await this.customerTicketsRepository.update(customerEventTicketData.id, {
+        isCheckedIn: true,
+        checkInTime: new Date(),
+        updatedDate: new Date()
+      })
+
+      return await this.getCustomerTicketsById(ticketId)
+    } catch (error) {
+      throw new BadRequestException('Failed to update Customer Tickets')
     }
   }
 }

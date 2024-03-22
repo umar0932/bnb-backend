@@ -1,7 +1,7 @@
 import { InputType, Field } from '@nestjs/graphql'
 
 @InputType()
-export class CustomerEventTicketsFilterInput {
+export class CustomerTicketsFilterInput {
   @Field(() => String, { nullable: true })
   search?: string
 }

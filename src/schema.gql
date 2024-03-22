@@ -141,7 +141,7 @@ type Customer {
   country: String
   createdBy: String
   createdDate: DateTime
-  customerEventTickets: [CustomerEventTickets!]
+  customerTickets: [CustomerTickets!]
   email: String!
   firstAddress: String
   firstName: String!
@@ -173,25 +173,6 @@ type Customer {
 type CustomerEmailUpdateResponse {
   accessToken: String!
   user: Customer!
-}
-
-type CustomerEventTickets {
-  checkInTime: DateTime
-  createdBy: String
-  createdDate: DateTime
-  customer: Customer!
-  event: Event!
-  id: ID!
-  isCheckedIn: Boolean
-  paymentType: PaymentType!
-  price: Float!
-  ticket: Tickets!
-  updatedBy: String
-  updatedDate: DateTime
-}
-
-input CustomerEventTicketsFilterInput {
-  search: String
 }
 
 input CustomerFilterInput {
@@ -228,6 +209,25 @@ type CustomerLoginOrRegisterResponse {
   user: Customer!
 }
 
+type CustomerTickets {
+  checkInTime: DateTime
+  createdBy: String
+  createdDate: DateTime
+  customer: Customer!
+  event: Event!
+  id: ID!
+  isCheckedIn: Boolean
+  paymentType: PaymentType!
+  price: Float!
+  ticket: Tickets!
+  updatedBy: String
+  updatedDate: DateTime
+}
+
+input CustomerTicketsFilterInput {
+  search: String
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -237,7 +237,7 @@ type Event {
   category: Category
   createdBy: String
   createdDate: DateTime
-  customerEventTickets: [CustomerEventTickets!]
+  customerTickets: [CustomerTickets!]
   endDate: DateTime!
   eventDetails: EventDetailsEntity
   eventLocationType: EventLocationType!
@@ -339,16 +339,18 @@ type ListCategoriesResponse {
   totalRows: Float
 }
 
-input ListCustomerEventTicketsInputs {
-  filter: CustomerEventTicketsFilterInput
+input ListCustomerTicketsInputs {
+  customerId: String
+  eventId: String
+  filter: CustomerTicketsFilterInput
   limit: Float
   offset: Float
 }
 
-type ListCustomerEventTicketsResponse {
+type ListCustomerTicketsResponse {
   limit: Int
   offset: Int
-  results: [CustomerEventTickets!]!
+  results: [CustomerTickets!]!
   totalRows: Float
 }
 
@@ -549,6 +551,9 @@ type Mutation {
   """This will save/update user profile image in DB"""
   saveCustomerMediaUrl(fileName: String!): String!
 
+  """This will scan ticket for the Event"""
+  scanTicket(input: String!): CustomerTickets!
+
   """This will charge the Customer on test stripe"""
   testCharge(chargeInput: CreateChargeInput!, orderInput: CreateOrderInput!): SuccessResponse!
 
@@ -684,7 +689,7 @@ type Query {
   getCustomerData: Customer!
 
   """The List of Event Tickets with Pagination and filters"""
-  getCustomerEventTickets(input: ListCustomerEventTicketsInputs!): ListCustomerEventTicketsResponse!
+  getCustomerTickets(input: ListCustomerTicketsInputs!): ListCustomerTicketsResponse!
 
   """Get S3 bucket Signed Url"""
   getCustomerUploadUrl: S3SignedUrlResponse!
@@ -828,7 +833,7 @@ type Tickets {
   availableQuantity: Int!
   createdBy: String
   createdDate: DateTime
-  customerEventTickets: [CustomerEventTickets!]
+  customerTickets: [CustomerTickets!]
   description: String
   endDate: DateTime!
   event: Event!

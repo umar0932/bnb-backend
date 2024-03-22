@@ -4,12 +4,12 @@ import { Allow, CurrentUser, JwtUserPayload } from '@app/common'
 
 import {
   CreateEventTicketInput,
-  ListCustomerEventTicketsInputs,
+  ListCustomerTicketsInputs,
   ListEventTicketsInputs,
   UpdateEventTicketInput
 } from './dto/inputs'
-import { ListCustomerEventTicketsResponse, ListEventTicketsResponse } from './dto/args'
-import { Tickets } from './entities'
+import { ListCustomerTicketsResponse, ListEventTicketsResponse } from './dto/args'
+import { CustomerTickets, Tickets } from './entities'
 import { TicketService } from './ticket.service'
 
 @Resolver(() => Tickets)
@@ -30,15 +30,17 @@ export class TicketResolver {
     return { results: eventTickets, totalRows: count, limit, offset }
   }
 
-  @Query(() => ListCustomerEventTicketsResponse, {
+  @Query(() => ListCustomerTicketsResponse, {
     description: 'The List of Event Tickets with Pagination and filters'
   })
   @Allow()
-  async getCustomerEventTickets(
-    @Args('input') listCustomerEventTicketsInputs: ListCustomerEventTicketsInputs
-  ): Promise<ListCustomerEventTicketsResponse> {
-    const [eventTickets, count, limit, offset] = await this.ticketService.getCustomerEventTickets(
-      listCustomerEventTicketsInputs
+  async getCustomerTickets(
+    @Args('input') listCustomerTicketsInputs: ListCustomerTicketsInputs,
+    @CurrentUser() user: JwtUserPayload
+  ): Promise<ListCustomerTicketsResponse> {
+    const [eventTickets, count, limit, offset] = await this.ticketService.getCustomerTickets(
+      listCustomerTicketsInputs,
+      user
     )
     return { results: eventTickets, totalRows: count, limit, offset }
   }
@@ -65,5 +67,12 @@ export class TicketResolver {
     @CurrentUser() user: JwtUserPayload
   ): Promise<Tickets> {
     return await this.ticketService.updateEventTicket(updateEventTicketsInput, user.userId)
+  }
+
+  @Mutation(() => CustomerTickets, {
+    description: 'This will scan ticket for the Event'
+  })
+  async scanTicket(@Args('input') ticketId: string): Promise<CustomerTickets> {
+    return await this.ticketService.scanTicket(ticketId)
   }
 }

@@ -6,7 +6,7 @@ import { CustomBaseEntity, SocialProvider } from '@app/common/entities'
 import { Likes } from '@app/like/entities'
 import { OrderEntity } from '@app/order/entities'
 import { Rating } from '@app/rating/entities'
-import { CustomerEventTickets } from '@app/tickets/entities'
+import { CustomerTickets } from '@app/tickets/entities'
 
 import { CustomerFollower } from './customer-follower.entity'
 
@@ -148,12 +148,12 @@ export class Customer extends CustomBaseEntity {
   })
   socialProvider?: SocialProvider
 
-  @Field(() => [CustomerEventTickets], { nullable: true })
-  @OneToMany(() => CustomerEventTickets, customerEventTickets => customerEventTickets.customer, {
+  @Field(() => [CustomerTickets], { nullable: true })
+  @OneToMany(() => CustomerTickets, customerTickets => customerTickets.customer, {
     eager: true,
     nullable: true
   })
-  customerEventTickets?: CustomerEventTickets[]
+  customerTickets?: CustomerTickets[]
 
   @Field(() => [OrderEntity], { nullable: true })
   @OneToMany(() => OrderEntity, orderEntity => orderEntity.event, {

@@ -1,17 +1,15 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
 import { RelayTypes } from '@app/common'
-import { CustomerEventTickets } from '@app/tickets/entities'
+import { CustomerTickets } from '@app/tickets/entities'
 
 @ObjectType()
-export class CustomerEventTicketsResponse extends RelayTypes<CustomerEventTickets>(
-  CustomerEventTickets
-) {}
+export class CustomerTicketsResponse extends RelayTypes<CustomerTickets>(CustomerTickets) {}
 
 @ObjectType()
-export class ListCustomerEventTicketsResponse {
-  @Field(() => [CustomerEventTickets])
-  results: CustomerEventTickets[]
+export class ListCustomerTicketsResponse {
+  @Field(() => [CustomerTickets])
+  results: CustomerTickets[]
 
   @Field(() => Number, { nullable: true })
   totalRows?: number

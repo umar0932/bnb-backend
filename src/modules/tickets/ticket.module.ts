@@ -5,13 +5,13 @@ import { AdminModule } from '@app/admin'
 import { CustomerUserModule } from '@app/customer-user'
 import { EventModule } from '@app/events'
 
-import { CustomerEventTickets, Tickets } from './entities'
+import { CustomerTickets, Tickets } from './entities'
 import { TicketResolver } from './ticket.resolver'
 import { TicketService } from './ticket.service'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CustomerEventTickets, Tickets]),
+    TypeOrmModule.forFeature([CustomerTickets, Tickets]),
     AdminModule,
     forwardRef(() => CustomerUserModule),
     EventModule

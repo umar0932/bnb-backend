@@ -6,7 +6,7 @@ import { CustomBaseEntity } from '@app/common/entities'
 import { Event } from '@app/events/entities'
 
 import { TicketsSalesChannel } from '../ticket.constants'
-import { CustomerEventTickets } from './customer-event-tickets.entity'
+import { CustomerTickets } from './customer-tickets.entity'
 
 registerEnumType(TicketsSalesChannel, {
   name: 'TicketsSalesChannel',
@@ -79,10 +79,10 @@ export class Tickets extends CustomBaseEntity {
   @JoinColumn({ name: 'event_id' })
   event: Event
 
-  @Field(() => [CustomerEventTickets], { nullable: true })
-  @OneToMany(() => CustomerEventTickets, customerEventTickets => customerEventTickets.ticket, {
+  @Field(() => [CustomerTickets], { nullable: true })
+  @OneToMany(() => CustomerTickets, customerTickets => customerTickets.ticket, {
     eager: true,
     nullable: true
   })
-  customerEventTickets?: CustomerEventTickets[]
+  customerTickets?: CustomerTickets[]
 }
